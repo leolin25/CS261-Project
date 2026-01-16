@@ -9,5 +9,7 @@ public class AirportSimulation extends JFrame {
     // Constructor method except controller
     public AirportSimulation(Controller controller) {
         this.controller = controller;
+        this.setTitle("Airport Management System");
+        this.setSize(800, 600); // I haven't checked these values (change these)
     }
 }

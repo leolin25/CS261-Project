@@ -1,12 +1,20 @@
 package objects;
 
 public class Runway {
-    public int id;
+    public int runwayNumber;
     public String mode; // Landing, Take-off, or Mixed
-    public boolean isAvailable; // False if Snow Clearance in progress
+    public boolean isAvailable;
 
-    public Runway(int id) {
-        this.id = id;
+    public Runway(int runwayNumber) {
+        this.runwayNumber = runwayNumber;
         this.isAvailable = true;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public boolean isAvailable() {
+        return isAvailable;
     }
 }

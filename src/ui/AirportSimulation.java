@@ -16,6 +16,7 @@ public class AirportSimulation extends JFrame {
         this.setSize(800, 600); // I haven't checked these values (change these)
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
+        // Every second we move a tick and call the controller
         simulationTimer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

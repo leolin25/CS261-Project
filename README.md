@@ -1,5 +1,8 @@
 # CS261-Project
 
+The initial plan:
+- Try incorporate the first 3 bullet points of the priority checklist
+
 This repository has 4 branches (main, logic, object and ui). 
 
 - 'main' is the main branch and shouldn't be edited directly

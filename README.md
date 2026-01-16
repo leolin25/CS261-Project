@@ -1,7 +1,7 @@
 # CS261-Project
 
 The initial plan:
-- Try incorporate the first 3 bullet points of the priority checklist
+- Try incorporate the first 3 bullet points of the priority checklist (takeoff and holding pattern stats)
 
 This repository has 4 branches (main, logic, object and ui). 
 

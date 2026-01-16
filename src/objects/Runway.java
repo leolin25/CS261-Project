@@ -10,10 +10,12 @@ public class Runway {
         this.isAvailable = true;
     }
 
+    // Getter method for mode, mode can be landing, take-off or mixed
     public String getMode() {
         return mode;
     }
 
+    // Method which returns whether the runway is available
     public boolean isAvailable() {
         return isAvailable;
     }

@@ -9,6 +9,17 @@ public class AirportSimulation extends JFrame {
     private Controller controller;
     private Timer simulationTimer;
 
+    /**
+     * User input:
+     * - Amount of runways (cap amount of runways at 10)
+     * - Inbound flow per hour
+     * - Outbound flow per hour
+     *
+     * Create dropdowns for each runway to change mode from mixed, takeoff or landing
+     *
+     * UI should be able to display stats from first 3 bullet points in priority spec
+     * */
+
     // Constructor method except controller
     public AirportSimulation(Controller controller) {
         this.controller = controller;

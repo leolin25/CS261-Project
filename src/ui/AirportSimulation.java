@@ -6,7 +6,7 @@ import javax.swing.*;
 public class AirportSimulation extends JFrame {
     private Controller controller;
 
-    // Contructor method except controller
+    // Constructor method except controller
     public AirportSimulation(Controller controller) {
         this.controller = controller;
     }

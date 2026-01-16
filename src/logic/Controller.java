@@ -13,6 +13,6 @@ public class Controller {
     }
 
     public double getAverageWaitTime() {
-        return 0.0; // Placeholder for the final report
+        return 0.0;
     }
 }

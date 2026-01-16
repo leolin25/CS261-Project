@@ -8,6 +8,7 @@ This repository has 4 branches (main, logic, object and ui).
 Whoever is working on UI has to use IntelliJ Ultimate edition (should be free if you use university email address), this is because the SwingUI designer is very easy to use in IntelliJ (drag/drop buttons) but extremely difficult to use in any other IDE. I would recommend everyone uses IntelliJ anyways since it is the only IDE that lets connect to Github and code on the branch, if you use another IDE you will have to copy and paste your code into the branches manually.
 
 Main branch files:
+
 Object:
 Runway - Java class for a runway object, should have specific parameters (see project spec)
 Aircraft - Java class for an aircraft object, should have specific parameters (see project spec)

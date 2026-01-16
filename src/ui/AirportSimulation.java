@@ -16,8 +16,11 @@ public class AirportSimulation extends JFrame {
      * - Outbound flow per hour
      *
      * Create dropdowns for each runway to change mode from mixed, takeoff or landing
+     * Runway should have another drop down to specify if it is operational or not
      *
-     * UI should be able to display stats from first 3 bullet points in priority spec
+     * UI should be able to display stats from Controller class
+     *
+     * UI should be able to show all aircraft in holding queue and takeoff queue
      * */
 
     // Constructor method except controller

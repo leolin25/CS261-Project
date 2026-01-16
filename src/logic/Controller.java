@@ -20,6 +20,14 @@ public class Controller {
         // Every second, this will reduce fuel and check for arrivals
     }
 
+    public ArrayList<Aircraft> getHoldPattern() {
+        return holdPattern;
+    }
+
+    public ArrayList<Aircraft> getTakeoffQueue() {
+        return takeoffQueue;
+    }
+
     // Takeoff time data (minutes)
     public double getTakeoffVariance() {
         return 0.0;

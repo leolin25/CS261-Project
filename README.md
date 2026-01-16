@@ -10,13 +10,13 @@ Whoever is working on UI has to use IntelliJ Ultimate edition (should be free if
 Main branch files:
 
 Object:
-Runway - Java class for a runway object, should have specific parameters (see project spec)
-Aircraft - Java class for an aircraft object, should have specific parameters (see project spec)
+- Runway - Java class for a runway object, should have specific parameters (see project spec)
+- Aircraft - Java class for an aircraft object, should have specific parameters (see project spec)
 
 Logic:
-Controller - Manages the interaction between the objects (Runway/Aircraft) and the UI. It should be able to create stats, manage queues (holding queue), generate random trafic and manage runway states
+- Controller - Manages the interaction between the objects (Runway/Aircraft) and the UI. It should be able to create stats, manage queues (holding queue), generate random trafic and manage runway states
 
 UI:
-Should be able to create a UI that is able to communicate with Controller. UI should be able to take user inputs and pass them to Controller and Controller should be able to pass data to display on the UI.
+- Should be able to create a UI that is able to communicate with Controller. UI should be able to take user inputs and pass them to Controller and Controller should be able to pass data to display on the UI.
 
 Entire code base should be in Java.

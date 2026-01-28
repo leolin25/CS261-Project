@@ -1,5 +1,7 @@
 # Airport Modelling Project
 
+If you need help then import the code into an LLM like gemini or chatGPT: https://github.com/leolin25/CS261-Project.git
+
 These instructions are to setup the project on your own computer.
 
 ## Step 1: Install Required Tools (If you don't have them)

@@ -4,9 +4,9 @@ class Aircraft(models.Model):
     # Note: Django automatically creates an 'id' field for aircraftID
     
     callsign = models.CharField(max_length=20, unique=True)
-    operator = models.CharField(max_length=100)  # e.g., "British Airways"
-    origin = models.CharField(max_length=4)      # e.g., "LHR"
-    destination = models.CharField(max_length=4) # e.g., "JFK"
+    operator = models.CharField(max_length=100)  
+    origin = models.CharField(max_length=4)
+    destination = models.CharField(max_length=4) 
     
     # Times can be empty (null=True) depending on if it's Arrival vs Departure
     scheduled_arrival = models.DateTimeField(null=True, blank=True)

@@ -78,6 +78,14 @@ def create_flight_stats(plane, current_time):
     arr_delay = 0.0
     dep_delay = 0.0
 
+    final_outcome = 'LANDED' # Default
+    if plane.zone_status == 'RUNWAY_LA':
+        final_outcome = 'LANDED'
+    elif plane.zone_status == 'RUNWAY_TO':
+        final_outcome = 'DEPARTED'
+    elif plane.zone_status in ['CANCELLED', 'DIVERTED']:
+        final_outcome = plane.zone_status
+
     # Arrival stats
     if plane.scheduled_arrival:
         # Holding time = now - queue_entry_time
@@ -103,7 +111,7 @@ def create_flight_stats(plane, current_time):
             takeoff_queue_time_mins=takeoff_time,
             arrival_delay_mins=arr_delay,
             departure_delay_mins=dep_delay,
-            outcome=plane.zone_status
+            outcome=final_outcome
         )
         print(f"Created stats for {plane.callsign}: Hold {hold_time} mins, Takeoff Queue {takeoff_time} mins, Arrival Delay {arr_delay} mins, Departure Delay {dep_delay} mins")
     except Exception as e:

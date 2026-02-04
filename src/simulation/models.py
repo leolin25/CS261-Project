@@ -12,11 +12,25 @@ class Aircraft(models.Model):
     scheduled_arrival = models.DateTimeField(null=True, blank=True)
     scheduled_departure = models.DateTimeField(null=True, blank=True)
     
-    altitude = models.FloatField(default=0.0)
-    fuel_mins = models.FloatField(default=0.0)   # Renamed for clarity
+    altitude = models.IntegerField(default=0)
+    fuel_mins = models.IntegerField(default=0)
     
     # Status flags
     emergency_status = models.BooleanField(default=False)
+
+    # Emergency Status
+    EMERGENCY_CHOICES = [
+        ('NONE', 'None'),
+        ('FUEL', 'Low Fuel'),
+        ('MECHANICAL', 'Mechanical Failure'),
+        ('MEDICAL', 'Passenger Health'),
+    ]
+    # Default is now the string 'NONE' instead of False
+    emergency_status = models.CharField(
+        max_length=20, 
+        choices=EMERGENCY_CHOICES, 
+        default='NONE'
+    )
     
     # Zone Status
     ZONE_CHOICES = [

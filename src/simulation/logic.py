@@ -102,7 +102,8 @@ def create_flight_stats(plane, current_time):
             holding_time_mins=hold_time,
             takeoff_queue_time_mins=takeoff_time,
             arrival_delay_mins=arr_delay,
-            departure_delay_mins=dep_delay
+            departure_delay_mins=dep_delay,
+            outcome=plane.zone_status
         )
         print(f"Created stats for {plane.callsign}: Hold {hold_time} mins, Takeoff Queue {takeoff_time} mins, Arrival Delay {arr_delay} mins, Departure Delay {dep_delay} mins")
     except Exception as e:

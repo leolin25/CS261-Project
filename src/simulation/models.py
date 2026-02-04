@@ -42,6 +42,7 @@ class Aircraft(models.Model):
         ('QUEUE_TO', 'Queue to takeoff'),
         ('DEPARTED', 'Departed'),
         ('CANCELLED', 'Cancelled'),
+        ('DIVERTED', 'Diverted'),
     ]
     zone_status = models.CharField(max_length=20, choices=ZONE_CHOICES)
 
@@ -82,6 +83,17 @@ class FlightStats(models.Model):
     takeoff_queue_time_mins = models.FloatField(default=0.0)
     arrival_delay_mins = models.FloatField(default=0.0)
     departure_delay_mins = models.FloatField(default=0.0)
+
+    # What happened to the flight (Landed, Departed, Cancelled, Diversion)
+    OUTCOME = [
+        ('LANDED', 'Landed'),
+        ('DEPARTED', 'Departed'),
+        ('CANCELLED', 'Cancelled'),
+        ('DIVERTED', 'Diverted'),
+    ]
+    outcome = models.CharField(max_length=20, choices=OUTCOME, default='LANDED')
+
+    time_recorded = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"Stats for {self.callsign}"

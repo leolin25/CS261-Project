@@ -50,7 +50,7 @@ class Aircraft(models.Model):
 class Runway(models.Model):
     # Django automatically creates 'id' for runwayID
     
-    runway_number = models.CharField(max_length=10) 
+    runway_number = models.CharField(max_length=2, unique=True) 
     length = models.IntegerField(help_text="Length in meters")
     bearing = models.IntegerField(help_text="Heading in degrees")
     
@@ -58,7 +58,13 @@ class Runway(models.Model):
     operating_mode = models.CharField(max_length=20, default="Mixed")
     
     # Operational Status: "Available", "Runway Inspection", "Snow Clearance", "Equipment Failure"
-    operational_status = models.CharField(max_length=20, default="Available")
+    OPERATIONAL_CHOICES = [
+        ('AVAILABLE', 'Available'),
+        ('RUNWAYINSPEC', 'Runway Inspection'),
+        ('SNOWCLEAR', 'Snow Clearance'),
+        ('EQUIPFAIL', 'Equipment Failure'),
+    ]
+    operational_status = models.CharField(max_length=20, choices=OPERATIONAL_CHOICES)
 
     def __str__(self):
         status = "OPEN" if self.operational_status == "Available" else "CLOSED"

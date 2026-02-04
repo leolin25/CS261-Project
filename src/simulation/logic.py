@@ -16,7 +16,14 @@ emergency_status to set a specified emergency status
 def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_status='NONE'):
     airline_code = random.choice(airlines)
     flight_number = random.randint(100, 9999)
-    callsign = f"{airline_code}{flight_number}"
+
+    callsign = ""
+
+    for _ in range(50):  # Try up to 50 times to find a unique callsign
+        callsign = f"{airline_code}{flight_number}"
+        if not Aircraft.objects.filter(callsign=callsign).exists():
+            break
+        flight_number = random.randint(100, 9999)  # Generate a new flight number if not unique
 
     # Choose a random origin and destination that are not the same
     origin = random.choice(cities)
@@ -26,39 +33,24 @@ def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_sta
     if is_arrival is None:
         is_arrival = random.choice([True, False])
 
+    status = 'SCHEDULED'  # Default status for new aircraft
+    altitude = 0
+
+    # Variance in time
+    error_mins = random.gauss(0, 5)
+    q_time = scheduled_time + timedelta(minutes=error_mins) if scheduled_time else None
+
     # Arrival: Starts in the holding pattern
     if is_arrival:
-        status = 'QUEUE_LA'
         fuel = random.randint(20, 60)
-
-        if scheduled_time:
-            s_arrival = scheduled_time
-            s_departure = None
-        else:
-            s_arrival = timezone.now() + timedelta(minutes=random.randint(10, 120))
-
-        # Find an appropriate altitude to start the holding pattern
-        holding_pattern_planes = Aircraft.objects.filter(zone_status='QUEUE_LA')
-        highest_plane = holding_pattern_planes.order_by('-altitude').first()
-
-        if highest_plane:
-            # Set the plane to 1000 ft above the highest plane
-            altitude = highest_plane.altitude + 1000
-        else:
-            # No other planes so we start at 2000 ft
-            altitude = 2000
+        s_arrival = scheduled_time
+        s_departure = None
 
     # Departure logic
     else:
-        status = 'QUEUE_TO'
-        altitude = 0
         fuel = random.randint(180, 300)  # More fuel for departures
-
-        if scheduled_time:
-            s_departure = scheduled_time
-            s_arrival = None
-        else:
-            s_departure = timezone.now() + timedelta(minutes=random.randint(10, 120))
+        s_arrival = None
+        s_departure = scheduled_time
 
     try:
         Aircraft.objects.create(
@@ -68,6 +60,7 @@ def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_sta
             destination=destination,
             scheduled_arrival=s_arrival,
             scheduled_departure=s_departure,
+            queue_entry_time=q_time,
             altitude=altitude,
             fuel_mins=fuel,
             zone_status=status,
@@ -76,6 +69,10 @@ def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_sta
         print(f"Generated aircraft: {callsign}, Arrival: {is_arrival}, Scheduled Time: {scheduled_time}, Emergency: {emergency_status}")
     except Exception as e:
         print(f"Error generating aircraft: {e}")
+
+# Function to create a new flight statistics entry in the database
+def create_flight_stats():
+    print
 
 """
 Create a random runway in the database
@@ -115,28 +112,24 @@ def generate_random_runway(operating_mode="Mixed", operational_status="Available
     
 # Function which processes a tick in the simulation and updates all aircraft in the database
 def update_simulation():
-    aircrafts = Aircraft.objects.all()
-    now = timezone.now()
+    # Scheduled flights should now be simulated
+    hidden_planes = aircrafts.filter(zone_status='SCHEDULED')
 
-    # Are the runways available for use?
-    active_runway = Runway.objects.filter(operational_status='Available').first()
-
-    for plane in aircrafts:
-        # 1 min of fuel is consumed for all planes in the air or queued
-        if plane.zone_status in ['QUEUE_LA', 'RUNWAY_LA', 'QUEUE_TO', 'RUNWAY_TO']:
-            plane.fuel_mins -= 1
-        
-        # Fuel emergency check
-        if plane.fuel_mins <= 10 and plane.emergency_status == 'NONE':
-            plane.emergency_status = 'FUEL'
-        
-        # Handle emergencies
-        if plane.emergency_status != 'NONE':
-            # Prioritize landing for emergencies
-            if plane.zone_status in ['QUEUE_LA', 'RUNWAY_LA']:
-                if not runway_occupied and active_runway:
-                    plane.zone_status = 'RUNWAY_LA'
-                    runway_occupied = True
-            elif plane.zone_status == 'QUEUE_TO':
-                # Divert to landing queue
+    for plane in hidden_planes:
+        if plane.queue_entry_time and now >= plane.queue_entry_time:
+            # Check if it's time for arrivals
+            if plane.scheduled_arrival:
                 plane.zone_status = 'QUEUE_LA'
+                holding_planes = Aircraft.objects.filter(zone_status='QUEUE_LA')
+                highest = holding_planes.order_by('-altitude').first()
+                plane.altitude = (highest.altitude + 1000) if highest else 2000
+                print(f"ACTIVATED Arrival {plane.callsign}")
+        
+            # Check if it's time for departures
+            elif plane.scheduled_departure and now >= plane.scheduled_departure:
+                plane.zone_status = 'QUEUE_TO'
+                plane.altitude = 0
+                print(f"ACTIVATED Departure {plane.callsign}")
+
+            plane.save()
+        

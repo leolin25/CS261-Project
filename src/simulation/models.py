@@ -11,6 +11,9 @@ class Aircraft(models.Model):
     # Times can be empty (null=True) depending on if it's Arrival vs Departure
     scheduled_arrival = models.DateTimeField(null=True, blank=True)
     scheduled_departure = models.DateTimeField(null=True, blank=True)
+
+    # Record when the aircraft has entered the queue for landing or takeoff
+    queue_entry_time = models.DateTimeField(null=True, blank=True)
     
     altitude = models.IntegerField(default=0)
     fuel_mins = models.IntegerField(default=0)
@@ -31,12 +34,14 @@ class Aircraft(models.Model):
     
     # Zone Status
     ZONE_CHOICES = [
+        ('SCHEDULED', 'In schedule (Hidden)')
         ('LANDED', 'Landed'),
         ('RUNWAY_LA', 'On runway for landing'),
         ('RUNWAY_TO', 'On runway for takeoff'),
         ('QUEUE_LA', 'Queue to land (holding pattern)'),
         ('QUEUE_TO', 'Queue to takeoff'),
         ('DEPARTED', 'Departed'),
+        ('CANCELLED', 'Cancelled'),
     ]
     zone_status = models.CharField(max_length=20, choices=ZONE_CHOICES)
 
@@ -47,7 +52,7 @@ class Aircraft(models.Model):
 class Runway(models.Model):
     # Django automatically creates 'id' for runwayID
     
-    runway_number = models.CharField(max_length=2, unique=True) 
+    callsign = models.CharField(max_length=20, unique=True)
     length = models.IntegerField(help_text="Length in meters")
     bearing = models.IntegerField(help_text="Heading in degrees")
     
@@ -66,3 +71,9 @@ class Runway(models.Model):
     def __str__(self):
         status = "OPEN" if self.operational_status == "Available" else "CLOSED"
         return f"Runway {self.runway_number} ({status})"
+    
+class FlightStats(models.Model):
+    # Django automatically creates 'id' for statsID
+
+    callsign = models.CharField(max_length=20)
+    hold

@@ -1,7 +1,7 @@
 import random
 from django.utils import timezone
 from datetime import timedelta
-from .models import Aircraft, Runway
+from .models import Aircraft, Runway, FlightStats
 
 # A list of sample airline code and city codes
 airlines = ["BAW", "EZY", "RYR", "AFR", "DLH", "UAE", "AAL", "DAL", "QFA", "SIA"]
@@ -71,8 +71,42 @@ def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_sta
         print(f"Error generating aircraft: {e}")
 
 # Function to create a new flight statistics entry in the database
-def create_flight_stats():
-    print
+def create_flight_stats(plane, current_time):
+    # Initialize defaults
+    hold_time = 0.0
+    takeoff_time = 0.0
+    arr_delay = 0.0
+    dep_delay = 0.0
+
+    # Arrival stats
+    if plane.scheduled_arrival:
+        # Holding time = now - queue_entry_time
+        duration = (current_time - plane.queue_entry_time).total_seconds() / 60.0
+        hold_time = max(0.0, duration)
+
+        # Arrival delay = now - scheduled_arrival (can be negative)
+        arr_delay = (current_time - plane.scheduled_arrival).total_seconds() / 60.0
+
+    # Departure stats
+    if plane.scheduled_departure:
+        # Takeoff queue time = now - queue_entry_time
+        duration = (current_time - plane.queue_entry_time).total_seconds() / 60.0
+        takeoff_time = max(0.0, duration)
+
+        # Departure delay = now - scheduled_departure (can be negative)
+        dep_delay = (current_time - plane.scheduled_departure).total_seconds() / 60.0
+
+    try:
+        FlightStats.objects.create(
+            callsign=plane.callsign,
+            holding_time_mins=hold_time,
+            takeoff_queue_time_mins=takeoff_time,
+            arrival_delay_mins=arr_delay,
+            departure_delay_mins=dep_delay
+        )
+        print(f"Created stats for {plane.callsign}: Hold {hold_time} mins, Takeoff Queue {takeoff_time} mins, Arrival Delay {arr_delay} mins, Departure Delay {dep_delay} mins")
+    except Exception as e:
+        print(f"Error creating flight stats for {plane.callsign}: {e}")
 
 """
 Create a random runway in the database

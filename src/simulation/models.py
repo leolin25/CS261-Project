@@ -34,7 +34,7 @@ class Aircraft(models.Model):
     
     # Zone Status
     ZONE_CHOICES = [
-        ('SCHEDULED', 'In schedule (Hidden)')
+        ('SCHEDULED', 'In schedule (Hidden)'),
         ('LANDED', 'Landed'),
         ('RUNWAY_LA', 'On runway for landing'),
         ('RUNWAY_TO', 'On runway for takeoff'),
@@ -52,7 +52,7 @@ class Aircraft(models.Model):
 class Runway(models.Model):
     # Django automatically creates 'id' for runwayID
     
-    callsign = models.CharField(max_length=20, unique=True)
+    runway_number = models.CharField(max_length=20, unique=True)
     length = models.IntegerField(help_text="Length in meters")
     bearing = models.IntegerField(help_text="Heading in degrees")
     
@@ -76,4 +76,12 @@ class FlightStats(models.Model):
     # Django automatically creates 'id' for statsID
 
     callsign = models.CharField(max_length=20)
-    hold
+    
+    # The 4 Key Stats
+    holding_time_mins = models.FloatField(default=0.0)
+    takeoff_queue_time_mins = models.FloatField(default=0.0)
+    arrival_delay_mins = models.FloatField(default=0.0)
+    departure_delay_mins = models.FloatField(default=0.0)
+
+    def __str__(self):
+        return f"Stats for {self.callsign}"

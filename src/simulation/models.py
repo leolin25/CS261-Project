@@ -14,9 +14,6 @@ class Aircraft(models.Model):
     
     altitude = models.IntegerField(default=0)
     fuel_mins = models.IntegerField(default=0)
-    
-    # Status flags
-    emergency_status = models.BooleanField(default=False)
 
     # Emergency Status
     EMERGENCY_CHOICES = [

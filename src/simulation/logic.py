@@ -118,14 +118,12 @@ def update_simulation():
     aircrafts = Aircraft.objects.all()
     now = timezone.now()
 
-    # Check that the runways is empty with no aircraft on it
-    runway_occupied = aircrafts.filter(zone_status__in=['RUNWAY_LA', 'RUNWAY_TO']).exists()
-    # Is the runways available for use?
+    # Are the runways available for use?
     active_runway = Runway.objects.filter(operational_status='Available').first()
 
     for plane in aircrafts:
         # 1 min of fuel is consumed for all planes in the air or queued
-        if plane.zone.status in ['QUEUE_LA', 'RUNWAY_LA', 'QUEUE_TO', 'RUNWAY_TO']:
+        if plane.zone_status in ['QUEUE_LA', 'RUNWAY_LA', 'QUEUE_TO', 'RUNWAY_TO']:
             plane.fuel_mins -= 1
         
         # Fuel emergency check

@@ -155,7 +155,7 @@ def generate_random_runway(operating_mode="Mixed", operational_status="Available
     
 # Function which processes a tick in the simulation and updates all aircraft in the database
 def update_simulation():
-    # Scheduled flights should now be simulated
+    # First phase: Activate all scheduled planes (hidden) so now they appear in the simulation
     hidden_planes = aircrafts.filter(zone_status='SCHEDULED')
 
     for plane in hidden_planes:
@@ -175,4 +175,31 @@ def update_simulation():
                 print(f"ACTIVATED Departure {plane.callsign}")
 
             plane.save()
+
+    # Second phase: Burn fuel from planes in the landing queue
+    holding_planes = list(aircrafts.filter(zone_status='QUEUE_LA'))
+
+    for planes in holding_planes:
+        planes.fuel_mins -= 1
         
+        # Check if we have to declare an emergency due to low fuel
+        if planes.fuel_mins <= 10 and planes.emergency_status == 'NONE':
+            planes.emergency_status = 'FUEL'
+            print(f"EMERGENCY: {planes.callsign} is low on fuel!")
+        
+        planes.save()
+
+    # Capacity analysis
+    active_planes = Aircraft.objects.exclude(zone_status__in=['SCHEDULED', 'CANCELLED', 'DIVERTED','DEPARTED', 'LANDED'])
+
+    open_runways = Runway.objects.filter(operational_status='Available')
+
+    caps_landing = open_runways.filter(operating_mode__icontains='Landing').exclude(operating_mode__icontains='Mixed').count()
+    caps_takeoff = open_runways.filter(operating_mode__icontains='Takeoff').exclude(operating_mode__icontains='Mixed').count()
+    caps_mixed = open_runways.filter(operating_mode__icontains='Mixed').count()
+
+    active_landings = active_planes.filter(zone_status='RUNWAY_LA').count()
+    active_takeoffs = active_planes.filter(zone_status='RUNWAY_TO').count()   
+
+    # Phase 3: Movement logic for planes
+         

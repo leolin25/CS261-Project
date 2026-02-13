@@ -14,6 +14,9 @@ class Aircraft(models.Model):
 
     # Record when the aircraft has entered the queue for landing or takeoff
     queue_entry_time = models.DateTimeField(null=True, blank=True)
+
+    # Record the runway this plane has been assigned
+    assigned_runway = models.CharField(max_length=20, null=True, blank=True)
     
     altitude = models.IntegerField(default=0)
     fuel_mins = models.IntegerField(default=0)
@@ -58,7 +61,12 @@ class Runway(models.Model):
     bearing = models.IntegerField(help_text="Heading in degrees")
     
     # Mode: e.g., "Takeoff Only", "Landing Only", "Mixed"
-    operating_mode = models.CharField(max_length=20, default="Mixed")
+    MODE_CHOICES = [
+        ('LANDING', 'Landing'),
+        ('TAKEOFF', 'Takeoff'),
+        ('MIXED', 'Mixed'),
+    ]
+    operating_mode = models.CharField(max_length=20, choices=MODE_CHOICES)
     
     # Operational Status: "Available", "Runway Inspection", "Snow Clearance", "Equipment Failure"
     OPERATIONAL_CHOICES = [
@@ -66,6 +74,7 @@ class Runway(models.Model):
         ('RUNWAYINSPEC', 'Runway Inspection'),
         ('SNOWCLEAR', 'Snow Clearance'),
         ('EQUIPFAIL', 'Equipment Failure'),
+        ('OCCUPIED', 'Occupied'),
     ]
     operational_status = models.CharField(max_length=20, choices=OPERATIONAL_CHOICES)
 

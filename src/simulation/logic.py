@@ -12,8 +12,9 @@ Function to generate a new random aircraft in the database
 is_arrival, false for departure, true for arrival
 scheduled_time to set a specified time
 emergency_status to set a specified emergency status
+queue_entry_time is scheduled_time but with the added random error variable
 """
-def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_status='NONE'):
+def generate_random_aircraft(is_arrival=None, scheduled_time=None, queue_entry_time=None, emergency_status='NONE'):
     airline_code = random.choice(airlines)
     flight_number = random.randint(100, 9999)
 
@@ -36,10 +37,6 @@ def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_sta
     status = 'SCHEDULED'  # Default status for new aircraft
     altitude = 0
 
-    # Variance in time
-    error_mins = random.gauss(0, 5)
-    q_time = scheduled_time + timedelta(minutes=error_mins) if scheduled_time else None
-
     # Arrival: Starts in the holding pattern
     if is_arrival:
         fuel = random.randint(20, 60)
@@ -60,7 +57,7 @@ def generate_random_aircraft(is_arrival=None, scheduled_time=None, emergency_sta
             destination=destination,
             scheduled_arrival=s_arrival,
             scheduled_departure=s_departure,
-            queue_entry_time=q_time,
+            queue_entry_time=queue_entry_time,
             altitude=altitude,
             fuel_mins=fuel,
             zone_status=status,
@@ -119,7 +116,7 @@ def create_flight_stats(plane, current_time):
 
 """
 Create a random runway in the database
-operating_mode defaults to "Mixed"
+operating_mode defaults to "Mixed", can be "Takeoff" or "Landing"
 operational_status defaults to "Available"
 """
 def generate_random_runway(operating_mode="Mixed", operational_status="Available"):
@@ -152,54 +149,3 @@ def generate_random_runway(operating_mode="Mixed", operational_status="Available
         print(f"Generated runway: {runway_number}, Bearing: {bearing}, Length: {length}, Mode: {operating_mode}, Status: {operational_status}")
     except Exception as e:
         print(f"Error creating runway: {e}")
-    
-# Function which processes a tick in the simulation and updates all aircraft in the database
-def update_simulation():
-    # First phase: Activate all scheduled planes (hidden) so now they appear in the simulation
-    hidden_planes = aircrafts.filter(zone_status='SCHEDULED')
-
-    for plane in hidden_planes:
-        if plane.queue_entry_time and now >= plane.queue_entry_time:
-            # Check if it's time for arrivals
-            if plane.scheduled_arrival:
-                plane.zone_status = 'QUEUE_LA'
-                holding_planes = Aircraft.objects.filter(zone_status='QUEUE_LA')
-                highest = holding_planes.order_by('-altitude').first()
-                plane.altitude = (highest.altitude + 1000) if highest else 2000
-                print(f"ACTIVATED Arrival {plane.callsign}")
-        
-            # Check if it's time for departures
-            elif plane.scheduled_departure and now >= plane.scheduled_departure:
-                plane.zone_status = 'QUEUE_TO'
-                plane.altitude = 0
-                print(f"ACTIVATED Departure {plane.callsign}")
-
-            plane.save()
-
-    # Second phase: Burn fuel from planes in the landing queue
-    holding_planes = list(aircrafts.filter(zone_status='QUEUE_LA'))
-
-    for planes in holding_planes:
-        planes.fuel_mins -= 1
-        
-        # Check if we have to declare an emergency due to low fuel
-        if planes.fuel_mins <= 10 and planes.emergency_status == 'NONE':
-            planes.emergency_status = 'FUEL'
-            print(f"EMERGENCY: {planes.callsign} is low on fuel!")
-        
-        planes.save()
-
-    # Capacity analysis
-    active_planes = Aircraft.objects.exclude(zone_status__in=['SCHEDULED', 'CANCELLED', 'DIVERTED','DEPARTED', 'LANDED'])
-
-    open_runways = Runway.objects.filter(operational_status='Available')
-
-    caps_landing = open_runways.filter(operating_mode__icontains='Landing').exclude(operating_mode__icontains='Mixed').count()
-    caps_takeoff = open_runways.filter(operating_mode__icontains='Takeoff').exclude(operating_mode__icontains='Mixed').count()
-    caps_mixed = open_runways.filter(operating_mode__icontains='Mixed').count()
-
-    active_landings = active_planes.filter(zone_status='RUNWAY_LA').count()
-    active_takeoffs = active_planes.filter(zone_status='RUNWAY_TO').count()   
-
-    # Phase 3: Movement logic for planes
-         

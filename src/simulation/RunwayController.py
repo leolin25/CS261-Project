@@ -26,7 +26,7 @@ class RunwayController:
         :type a: Aircraft
         """
         # Get dynamically available runways (in case statuses changed)
-        available_runways = [r for r in Runway.objects.filter(operational_status='Available')]
+        available_runways = Runway.objects.filter(operational_status='AVAILABLE')
 
         # No available runways
         if not available_runways:
@@ -37,21 +37,21 @@ class RunwayController:
         # Arriving flights
         if a.zone_status == 'QUEUE_LA':
             # Try Landing Only first
-            landing = available_runways.filter(operating_mode__icontains='Landing').first()
+            landing = available_runways.filter(operating_mode__icontains='LANDING').first()
             if landing:
                 assigned_runway = landing
             else:
                 # Fallback to Mixed
-                assigned_runway = available_runways.filter(operating_mode__icontains='Mixed').first()
+                assigned_runway = available_runways.filter(operating_mode__icontains='MIXED').first()
         # Departing flights
         elif a.zone_status == 'QUEUE_TO':
             # Try Takeoff Only first
-            takeoff = available_runways.filter(operating_mode__icontains='Takeoff').first()
+            takeoff = available_runways.filter(operating_mode__icontains='TAKEOFF').first()
             if takeoff:
                 assigned_runway = takeoff
             else:
                 # Fallback to Mixed
-                assigned_runway = available_runways.filter(operating_mode__icontains='Mixed').first()
+                assigned_runway = available_runways.filter(operating_mode__icontains='MIXED').first()
 
         # Lock the runway as occupied and set the airplane's assigned runway
         if assigned_runway:

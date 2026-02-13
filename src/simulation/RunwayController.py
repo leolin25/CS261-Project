@@ -30,9 +30,9 @@ class RunwayController:
 
         # No available runways
         if not available_runways:
-            return None
+            return False
         
-        assign_runway = None
+        assign_runway = False
 
         # Arriving flights
         if a.zone_status == 'QUEUE_LA':

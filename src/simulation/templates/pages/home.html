@@ -1,8 +1,75 @@
 {% extends 'pages/base.html' %}
+{% load static %}
 
 {% block content %}
-    <h2>This is the airport modelling page</h2>
-    <p>This is a clean page. You can add buttons, forms, and tables here.</p>
-    <a href="{% url 'results' %}">Results page</a>
-    <button style="padding: 10px 20px; cursor: pointer;">Start New Simulation</button>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <div class="config-card-container">
+        <div class="config-header">
+            <h2><i class="fa-solid fa-sliders"></i> Simulation Setup</h2>
+            <p>Define airport parameters to initialize the traffic model.</p>
+        </div>
+        
+        <form action="{% url 'results' %}" method="POST" id="config-form" class="modern-form">
+            {% csrf_token %}
+            
+            <div class="form-section">
+                <h3><i class="fa-solid fa-plane-circle-check"></i> Flow Parameters</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="inbound_flow"><i class="fa-solid fa-plane-arrival label-icon"></i> Inbound Flights (per hour)</label>
+                        <input type="number" id="inbound_flow" name="inbound_flow" min="0" required placeholder="e.g., 20" class="fancy-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="outbound_flow"><i class="fa-solid fa-plane-departure label-icon"></i> Outbound Flights (per hour)</label>
+                        <input type="number" id="outbound_flow" name="outbound_flow" min="0" required placeholder="e.g., 20" class="fancy-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3><i class="fa-solid fa-road"></i> Runway Configuration</h3>
+                <div class="form-group">
+                    <label for="num_runways"><i class="fa-solid fa-hashtag label-icon"></i> Available Runways (1-10)</label>
+                    <input type="number" id="num_runways" name="num_runways" min="1" max="10" required placeholder="e.g., 2" class="fancy-input">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="runway_mode"><i class="fa-solid fa-gear label-icon"></i> Default Operating Mode</label>
+                        <select id="runway_mode" name="runway_mode" required class="fancy-input">
+                            <option value="mixed" selected>Mixed Mode (Arr/Dep)</option>
+                            <option value="landing">Landing Only</option>
+                            <option value="takeoff">Take-Off Only</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="runway_status"><i class="fa-solid fa-traffic-light label-icon"></i> Default Status</label>
+                        <select id="runway_status" name="runway_status" required class="fancy-input">
+                            <option value="available" selected>🟢 Available</option>
+                            <option value="inspection">🟡 Runway Inspection</option>
+                            <option value="snow">⚪ Snow Clearance</option>
+                            <option value="equipment_failure">🔴 Equipment Failure</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group checkbox-group fancy-checkbox-container">
+                    <input type="checkbox" id="random_events" name="random_events" class="fancy-checkbox">
+                    <label for="random_events"><i class="fa-solid fa-dice label-icon"></i> Enable Random Events <small>(Mechanical failures, weather shifts)</small></label>
+                </div>
+            </div>
+
+            <div id="error-message" class="fancy-error" style="display: none;">
+                <i class="fa-solid fa-triangle-exclamation"></i> <span id="error-text"></span>
+            </div>
+
+            <button type="submit" class="btn-fancy-submit">
+                Initialize Simulation <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+    </div>
+
+    <script src="{% static 'js/validation.js' %}"></script>
 {% endblock %}

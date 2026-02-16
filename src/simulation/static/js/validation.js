@@ -1,41 +1,36 @@
 document.addEventListener("DOMContentLoaded", function() {
     const configForm = document.getElementById('config-form');
     const errorContainer = document.getElementById('error-message');
-    const errorTextSpan = document.getElementById('error-text');
 
     configForm.addEventListener('submit', function(event) {
-        // Reset error state
+        // Очищаем предыдущие ошибки
         errorContainer.style.display = 'none';
-        errorTextSpan.textContent = '';
+        errorContainer.textContent = '';
         
         let errorMsg = '';
 
-        // Get values
-        // Use || 0 to treat empty fields as 0 for validation
-        const inboundFlow = parseInt(document.getElementById('inbound_flow').value) || 0;
-        const outboundFlow = parseInt(document.getElementById('outbound_flow').value) || 0;
-        const numRunways = parseInt(document.getElementById('num_runways').value) || 0;
+        // Получаем значения полей
+        const inboundFlow = parseInt(document.getElementById('inbound_flow').value);
+        const outboundFlow = parseInt(document.getElementById('outbound_flow').value);
+        const numRunways = parseInt(document.getElementById('num_runways').value);
 
-        // --- Validation ---
-
-        // Rule 1: Negative values
+        // Правило 1: Защита от отрицательных потоков (Security/Robustness requirement)
         if (inboundFlow < 0 || outboundFlow < 0) {
-            errorMsg = "Flight flow rates cannot be negative.";
+            errorMsg = "Error: Flight flow rates per hour cannot be negative values.";
         }
         
-        // Rule 2: Number of runways out of 1-10 range
+        // Правило 2: Ограничение количества полос (1-10)
         else if (numRunways < 1 || numRunways > 10) {
-            errorMsg = "Number of runways must be strictly between 1 and 10.";
+            errorMsg = "Error: The number of operational runways must be strictly between 1 and 10.";
         }
 
-        // --- If there is an error ---
+        // Если есть ошибка, останавливаем отправку формы и показываем сообщение
         if (errorMsg !== '') {
-            event.preventDefault(); // Stop submission
+            event.preventDefault(); // Блокирует submit
+            errorContainer.textContent = errorMsg;
+            errorContainer.style.display = 'block';
             
-            errorTextSpan.textContent = errorMsg; // Insert text
-            errorContainer.style.display = 'flex'; // Show container (flex for alignment with icon)
-            
-            // Smooth scroll to the error if the form is long
+            // Прокручиваем к сообщению об ошибке для удобства пользователя
             errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });

@@ -1,227 +1,96 @@
-/* --- Imports & Base Reset --- */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-:root {
-    --primary-color: #2563eb; /* Современный синий */
-    --primary-hover: #1d4ed8;
-    --bg-gradient: linear-gradient(135deg, #f6f8fd 0%, #e2e8f0 100%);
-    --card-bg: #ffffff;
-    --text-dark: #1e293b;
-    --text-medium: #64748b;
-    --error-color: #ef4444;
-    --border-color: #cbd5e1;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-}
-
-* {
-    box-sizing: border-box;
-}
-
+/* Базовые стили (дополнение к тому, что уже мог начать Итан) */
 body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg-gradient);
-    color: var(--text-dark);
-    min-height: 100vh;
-}
-/* --- Header Styles --- */
-header {
-    text-align: center;
-    padding: 40px 20px 10px;
-    width: 100%;
-}
-
-header h1 {
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--primary-color); /* Используем наш фирменный синий цвет */
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
     margin: 0;
-    letter-spacing: -0.5px;
-}
-/* --- Layout --- */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    padding: 0;
 }
 
-/* --- Configuration Card Component --- */
-.config-card-container {
-    background-color: var(--card-bg);
-    width: 100%;
-    max-width: 700px; /* Чуть шире для "воздуха" */
-    padding: 40px;
-    border-radius: 16px;
-    box-shadow: var(--shadow-lg);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
-.config-header {
+header {
+    background-color: #2c3e50;
+    color: white;
+    padding: 20px;
     text-align: center;
-    margin-bottom: 35px;
 }
 
-.config-header h2 {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
 }
 
-.config-header p {
-    color: var(--text-medium);
-    font-size: 16px;
+/* Стили формы конфигурации */
+.config-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-/* --- Form Sections --- */
 .form-section {
-    margin-bottom: 35px;
-    padding-bottom: 25px;
-    border-bottom: 2px dashed var(--border-color);
-}
-
-.form-section:last-of-type {
-    border-bottom: none;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
 }
 
 .form-section h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-top: 0;
+    color: #2c3e50;
 }
 
-/* --- Form Inputs & Layouts --- */
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     display: flex;
     flex-direction: column;
-    flex: 1; /* Для использования в flex-row */
-}
-
-/* Строка для двух колонок */
-.form-row {
-    display: flex;
-    gap: 20px;
-}
-
-@media (max-width: 600px) {
-    .form-row { flex-direction: column; gap: 0; }
 }
 
 .form-group label {
-    margin-bottom: 8px;
-    font-weight: 500;
-    font-size: 14px;
-    color: var(--text-dark);
-    display: flex;
-    align-items: center;
+    margin-bottom: 5px;
+    font-weight: bold;
 }
 
-.label-icon {
-    margin-right: 8px;
-    color: var(--text-medium);
-}
-
-.fancy-input {
-    padding: 12px 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
+.form-group input[type="number"],
+.form-group select {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     font-size: 16px;
-    font-family: 'Inter', sans-serif;
-    transition: all 0.3s ease;
-    background-color: #f8fafc;
 }
 
-.fancy-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    background-color: #fff;
-    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-}
-
-/* --- Checkbox --- */
-.fancy-checkbox-container {
+.checkbox-group {
     flex-direction: row;
     align-items: center;
-    background-color: #f0f9ff;
-    padding: 15px;
-    border-radius: 8px;
-    border: 1px solid #bae6fd;
 }
 
-.fancy-checkbox {
-    width: 20px;
-    height: 20px;
-    margin-right: 12px;
-    cursor: pointer;
+.checkbox-group input {
+    margin-right: 10px;
+    transform: scale(1.2);
 }
 
-.fancy-checkbox-container label small {
-    display: block;
-    color: var(--text-medium);
-    margin-left: 28px; /* Отступ под иконку */
-}
-
-/* --- Buttons & Errors --- */
-.btn-fancy-submit {
-    width: 100%;
-    padding: 16px;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+.btn-submit {
+    background-color: #3498db;
     color: white;
+    padding: 12px 24px;
     border: none;
-    border-radius: 12px;
-    font-size: 18px;
-    font-weight: 600;
+    border-radius: 4px;
+    font-size: 16px;
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: var(--shadow-md);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
+    width: 100%;
+    transition: background-color 0.3s;
 }
 
-.btn-fancy-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-    background: linear-gradient(135deg, var(--primary-hover) 0%, #153e90 100%);
+.btn-submit:hover {
+    background-color: #2980b9;
 }
 
-.btn-fancy-submit:active {
-    transform: translateY(0);
-}
-
-.fancy-error {
-    background-color: #fef2f2;
-    border: 2px solid var(--error-color);
-    color: #991b1b;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-    text-align: left;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    animation: shake 0.4s ease-in-out;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  75% { transform: translateX(5px); }
+/* Стили для ошибок валидации */
+.error-message {
+    background-color: #e74c3c;
+    color: white;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: bold;
 }

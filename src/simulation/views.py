@@ -5,3 +5,7 @@ from .logic import generate_random_aircraft
 def home(request):
     # Loads the home page with current simulation data
     return render(request, 'pages/home.html')
+
+def results(request):
+    #Loads resulst page
+    return render(request, 'pages/results.html')

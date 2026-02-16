@@ -4,27 +4,20 @@ class RunwayController:
     def __init__(self):
         self.runways = list(Runway.objects.all())
 
+    # Update the operating mode of the runway (LANDING, TAKEOFF, MIXED)
     def update_mode(self, runway: Runway, mode: str) -> None:
         runway.operating_mode = mode
         runway.save()
         print(f"Runway {runway.runway_number} mode updated to {mode}")
 
+    # Update the status of the runway (AVAILABLE, OCCUPIED, MAINTENANCE)
     def update_status(self, runway: Runway, status: str) -> None:
         runway.operational_status = status
         runway.save()
         print(f"Runway {runway.runway_number} status updated to {status}")
 
+    # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns the assigned runway or None if no suitable runway is available. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
     def assign_runway(self, a: Aircraft) -> Runway:
-        """
-        Take in an aircraft parameter and find a suitable runway for it to use based on its zone status (arriving or departing).
-        
-        :param self: Runway controller instance
-        :param a: Aircraft instance that needs a runway assigned
-        :type a: Aircraft
-        :return: The assigned Runway object if successful, None if no runway is available
-        :rtype: Runway
-        
-        """
         available_runways = Runway.objects.filter(operational_status='AVAILABLE')
 
         if not available_runways.exists():
@@ -55,11 +48,8 @@ class RunwayController:
 
         return None
 
+    # Takes an aircraft, finds the runway it was holding, and unlocks it. True if successful, False if the plane had no runway assigned or if the runway was not found.
     def free_runway(self, a: Aircraft) -> bool:
-        """
-        The exact opposite of assign_runway.
-        Takes an aircraft, finds the runway it was holding, and unlocks it.
-        """
         if not a.assigned_runway:
             return False
 

@@ -94,3 +94,17 @@ header {
     text-align: center;
     font-weight: bold;
 }
+
+/*Styles for results page */
+
+.resultcontainer {
+  display: flex;
+  background-color: white;
+}
+
+.resultcontainer div {
+  background-color: white;
+  margin: 10px;
+  padding: 20px;
+  font-size: 30px;
+}

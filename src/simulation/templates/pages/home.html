@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+    <div class="container">
     <div class="config-container">
         <h2>Airport Simulation Configuration</h2>
         <p>Please define the airport parameters below to begin a new traffic management simulation.</p>
@@ -60,4 +61,6 @@
     </div>
 
     <script src="{% static 'js/validation.js' %}"></script>
+</div>
+
 {% endblock %}

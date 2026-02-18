@@ -1,14 +1,15 @@
 {% extends 'pages/base.html' %}
 
 {% block content %}
-    <header>
-        <h1>Summary Screen</h1>
-    </header>
+
+<h2>Summary Screen</h2>
+
 
 
 <div class="resultcontainer">
   <div>
     <table>
+        <caption>Configuration</caption>
         <tr>
             <th>Config setting</th>
             <th>Value</th>
@@ -37,7 +38,8 @@
     </table>
   </div>
   <div>
-        <table>
+    <table>
+        <caption>Statistics</caption>
         <tr>
             <th>Statistic</th>
             <th>Value</th>
@@ -51,24 +53,58 @@
             <td>Max planes in landing queue</td>
             <td>15 - Get real value from backend</td>
         </tr>
+        <tr>
+            <td>Max Planes in holding pattern</td>
+            <td>15 - Get real value from backend</td>
+        </tr>
+        <tr>
+            <td>Average hold time</td>
+            <td>15 - Get real value from backend</td>
+        </tr>
+        <tr>
+            <td>Max delay</td>
+            <td>15 - Get real value from backend</td>
+        </tr>
+        <tr>
+            <td>Average delay</td>
+            <td>15 - Get real value from backend</td>
+        </tr>
     </table>
   </div>
   <div>
-        <table>
+    <table>
+        <caption>Advanced Statistics</caption>
         <tr>
             <th>Advanced Statistic</th>
             <th>Value</th>
 
         </tr>
         <tr>
-            <td>Delay Variance</td>
+            <td>Delay variance</td>
             <td>15 - Get real value from backend</td>
         </tr>
         <tr>
-
+            <td>Delay range</td>
+            <td>15 - Get real value from backend</td>
         </tr>
+        <tr>
+            <td>Planes diverted</td>
+            <td>15 - Get real value from backend</td>
+        </tr>
+
     </table>
   </div>
+</div>
+<div class="resultcontainer">
+    <div>
+        <button type="button" class="btn-submit">Save Configuration</button>
+    </div>
+    <div>
+        <button type="button" class="btn-submit">Run New Configuration</button>
+    </div>
+    <div>
+        <button type="button" class="btn-submit">Replay Same Configuration</button>
+    </div>
 </div>
 
 

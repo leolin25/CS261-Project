@@ -95,12 +95,20 @@ header {
     font-weight: bold;
 }
 
-/*Styles for results page - Done by Ethan*/
+/*Styles for results pages - Done by Ethan*/
 
+h2{
+    text-align: center;
+    font-size: 25px;
+}
+
+
+
+/*Styles for the flex box containing results tables and buttons */
 .resultcontainer {
   display: flex;
-  background-color: white;
-  justify-content: center;
+  background-color: #ffffff;
+  justify-content: space-evenly;
 }
 
 .resultcontainer div {
@@ -108,10 +116,18 @@ header {
   margin: 50px;
   padding: 50px;
   font-size: 20px;
+  flex: 1;
+  width: 0;
 }
 
+/*Styles for the tables in results and simulation */
 table, th, td {
       border: 1px solid black;
+}
+
+
+tr,th {
+    height: 50px;   
 }
 
 table {
@@ -121,3 +137,31 @@ table {
 th {
     background-color: gray;
 }
+
+caption{
+    font-size: 40px;
+    padding: 10px;
+}
+
+/*Styles for simulation flex tables */
+
+.simulationcontainer {
+  display: flex;
+  background-color: #ffffff;
+  justify-content: space-evenly;
+
+}
+
+.simulationcontainer div {
+  background-color: white;
+  margin: 50px;
+  padding: 50px;
+  font-size: 20px;
+  flex: 1;
+  width: 0;
+}
+
+.simulationcontainer tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+

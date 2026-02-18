@@ -7,5 +7,9 @@ def home(request):
     return render(request, 'pages/home.html')
 
 def results(request):
-    #Loads resulst page
+    #Loads results page
     return render(request, 'pages/results.html')
+
+def simulation(request):
+    #Loads simulation page
+    return render(request, 'pages/simulationtables.html')

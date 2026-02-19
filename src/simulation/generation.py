@@ -15,6 +15,10 @@ class Generator:
         # Average delay of 0 minutes with a standard deviation of 5 minutes
         return int(round(random.normal(loc=0, scale=5)))
 
+    @staticmethod
+    def generate_fuel():
+        # Random fuel between 20 and 60 minutes for arrivals, 180 to 300 for departures
+        return random.randint(20, 60)
 
 if __name__ == '__main__':
     pass

@@ -10,12 +10,20 @@ class Command(BaseCommand):
         parser.add_argument("inbound_per_hour", type=int, default=15, nargs="?")
         parser.add_argument("outbound_per_hour", type=int, default=15, nargs="?")
 
+    def output_schedule(self, arrivals, departures):
+        self.stdout.write("-----------------Arrivals Schedule-----------------")
+        for aircraft in arrivals:
+            self.stdout.write(f"Aircraft: {aircraft.callsign} Scheduled: {aircraft.scheduled_arrival} Expected: {aircraft.queue_entry_time}")
+
+        self.stdout.write("-----------------Departures Schedule-----------------")
+        for aircraft in departures:
+            self.stdout.write(f"Aircraft: {aircraft.callsign} Scheduled: {aircraft.scheduled_departure} Expected: {aircraft.queue_entry_time}")
+
     def handle(self, *args, **options):
         generator = Generator(
             hour_limit=options["hour_limit"],
             inbound_per_hour=options["inbound_per_hour"],
             outbound_per_hour=options["outbound_per_hour"],
         )
-        for _ in range(10):
-            plane = generator.generate_aircraft(is_arrival=True)
-            self.stdout.write(f"Generated Aircraft: {plane.callsign}, Scheduled Arrival: {plane.scheduled_arrival}, Queue Entry: {plane.queue_entry_time}, Fuel: {plane.fuel_mins} mins")
+        arrivals, departures = generator.run_generation()
+        self.output_schedule(arrivals, departures)

@@ -50,3 +50,14 @@ class Generator:
             self.last_generated_outbound = scheduled_time
             self.outbound_schedule.append(aircraft)
         return aircraft
+
+    def run_generation(self):
+        while datetime.now() + timedelta(hours=self.hour_limit) > self.last_generated_inbound:
+            self.generate_aircraft(is_arrival=True)
+
+        while datetime.now() + timedelta(hours=self.hour_limit) > self.last_generated_outbound:
+            self.generate_aircraft(is_arrival=False)
+
+        self.inbound_schedule = sorted(self.inbound_schedule, key=lambda aircraft: aircraft.queue_entry_time)
+        self.outbound_schedule = sorted(self.outbound_schedule, key=lambda aircraft: aircraft.queue_entry_time)
+        return self.inbound_schedule, self.outbound_schedule

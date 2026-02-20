@@ -83,7 +83,7 @@ class DepartureManager:
     def get_stats():    
         stats = FlightStats.objects.filter(outcome='DEPARTED')
 
-        if not stats.exist():
+        if not stats.exists():
             return {"peak_queue": DepartureManager.max_queue_size, "status": "No departures recorded."}
         
 

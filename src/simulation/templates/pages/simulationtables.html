@@ -1,63 +1,81 @@
 {% extends 'pages/base.html' %}
 
 {% block content %}
+    
 <h2>Active Simulation</h2>
+    
+
 
 <div class="simulationcontainer">
   <div>
     <table>
-      <caption>Take-Off Queue</caption>
-      <tr>
-        <th>Callsign</th>
-        <th>Operator</th>
-        <th>Destination</th>
-        <th>Scheduled Departure Time</th>
-      </tr>
+        <caption>Take-Off Queue</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Destination</th>
+            <th>Scheduled Departure Time</th>
 
-      {% for plane in takeoff_queue %}
-      <tr>
-        <td>{{ plane.callsign }}</td>
-        <td>{{ plane.operator }}</td>
-        <td>{{ plane.destination }}</td>
-        <td>{{ plane.scheduled_departure }}</td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="4">No aircraft currently in take-off queue.</td>
-      </tr>
-      {% endfor %}
+        </tr>
+        <tr>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+
+        </tr>
+        <tr>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+
+        </tr>
+        <tr>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+
+        </tr>
     </table>
   </div>
-
   <div>
     <table>
-      <caption>Landing Queue</caption>
-      <tr>
-        <th>Callsign</th>
-        <th>Operator</th>
-        <th>Origin</th>
-        <th>Scheduled Arrival Time</th>
-        <th>Altitude</th>
-        <th>Fuel Remaining</th>
-        <th>Emergency Status</th>
-      </tr>
-
-      {% for plane in landing_queue %}
-      <tr>
-        <td>{{ plane.callsign }}</td>
-        <td>{{ plane.operator }}</td>
-        <td>{{ plane.origin }}</td>
-        <td>{{ plane.scheduled_arrival }}</td>
-        <td>{{ plane.altitude }}</td>
-        <td>{{ plane.fuel_mins }}</td>
-        <td>{{ plane.emergency_status }}</td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="7">No aircraft currently in landing queue.</td>
-      </tr>
-      {% endfor %}
+        <caption>Landing Queue</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Origin</th>
+            <th>Scheduled Arrival Time</th>
+            <th>Altitude</th>
+            <th>Fuel Remaining</th>
+            <th>Emergency Status</th>
+        </tr>
+        <tr>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+        </tr>
+        <tr>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+            <td>Example Data</td>
+        </tr>
     </table>
   </div>
 </div>
+
+
+
+
+    
 {% endblock %}

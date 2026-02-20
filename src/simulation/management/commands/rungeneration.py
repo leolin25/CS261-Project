@@ -13,11 +13,11 @@ class Command(BaseCommand):
     def output_schedule(self, arrivals, departures):
         self.stdout.write("-----------------Arrivals Schedule-----------------")
         for aircraft in arrivals:
-            self.stdout.write(f"Aircraft: {aircraft.callsign} Scheduled: {aircraft.scheduled_arrival} Expected: {aircraft.queue_entry_time}")
+            self.stdout.write(f"Aircraft: {aircraft.callsign} Operator: {aircraft.operator} Origin: {aircraft.origin} Destination: {aircraft.destination} Scheduled: {aircraft.scheduled_arrival} Expected: {aircraft.queue_entry_time}")
 
         self.stdout.write("-----------------Departures Schedule-----------------")
         for aircraft in departures:
-            self.stdout.write(f"Aircraft: {aircraft.callsign} Scheduled: {aircraft.scheduled_departure} Expected: {aircraft.queue_entry_time}")
+            self.stdout.write(f"Aircraft: {aircraft.callsign} Operator: {aircraft.operator} Origin: {aircraft.origin} Destination: {aircraft.destination} Scheduled: {aircraft.scheduled_departure} Expected: {aircraft.queue_entry_time}")
 
     def handle(self, *args, **options):
         generator = Generator(

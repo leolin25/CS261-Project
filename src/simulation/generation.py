@@ -1,5 +1,6 @@
 from .models import Aircraft
 from numpy import random
+import pandas as pd
 from datetime import timedelta, datetime
 
 class Generator:
@@ -11,6 +12,7 @@ class Generator:
         self.outbound = outbound_per_hour
         self.last_generated_inbound = datetime.now()
         self.last_generated_outbound = datetime.now()
+        self.data = pd.read_csv("simulation/data/flight-data.csv")
 
     @staticmethod
     def generate_delay():
@@ -30,11 +32,12 @@ class Generator:
             scheduled_time = self.last_generated_outbound + timedelta(minutes=round(60/self.outbound))
         expected_time = scheduled_time + timedelta(minutes=delay)
         fuel = self.generate_fuel()
+        data = self.data.sample()
         aircraft = Aircraft(
-            callsign="123",
-            operator="TEST",
-            origin="AAA",
-            destination="BBB",
+            callsign=data["flight"].values[0],
+            operator=data["name"].values[0],
+            origin=data["origin"].values[0],
+            destination=data["dest"].values[0],
             scheduled_arrival=scheduled_time,
             scheduled_departure=scheduled_time,
             queue_entry_time=expected_time,

@@ -8,7 +8,7 @@
 
 <div class="simulationcontainer">
   <div>
-    <table>
+    <table id="takeoffTable">
         <caption>Take-Off Queue</caption>
         <tr>
             <th>Callsign</th>
@@ -17,31 +17,18 @@
             <th>Scheduled Departure Time</th>
 
         </tr>
+        {% for x in takeoffQ %}
         <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.destination}}</td>
+            <td>{{x.scheduledDeparture}}</td>
         </tr>
-        <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-
-        </tr>
-        <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-
-        </tr>
+        {% endfor %}
     </table>
   </div>
   <div>
-    <table>
+    <table id="landingTable">
         <caption>Landing Queue</caption>
         <tr>
             <th>Callsign</th>
@@ -52,30 +39,55 @@
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
+
+        {% for x in landingQ %}
         <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.origin}}</td>
+            <td>{{x.scheduledArrival}}</td>
+            <td>{{x.altitude}}</td>
+            <td>{{x.fuelRemaining}}</td>
+            <td>{{x.emergencyStatus}}</td>
         </tr>
-        <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-        </tr>
+        {% endfor %}
     </table>
   </div>
 </div>
+<p>Data stream</p>
+<div id="test"></div>
 
 
+<script>
+const x = document.getElementById("takeoffTable");
+if(typeof(EventSource) !== "undefined") {
 
+  var source = new EventSource("/stream/"); 
+  source.onmessage = function(event) {
+    //x.innerHTML += event.data + "<br>";
+    try {
+      var payload = JSON.parse(event.data);
+      //DOM manipulation will go here
+      var row =x.insertRow(-1);
+      var c0 = row.insertCell(0);
+      var c1 = row.insertCell(1);
+      var c2 = row.insertCell(2);
+      var c3 = row.insertCell(3);
+
+      c0.innerText = "Data"
+      c1.innerText = "Test"
+      c2.innerText = "Data"
+      c3.innerText = "Test"
+
+    } catch (e){
+      console.error("Error in JSON parsing:",e,event.data)
+    }
+
+  };
+} else {
+  x.innerHTML = "SSE Error";
+}
+</script>
 
     
 {% endblock %}

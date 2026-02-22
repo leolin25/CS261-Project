@@ -6,4 +6,6 @@ urlpatterns = [
     path('results/', results, name='results'),
     path('simulation/',simulation, name='simulation'),
     path('api/sample-data/', GetSampleData.as_view(), name='sample-data'),
+    path('stream/', views.stream, name='stream')
+
 ]

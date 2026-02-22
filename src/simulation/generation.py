@@ -37,7 +37,7 @@ class Generator:
         fuel = self.generate_fuel()
         data = self.data.sample()
         aircraft = Aircraft(
-            callsign=data["flight"].values[0],
+            callsign=data["carrier"].values[0] + str(data["flight"].values[0]),
             operator=data["name"].values[0],
             origin=data["origin"].values[0],
             destination=data["dest"].values[0],

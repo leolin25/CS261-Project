@@ -67,6 +67,10 @@ def stream(request):
         while True:
             time.sleep(1)
             #yield 'data: The server time is: %s\n\n' % datetime.datetime.now()
+            takeoffQ = {
+                "examplefield": "exampledata",
+                "examplefield2": "exampledata2"
+            }
             data = f"data: {json.dumps(takeoffQ)}\n\n" #neeed to define takeoffQ, should just be a json file 
             yield data
     

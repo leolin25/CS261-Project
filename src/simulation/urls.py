@@ -1,8 +1,9 @@
 from django.urls import path
-from . import views
+from .views import home, results, simulation, GetSampleData
 
 urlpatterns = [
-    path('', views.home, name='home'),
-    path('results/', views.results, name='results'),
-    path('simulation/',views.simulation, name='simulation'),
+    path('', home, name='home'),
+    path('results/', results, name='results'),
+    path('simulation/',simulation, name='simulation'),
+    path('api/sample-data/', GetSampleData.as_view(), name='sample-data'),
 ]

@@ -1,7 +1,13 @@
 asgiref==3.11.1
 Django==6.0.2
+django-stubs==5.2.9
+django-stubs-ext==5.2.9
+djangorestframework==3.16.1
+djangorestframework-stubs==3.16.8
 numpy==2.4.2
 pandas==3.0.1
 python-dateutil==2.9.0.post0
 six==1.17.0
 sqlparse==0.5.5
+types-PyYAML==6.0.12.20250915
+typing_extensions==4.15.0

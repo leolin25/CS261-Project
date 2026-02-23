@@ -5,10 +5,31 @@ from .models import Aircraft, FlightStats
 from .logic import create_flight_stats
 
 
-class Stack:
+class Stack():
+    """A stack data structure"""
+    
     def __init__(self):
-        self.array = []
         self.length = 0
+        self.array = []
+        
+    def enqueue(self, airplane):
+        self.length += 1
+        self.array.append(airplane)
+
+    def dequeue(self):
+        if self.length == 0:
+            return False
+        
+        self.length -= 1
+        
+        return self.array.pop(0)
+
+    def get_array(self):
+        return self.array
+    
+    def output(self):
+        print(self.array)
+
     
 
 

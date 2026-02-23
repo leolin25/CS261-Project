@@ -7,18 +7,26 @@ from .logic import create_flight_stats
 
 
 class DepartureManager:
-    max_queue_size = 0 
+
+
+    max_planes_in_queue = 0 
+
+
+
     """Applying normal distribution for queue entry
     Mean = Scheduled departure time
     S.D = 5m
     """
-    @staticmethod
-    def entry_variance(plane):
-        if plane.scheduled_departure and not plane.queue_entry_time:
-            variance = random.gauss(0,5) 
-            plane.queue_entry_time = plane.scheduled_departure+timedelta(minutes=variance)
-            plane.save()
-        return plane
+    # @staticmethod
+    # def entry_variance(plane):
+    #     if plane.scheduled_departure and not plane.queue_entry_time:
+    #         variance = random.gauss(0,5) 
+    #         plane.queue_entry_time = plane.scheduled_departure+timedelta(minutes=variance)
+    #         plane.save()
+    #     return plane
+
+
+
     
     """
     Cancel flights that have waited longer than 30 minutes in the queue
@@ -45,19 +53,30 @@ class DepartureManager:
     """
     @staticmethod
     def process_departures(time,runway_controller):
-        scheduled_flights = Aircraft.objects.filter(zone_status='SCHEDULED',scheduled_departure__isnull=False)
+        
 
-        #Place scheduled planes in the queue if possible
-        for plane in scheduled_flights:
-            plane = DepartureManager.entry_variance(plane)
-            if time>=plane.queue_entry_time:
-                plane.zone_status = 'QUEUE_TO'
-                plane.save()
+        '''ideally want planes on runway for 45s, but simulation ticks every minute, 
+        so this makes planes stay on runway for 60s as planes on the runway are removed every tick.
+        free the runway the plane was on.
+        '''
+        departed = Aircraft.objects.filter(zone_status='RUNWAY_TO')
+        for plane in departed:
+            plane.zone_status = 'DEPARTED'
+            print(f"Flight {plane.callsign} has taken off")
+            plane.save()
+            runway_controller.free_runway(plane)
+            create_flight_stats(plane, time)
+
+
+        ready_to_queue = Aircraft.objects.filter(zone_status='SCHEDULED',queue_entry_time__lte=time)
+        for plane in ready_to_queue:
+            plane.zone_status = 'QUEUE_TO' 
+            plane.save()
                 
         # Keep count of the most number of planes in queue at a time. 
         current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_TO').count()
-        if current_queue_count > DepartureManager.max_queue_size:
-            DepartureManager.max_queue_size=current_queue_count
+        if current_queue_count > DepartureManager.max_planes_in_queue:
+            DepartureManager.max_planes_in_queue=current_queue_count
 
         #Clear planes which have been waiting for longer than 30 minutes
         DepartureManager.check_cancellations(time)
@@ -69,10 +88,9 @@ class DepartureManager:
             assigned_runway = runway_controller.assign_runway(plane)
 
             if assigned_runway:
-                plane.zone_status = 'DEPARTED'
+                plane.zone_status = 'RUNWAY_TO'
                 plane.save()
-                create_flight_stats(plane,time)
-                print(f"Flight {plane.callsign} taking off on Runway {assigned_runway.runway_number}")
+                print(f"Flight {plane.callsign} preparing for takeoff on runway {assigned_runway.runway_number}")
         
 
 
@@ -83,8 +101,8 @@ class DepartureManager:
     def get_stats():    
         stats = FlightStats.objects.filter(outcome='DEPARTED')
 
-        if not stats.exist():
-            return {"peak_queue": DepartureManager.max_queue_size, "status": "No departures recorded."}
+        if not stats.exists():
+            return {"peak_queue": DepartureManager.max_planes_in_queue, "status": "No departures recorded."}
         
 
         results=  stats.aggregate(
@@ -94,5 +112,5 @@ class DepartureManager:
             max_delay=Max('departure_delay_mins')
 
         )
-        results['peak_queue_size'] = DepartureManager.max_queue_size
+        results['peak_queue_size'] = DepartureManager.max_planes_in_queue
         return results

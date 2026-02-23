@@ -3,8 +3,7 @@ from django.conf import settings
 from numpy import random
 import pandas as pd
 from .models import Aircraft
-
-
+from django.utils import timezone 
 class Generator:
     def __init__(self, hour_limit, inbound_per_hour, outbound_per_hour, start_time=None):
         self.inbound_schedule = []
@@ -12,7 +11,7 @@ class Generator:
         self.hour_limit = hour_limit
         self.inbound_per_hour = inbound_per_hour
         self.outbound_per_hour = outbound_per_hour
-        base_time = start_time if start_time is not None else datetime.now()
+        base_time = start_time if start_time is not None else timezone.now()
         self.last_generated_inbound = base_time
         self.last_generated_outbound = base_time
         self.data = pd.read_csv(settings.BASE_DIR / 'simulation' / 'data' / 'flight-data.csv')
@@ -58,11 +57,11 @@ class Generator:
         return aircraft
 
     def run_generation(self):
-        while (datetime.now() + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
+        while (timezone.now() + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
                self.inbound_per_hour > 0):
             self.generate_aircraft(is_arrival=True)
 
-        while (datetime.now() + timedelta(hours=self.hour_limit) > self.last_generated_outbound and
+        while (timezone.now()+ timedelta(hours=self.hour_limit) > self.last_generated_outbound and
                self.outbound_per_hour > 0):
             self.generate_aircraft(is_arrival=False)
 

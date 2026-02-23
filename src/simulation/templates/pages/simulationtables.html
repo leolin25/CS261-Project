@@ -8,7 +8,7 @@
 
 <div class="simulationcontainer">
   <div>
-    <table>
+    <table id="takeoffTable">
         <caption>Take-Off Queue</caption>
         <tr>
             <th>Callsign</th>
@@ -17,31 +17,20 @@
             <th>Scheduled Departure Time</th>
 
         </tr>
+        <tbody>
+        {% for x in takeoffQ %}
         <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.destination}}</td>
+            <td>{{x.scheduledDeparture}}</td>
         </tr>
-        <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-
-        </tr>
-        <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-
-        </tr>
+        {% endfor %}
+        </tbody>
     </table>
   </div>
   <div>
-    <table>
+    <table id="landingTable">
         <caption>Landing Queue</caption>
         <tr>
             <th>Callsign</th>
@@ -52,30 +41,96 @@
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
+        <tbody>
+        {% for x in landingQ %}
         <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.origin}}</td>
+            <td>{{x.scheduledArrival}}</td>
+            <td>{{x.altitude}}</td>
+            <td>{{x.fuelRemaining}}</td>
+            <td>{{x.emergencyStatus}}</td>
         </tr>
-        <tr>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-            <td>Example Data</td>
-        </tr>
+        {% endfor %}
+        </tbody>
     </table>
   </div>
 </div>
+<p>Data stream</p>
+<div id="test"></div>
 
 
+<script>
+const takeoffTable = document.getElementById("takeoffTable");
+const landingTable = document.getElementById("landingTable");
 
+if(typeof(EventSource) !== "undefined") {
+
+  var source = new EventSource("/stream/"); 
+  source.onmessage = function(event) {
+    //x.innerHTML += event.data + "<br>";
+    try {
+      //Delete all existing rows
+      while (takeoffTable.rows.length > 1) {
+          takeoffTable.deleteRow(1);
+      }
+
+      while (landingTable.rows.length > 1) {
+          landingTable.deleteRow(1);
+      }
+      var payload = JSON.parse(event.data);
+      //For each flight in json
+      for(let i = 0; i < payload.length; i++){
+        let flight = payload[i];
+
+        //If flight has a scheduled departure put it in takeoffQ
+        if(flight.scheduled_departure != null){
+          var row =takeoffTable.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.destination
+          c3.innerText = flight.scheduled_departure
+
+        }else{
+          //Otherwise put it in landing Queue
+          var row =landingTable.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
+          var c5 = row.insertCell(5);
+          var c6 = row.insertCell(6);
+
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.origin
+          c3.innerText = flight.scheduled_arrival
+          c4.innerText = flight.altitude
+          c5.innerText = flight.fuel_mins
+          c6.innerText = flight.emergency_status
+
+        }
+
+      }
+
+
+    } catch (e){
+      console.error("Error in JSON parsing:",e,event.data)
+    }
+
+  };
+} else {
+  landingTable.innerHTML = "SSE Error";
+}
+</script>
 
     
 {% endblock %}

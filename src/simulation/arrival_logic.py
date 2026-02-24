@@ -109,10 +109,6 @@ class ArrivalManager:
                 print(f"Flight {plane.callsign} cancelled")
 
         return num_diverted_planes
-
-  
-    def check_holding_pattern(plane):
-        in_queue = Aircraft.objects.filter(zone_status = 'QUEUE_LA')
         
 
     """
@@ -120,9 +116,10 @@ class ArrivalManager:
     This runs under the assumption that planes take off as soon as they receive a runway slot. 
     """
 
-    '''ideally want planes on runway for 45s, but simulation ticks every minute, 
-        so this makes planes stay on runway for 60s as planes on the runway are removed every tick.
-        free the runway the plane was on.
+    '''
+    ideally want planes on runway for 45s, but simulation ticks every minute, 
+    so this makes planes stay on runway for 60s as planes on the runway are removed every tick.
+    free the runway the plane was on.
     '''
     @staticmethod
     def process_arrivals(time,runway_controller):
@@ -153,11 +150,11 @@ class ArrivalManager:
                 
         # Keep count of the most number of planes in queue at a time. 
         current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_LA').count()
-        if current_queue_count > DepartureManager.max_planes_in_queue:
-            DepartureManager.max_planes_in_queue=current_queue_count
+        if current_queue_count > ArrivalManager.max_planes_in_queue:
+            ArrivalManager.max_planes_in_queue=current_queue_count
 
         # Clear planes which have been waiting for longer than 30 minutes
-        DepartureManager.check_divertion(time)
+        ArrivalManager.check_divertion(time)
 
         # Put the planes on the runway if possible so they can be landed on the next tick
         for i in range(holding_pattern.length):
@@ -179,7 +176,7 @@ class ArrivalManager:
         stats = FlightStats.objects.filter(outcome='DEPARTED')
 
         if not stats.exists():
-            return {"peak_queue": DepartureManager.max_queue_size, "status": "No departures recorded."}
+            return {"peak_queue": ArrivalManager.max_queue_size, "status": "No departures recorded."}
         
 
         results=  stats.aggregate(
@@ -189,5 +186,5 @@ class ArrivalManager:
             max_delay = Max('departure_delay_mins')
 
         )
-        results['peak_queue_size'] = DepartureManager.max_queue_size
+        results['peak_queue_size'] = ArrivalManager.max_queue_size
         return results

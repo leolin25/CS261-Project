@@ -5,50 +5,81 @@ from .models import Aircraft, FlightStats
 from .logic import create_flight_stats
 
 
-class Stack():
-    """A stack data structure"""
+class Queue:
+    """A queue data structure"""
     
     def __init__(self):
         self.length = 0
         self.array = []
+        self.priority_pointer = 0 # This points to the index position that the new emergency plane should be placed in
+        self.max_length = 4 # Maximum number of planes in the holding pattern
         
     def enqueue(self, airplane):
-        self.length += 1
-        self.array.append(airplane)
+        #Add the new airplane to the back of the queue
+
+        # Return False if the queue is full
+        if self.length == self.max_length:
+            print("queue full")
+            return False
+        else:
+            self.length += 1
+            self.array.append(airplane)
+
+            return True
 
     def dequeue(self):
+        #Remove the airplane at the front of the queue
+
+        # Return False if the queue is empty
         if self.length == 0:
             return False
+
+        # Decrease the pointer by 1 when there are airplanes with emergencies
+        elif self.priority_pointer > 0:
+            self.priority_pointer -= 1
         
         self.length -= 1
-        
         return self.array.pop(0)
 
     def get_array(self):
+        #Return the array itself
+        
         return self.array
     
     def output(self):
+        #Output the items within the queue
+
         print(self.array)
+
+    def enqueue_priority(self, airplane):
+        #Add to the front of the queue because of priority/emergency.
+        #If there are planes with emergency already in the queue, add the airplane behind the existing ones
+
+        last_plane = True # Return True if enqueue successful, this will be replaced with the plane that got kicked out if the queue is full
+        
+        # If hold pattern full of emergency, return False
+        if self.priority_pointer == self.max_length:
+            print("priority full")
+            return False
+        
+        # If full, remove the last plane and add the emergency plane to the front
+        elif self.length == self.max_length:
+            last_plane = self.array.pop(-1)
+            print("This one got kicked out:", last_plane)
+            self.length -= 1
+
+        self.array.insert(self.priority_pointer, airplane)
+        self.priority_pointer += 1
+        self.length += 1
+
+        return last_plane
 
     
 
 
 class ArrivalManager:
     max_queue_size = 0 
-    holding_pattern_stack = 
-
-  
-    """Applying normal distribution for queue entry
-    Mean = Scheduled departure time
-    S.D = 5m
-    """
-    @staticmethod
-    def entry_variance(plane):
-        if plane.scheduled_departure and not plane.queue_entry_time:
-            variance = random.gauss(0,5) 
-            plane.queue_entry_time = plane.scheduled_departure+timedelta(minutes=variance)
-            plane.save()
-        return plane
+    holding_pattern_stack = Stack()
     
     """
     Divert flights that have waited longer than 30 minutes in the holding pattern

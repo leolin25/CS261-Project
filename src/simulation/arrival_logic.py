@@ -13,25 +13,24 @@ class Queue:
         self.array = []
         self.priority_pointer = 0 # This points to the index position that the new emergency plane should be placed in
         self.max_length = 4 # Maximum number of planes in the holding pattern
-        
+
+    # Add the new airplane to the back of the queue
     def enqueue(self, airplane):
-        #Add the new airplane to the back of the queue
 
         # Return False if the queue is full
         if self.length == self.max_length:
             print("queue full")
             return False
-        else:
-            self.length += 1
-            self.array.append(airplane)
-
-            return True
-
+            
+        self.length += 1
+        self.array.append(airplane)
+        return True
+        
+    # Remove the airplane at the front of the queue
     def dequeue(self):
-        #Remove the airplane at the front of the queue
-
+    
         # Return False if the queue is empty
-        if self.length == 0:
+        if self.isEmpty():
             return False
 
         # Decrease the pointer by 1 when there are airplanes with emergencies
@@ -40,21 +39,29 @@ class Queue:
         
         self.length -= 1
         return self.array.pop(0)
-
-    def get_array(self):
-        #Return the array itself
         
+    # Return the array itself
+    def get_array(self):
         return self.array
-    
+        
+    # Output the items within the queue  
     def output(self):
-        #Output the items within the queue
-
         print(self.array)
+        
+    # Look into the first plane in the holding pattern
+    def look(self):
+        if self.isEmpty():
+            return False
+        
+        return self.array[0]
 
+    # Check if the queue is empty
+    def isEmpty(self):
+        return self.length == 0
+
+    # Add to the front of the queue because of priority/emergency.
+    # If there are planes with emergency already in the queue, add the airplane behind the existing ones 
     def enqueue_priority(self, airplane):
-        #Add to the front of the queue because of priority/emergency.
-        #If there are planes with emergency already in the queue, add the airplane behind the existing ones
-
         last_plane = True # Return True if enqueue successful, this will be replaced with the plane that got kicked out if the queue is full
         
         # If hold pattern full of emergency, return False
@@ -75,24 +82,26 @@ class Queue:
         return last_plane
 
     
-
-
 class ArrivalManager:
     max_queue_size = 0 
-    holding_pattern_stack = Stack()
+    holding_pattern = Queue()
     
     """
-    Divert flights that have waited longer than 30 minutes in the holding pattern
+    Divert flights that have waited longer than 30 minutes in the holding pattern, or have fuel <= 11min
     """
     @staticmethod
     def check_divertion(time):
         in_queue = Aircraft.objects.filter(zone_status = 'QUEUE_LA')
         num_diverted_planes = 0 
-      
-        for plane in in_queue:
-            wait_duration = (time - plane.queue_entry_time).total_seconds() / 60
-            
-            if wait_duration>30:
+
+    
+        for i in range(holding_pattern.length):
+            wait_duration = (time - holding_pattern.look().queue_entry_time).total_seconds() / 60
+            fuel_level = holding_pattern.look().fuel_mins
+
+            # Divert the plane if it has waited for more than 30min, or less or equal to 10min of fuel
+            if wait_duration > 30 fuel_level <= 11:
+                plane = holding_pattern.dequeue()
                 plane.zone_status = 'DIVERTED'
                 plane.save()
                 create_flight_stats(plane,time)
@@ -106,44 +115,61 @@ class ArrivalManager:
         in_queue = Aircraft.objects.filter(zone_status = 'QUEUE_LA')
         
 
-
-  
     """
     Main logic loop for simulation
     This runs under the assumption that planes take off as soon as they receive a runway slot. 
     """
+
+    '''ideally want planes on runway for 45s, but simulation ticks every minute, 
+        so this makes planes stay on runway for 60s as planes on the runway are removed every tick.
+        free the runway the plane was on.
+    '''
     @staticmethod
     def process_arrivals(time,runway_controller):
-        scheduled_flights = Aircraft.objects.filter(zone_status='SCHEDULED',scheduled_departure__isnull=False)
 
-        #Place scheduled planes in the queue if possible
-        for plane in scheduled_flights:
-            plane = DepartureManager.entry_variance(plane)
-            if time>=plane.queue_entry_time:
-                plane.zone_status = 'QUEUE_TO'
+        # Land the planes that are already on the runway from last tick
+        set_to_land = Aircraft.objects.filter(zone_status='RUNWAY_LA')
+        for plane in departed:
+            plane.zone_status = 'LANDED'
+            print(f"Flight {plane.callsign} has landed")
+            plane.save()
+            runway_controller.free_runway(plane)
+            create_flight_stats(plane, time)
+
+        # Get new planes that are on arrival
+        arrival_planes = Aircraft.objects.filter(zone_status='SCHEDULED',queue_entry_time__lte=time)
+        for plane in ready_to_queue:
+
+            # Check if it is a arrival plane
+            if plane.scheduled_departure == None
+                plane.zone_status = 'QUEUE_LA' 
                 plane.save()
+
+                # Add the planes to the holding pattern
+                if plane.emergency_status.choices == "NONE":
+                    holding_pattern.enqueue(plane)
+                else:
+                    holding_pattern.priority_enqueue(plane)
                 
         # Keep count of the most number of planes in queue at a time. 
-        current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_TO').count()
-        if current_queue_count > DepartureManager.max_queue_size:
-            DepartureManager.max_queue_size=current_queue_count
+        current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_LA').count()
+        if current_queue_count > DepartureManager.max_planes_in_queue:
+            DepartureManager.max_planes_in_queue=current_queue_count
 
-        #Clear planes which have been waiting for longer than 30 minutes
-        DepartureManager.check_cancellations(time)
+        # Clear planes which have been waiting for longer than 30 minutes
+        DepartureManager.check_divertion(time)
 
-        #Attempt to assign runways to planes in queue, ensuring FIFO ordering
-        queue = Aircraft.objects.filter(zone_status='QUEUE_TO').order_by('queue_entry_time')
-
-        for plane in queue:
-            assigned_runway = runway_controller.assign_runway(plane)
+        # Put the planes on the runway if possible so they can be landed on the next tick
+        for i in range(holding_pattern.length):
+            assigned_runway = runway_controller.assign_runway(holding_pattern.look())
 
             if assigned_runway:
-                plane.zone_status = 'DEPARTED'
+                plane = holding_pattern.dequeue()
+                plane.zone_status = 'RUNWAY_LA'
                 plane.save()
-                create_flight_stats(plane,time)
-                print(f"Flight {plane.callsign} taking off on Runway {assigned_runway.runway_number}")
-        
-
+                print(f"Flight {plane.callsign} preparing for landing on runway {assigned_runway.runway_number}")
+            else:
+                break
 
     """
     Finding maximum and average delay between scheduled departure time and actual departure time as per requirements

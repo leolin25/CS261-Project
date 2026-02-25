@@ -81,7 +81,9 @@ class Queue:
 
         return last_plane
 
-    
+"""
+This class manages the arrival of planes, including the holding pattern and diverting planes that have been waiting for too long or have low fuel.
+"""
 class ArrivalManager:
     max_queue_size = 0 
     holding_pattern = Queue()
@@ -100,7 +102,7 @@ class ArrivalManager:
             fuel_level = holding_pattern.look().fuel_mins
 
             # Divert the plane if it has waited for more than 30min, or less or equal to 10min of fuel
-            if wait_duration > 30 fuel_level <= 11:
+            if wait_duration > 30 or fuel_level <= 11:
                 plane = holding_pattern.dequeue()
                 plane.zone_status = 'DIVERTED'
                 plane.save()
@@ -188,3 +190,13 @@ class ArrivalManager:
         )
         results['peak_queue_size'] = ArrivalManager.max_queue_size
         return results
+    
+    """
+    Decrease the fuel level of all planes in the holding pattern by 1 min, this function should be called by main every minute tick
+    """
+    @staticmethod
+    def decrease_fuel():
+        holding_pattern = ArrivalManager.holding_pattern
+        for plane in holding_pattern.get_array():
+            plane.fuel_mins -= 1
+            plane.save()

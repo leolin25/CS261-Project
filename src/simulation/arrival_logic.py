@@ -59,8 +59,6 @@ class Queue:
         self.priority_pointer += 1
         self.length += 1
 
-        return last_plane
-
     # Decrease the fuel level at each tick
     def decrease_fuel_level(self):
         for plane in self.array:

@@ -27,8 +27,9 @@ class Controller:
     def run_simulation(self):
         update_start_time = timezone.now()
         self.calculate_new_time((update_start_time - self.last_update_time).total_seconds())
+        self.generator.run_generation(self.simulation_time)
         self.last_update_time = update_start_time
 
     def setup_simulation(self):
         Aircraft.objects.all().delete()
-        self.generator.run_generation()
+        self.generator.run_generation(self.simulation_time)

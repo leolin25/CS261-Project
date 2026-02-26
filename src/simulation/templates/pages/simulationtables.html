@@ -14,7 +14,7 @@
             <th>Callsign</th>
             <th>Operator</th>
             <th>Destination</th>
-            <th>Scheduled Departure Time</th>
+            <th>Expected Departure Time</th>
 
         </tr>
         <tbody>
@@ -36,7 +36,7 @@
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
-            <th>Scheduled Arrival Time</th>
+            <th>Expected Arrival Time</th>
             <th>Altitude</th>
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
@@ -99,7 +99,7 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          c3.innerText = flight.scheduled_departure
+          c3.innerText = flight.queue_entry_time
 
         }else{
           //Otherwise put it in landing Queue
@@ -116,7 +116,7 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          c3.innerText = flight.scheduled_arrival
+          c3.innerText = flight.queue_entry_time
           c4.innerText = flight.altitude
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status

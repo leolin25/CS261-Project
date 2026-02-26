@@ -18,6 +18,15 @@ class Controller:
     def calculate_new_time(self, time_elapsed):
         self.simulation_time += timedelta(minutes=(time_elapsed * self.timescale))
 
+    def update_aircraft_statuses(self):
+        aircrafts = Aircraft.objects.filter(zone_status="SCHEDULED", queue_entry_time__lte=self.simulation_time)
+        for aircraft in aircrafts:
+            if aircraft.scheduled_arrival:
+                aircraft.zone_status = "QUEUE_LA"
+            elif aircraft.scheduled_departure :
+                aircraft.zone_status = "QUEUE_TO"
+        Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+
     @staticmethod
     def get_stream_data():
         inbound_schedule = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_departure=None).order_by('queue_entry_time')
@@ -27,7 +36,9 @@ class Controller:
     def run_simulation(self):
         update_start_time = timezone.now()
         self.calculate_new_time((update_start_time - self.last_update_time).total_seconds())
+        print(f"Simulation Time: {self.simulation_time}, Real Time: {update_start_time}")
         self.generator.run_generation(self.simulation_time)
+        self.update_aircraft_statuses()
         self.last_update_time = update_start_time
 
     def setup_simulation(self):

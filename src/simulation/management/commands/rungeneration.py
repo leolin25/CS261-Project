@@ -27,5 +27,7 @@ class Command(BaseCommand):
             inbound_per_hour=options["inbound_per_hour"],
             outbound_per_hour=options["outbound_per_hour"],
         )
-        arrivals, departures = generator.run_generation()
+        generator.run_generation()
+        arrivals = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_departure=None).order_by('queue_entry_time')
+        departures = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_arrival=None).order_by('queue_entry_time')
         self.output_schedule(arrivals, departures)

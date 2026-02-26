@@ -63,7 +63,3 @@ class Generator:
         while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_outbound and
                self.outbound_per_hour > 0):
             self.generate_aircraft(is_arrival=False).save()
-
-        inbound_schedule = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_departure=None).order_by('queue_entry_time')
-        outbound_schedule = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_arrival=None).order_by('queue_entry_time')
-        return inbound_schedule, outbound_schedule

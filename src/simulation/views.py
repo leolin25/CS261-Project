@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from .generation import Generator
 from .serializers import SampleDataSerializer
 from .control import Controller
+from .models import Aircraft
 
 
 def home(request):
@@ -55,8 +56,10 @@ class GetSampleData(APIView):
 
     def get(self, request):
         generator = Generator(2, 15, 15)
-        inbound, outbound = generator.run_generation()
-        serializer = self.serializer_class(inbound + outbound, many=True)
+        generator.run_generation()
+        inbound = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_departure=None).order_by('queue_entry_time')
+        outbound = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_arrival=None).order_by('queue_entry_time')
+        serializer = self.serializer_class(list(inbound) + list(outbound), many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

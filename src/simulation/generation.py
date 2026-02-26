@@ -1,9 +1,9 @@
 from datetime import timedelta
 from django.conf import settings
+from django.utils import timezone
 from numpy import random
 import pandas as pd
 from .models import Aircraft
-from django.utils import timezone
 
 
 class Generator:
@@ -55,12 +55,12 @@ class Generator:
             self.last_generated_outbound = scheduled_time
         return aircraft
 
-    def run_generation(self):
-        while (timezone.now() + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
+    def run_generation(self, simulation_time=timezone.now()):
+        while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
                self.inbound_per_hour > 0):
             self.generate_aircraft(is_arrival=True).save()
 
-        while (timezone.now()+ timedelta(hours=self.hour_limit) > self.last_generated_outbound and
+        while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_outbound and
                self.outbound_per_hour > 0):
             self.generate_aircraft(is_arrival=False).save()
 

@@ -78,6 +78,8 @@ class Runway(models.Model):
     ]
     operational_status = models.CharField(max_length=20, choices=OPERATIONAL_CHOICES)
 
+    temp_optimised = models.BooleanField(default=False)
+
     def __str__(self):
         status = "OPEN" if self.operational_status == "Available" else "CLOSED"
         return f"Runway {self.runway_number} ({status})"

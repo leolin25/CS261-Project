@@ -151,7 +151,7 @@ class ArrivalManager:
         for plane in arrival_planes:
 
             # Check if it is a arrival plane
-            if plane.scheduled_departure == None
+            if plane.scheduled_departure == None:
                 plane.zone_status = 'QUEUE_LA' 
                 plane.save()
 

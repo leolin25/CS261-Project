@@ -1,9 +1,11 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.conf import settings
 from numpy import random
 import pandas as pd
 from .models import Aircraft
-from django.utils import timezone 
+from django.utils import timezone
+
+
 class Generator:
     def __init__(self, hour_limit, inbound_per_hour, outbound_per_hour, start_time=None):
         self.inbound_schedule = []
@@ -46,7 +48,8 @@ class Generator:
             altitude=1000 if is_arrival else 0, #Default altitude for new aircraft
             fuel_mins=fuel,
             emergency_status='NONE',
-            zone_status='SCHEDULED'
+            zone_status='SCHEDULED',
+            last_update=expected_time #Only need to consider plane when it enters airport zone
         )
         if is_arrival:
             self.last_generated_inbound = scheduled_time

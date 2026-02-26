@@ -15,5 +15,6 @@ class SampleDataSerializer(serializers.ModelSerializer):
             'altitude',
             'fuel_mins',
             'emergency_status',
-            'zone_status'
+            'zone_status',
+            'last_update'
         )

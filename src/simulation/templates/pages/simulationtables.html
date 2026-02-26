@@ -64,12 +64,16 @@
 <script>
 const takeoffTable = document.getElementById("takeoffTable");
 const landingTable = document.getElementById("landingTable");
+let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
 
   var source = new EventSource("/stream/"); 
   source.onmessage = function(event) {
     //x.innerHTML += event.data + "<br>";
+    const now = new Date().getTime();
+    if (now - lastUpdate < 25) return; // Throttle updates to at most 40FPS
+    lastUpdate = now;
     try {
       //Delete all existing rows
       while (takeoffTable.rows.length > 1) {

@@ -96,11 +96,13 @@ class RunwayController:
             # Prioritise landing if there are more emergency risks, otherwise prioritise takeoff if there are more cancellation risks.
             if arrival_priority > takeoff_priority:
                 arrival_priority = arrival_priority - 1
+                amount_arriving = amount_arriving - 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
                 runway.save()
             elif takeoff_priority > arrival_priority:
                 takeoff_priority = takeoff_priority - 1
+                amount_departing = amount_departing - 1
                 runway.operating_mode = 'TAKEOFF'
                 runway.temp_optimised = True
                 runway.save()

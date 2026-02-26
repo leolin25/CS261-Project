@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from django.conf import settings
+from django.utils import timezone
 from numpy import random
 import pandas as pd
 from .models import Aircraft
-from django.utils import timezone 
+
+
 class Generator:
     def __init__(self, hour_limit, inbound_per_hour, outbound_per_hour, start_time=None):
-        self.inbound_schedule = []
-        self.outbound_schedule = []
         self.hour_limit = hour_limit
         self.inbound_per_hour = inbound_per_hour
         self.outbound_per_hour = outbound_per_hour
@@ -46,25 +46,20 @@ class Generator:
             altitude=1000 if is_arrival else 0, #Default altitude for new aircraft
             fuel_mins=fuel,
             emergency_status='NONE',
-            zone_status='SCHEDULED'
+            zone_status='SCHEDULED',
+            last_update=expected_time #Only need to consider plane when it enters airport zone
         )
         if is_arrival:
             self.last_generated_inbound = scheduled_time
-            self.inbound_schedule.append(aircraft)
         else:
             self.last_generated_outbound = scheduled_time
-            self.outbound_schedule.append(aircraft)
         return aircraft
 
-    def run_generation(self):
-        while (timezone.now() + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
+    def run_generation(self, simulation_time=timezone.now()):
+        while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
                self.inbound_per_hour > 0):
-            self.generate_aircraft(is_arrival=True)
+            self.generate_aircraft(is_arrival=True).save()
 
-        while (timezone.now()+ timedelta(hours=self.hour_limit) > self.last_generated_outbound and
+        while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_outbound and
                self.outbound_per_hour > 0):
-            self.generate_aircraft(is_arrival=False)
-
-        self.inbound_schedule = sorted(self.inbound_schedule, key=lambda aircraft: aircraft.queue_entry_time)
-        self.outbound_schedule = sorted(self.outbound_schedule, key=lambda aircraft: aircraft.queue_entry_time)
-        return self.inbound_schedule, self.outbound_schedule
+            self.generate_aircraft(is_arrival=False).save()

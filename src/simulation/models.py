@@ -3,7 +3,7 @@ from django.db import models
 class Aircraft(models.Model):
     # Note: Django automatically creates an 'id' field for aircraftID
     
-    callsign = models.CharField(max_length=20, unique=True)
+    callsign = models.CharField(max_length=20)
     operator = models.CharField(max_length=100)  
     origin = models.CharField(max_length=4)
     destination = models.CharField(max_length=4) 
@@ -48,6 +48,8 @@ class Aircraft(models.Model):
         ('DIVERTED', 'Diverted'),
     ]
     zone_status = models.CharField(max_length=20, choices=ZONE_CHOICES)
+
+    last_update = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.callsign} ({self.zone_status})"

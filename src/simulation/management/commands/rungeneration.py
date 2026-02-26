@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from simulation.models import Aircraft
 from simulation.generation import Generator
 
 
@@ -20,6 +21,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Aircraft: {aircraft.callsign} Operator: {aircraft.operator} Origin: {aircraft.origin} Destination: {aircraft.destination} Scheduled: {aircraft.scheduled_departure} Expected: {aircraft.queue_entry_time}")
 
     def handle(self, *args, **options):
+        Aircraft.objects.all().delete()
         generator = Generator(
             hour_limit=options["hour_limit"],
             inbound_per_hour=options["inbound_per_hour"],

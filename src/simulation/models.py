@@ -3,7 +3,7 @@ from django.db import models
 class Aircraft(models.Model):
     # Note: Django automatically creates an 'id' field for aircraftID
     
-    callsign = models.CharField(max_length=20, unique=True)
+    callsign = models.CharField(max_length=20)
     operator = models.CharField(max_length=100)  
     origin = models.CharField(max_length=4)
     destination = models.CharField(max_length=4) 

@@ -72,7 +72,6 @@ class GetSampleData(APIView):
 def stream(request):
     def event_stream():
         while True:
-            time.sleep(1)
             provider = GetSampleData()
             takeoffQ = provider.getinternal()
             #yield 'data: The server time is: %s\n\n' % datetime.datetime.now()

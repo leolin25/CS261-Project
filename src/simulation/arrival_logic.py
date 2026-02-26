@@ -119,4 +119,4 @@ class ArrivalManager:
         )
         
         results['peak_queue_size'] = ArrivalManager.max_planes_in_queue
-        return results
+        return results  

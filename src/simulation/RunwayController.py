@@ -74,51 +74,62 @@ class RunwayController:
         now = timezone.now()
         twenty_five_mins_ago = now - timedelta(minutes=25)
 
+        # In case of any bugs we can reset runways right here
+        self.reset_optimised_runways()
+
         # Find all mixed runways that are currently available
         mixed_runways = Runway.objects.filter(operational_status='AVAILABLE', operating_mode__icontains='MIXED')
         if not mixed_runways.exists():
             return
         
-        # Calculate the number of emergency risks and diversion risks for arrivals, and cancellation risks for departures, to determine priority. Emergency risks are planes that have an emergency status or low fuel, diversion risks are planes that have been waiting to land for 25+ mins, and cancellation risks are planes that have been waiting to takeoff for 25+ mins. We also calculate the total amount of arriving and departing planes in the queues to use as a tiebreaker if there are no emergency or cancellation risks.
-        emergency_risks = Aircraft.objects.filter(zone_status='QUEUE_LA').filter(models.Q(emergency_status__ne='NONE') | models.Q(fuel_mins__lte=11)).count()
-        divert_risks_arrival = Aircraft.objects.filter(zone_status='QUEUE_LA', queue_entry_time__lte=twenty_five_mins_ago).count()
-        arrival_priority = emergency_risks + divert_risks_arrival
+        # Emergency risks are the most important, calculate them first and that sets the lower bound of landing runways
+        emergency_count = Aircraft.objects.filter(zone_status='QUEUE_LA').exclude(emergency_status='NONE').count()
         
-        # Cancellation risks are only relevant for takeoff, as planes that are about to takeoff have already been waiting on the runway and are more likely to have been delayed by other planes, whereas arriving planes have not yet reached the runway and so are less likely to have been delayed by other planes. Therefore we only consider cancellation risks for takeoff when optimising the runways, and not diversion risks for arrival.
-        cancel_risks = Aircraft.objects.filter(zone_status='QUEUE_TO', queue_entry_time__lte=twenty_five_mins_ago).count()
-        takeoff_priority = cancel_risks
+        # Calculate the number of diversion risks for arrivals 
+        arrival_risks = Aircraft.objects.filter(zone_status='QUEUE_LA', queue_entry_time__lte=twenty_five_mins_ago).count()
+        
+        # Cancellation risks are only relevant for takeoff
+        takeoff_risks = Aircraft.objects.filter(zone_status='QUEUE_TO', queue_entry_time__lte=twenty_five_mins_ago).count()
 
         # Calculate the total amount of arriving and departing planes in the queues to use as a tiebreaker if there are no emergency or cancellation risks. We prioritise the one with more traffic to try and reduce the queues overall, as well as prioritising takeoff if there is a tie to try and reduce congestion on the runways, as planes that are about to takeoff have already been waiting on the runway and are more likely to have been delayed by other planes, whereas arriving planes have not yet reached the runway and so are less likely to have been delayed by other planes.
         amount_arriving = Aircraft.objects.filter(zone_status='QUEUE_LA').count()
         amount_departing = Aircraft.objects.filter(zone_status='QUEUE_TO').count()
 
         for runway in mixed_runways:
-            # Prioritise landing if there are more emergency risks, otherwise prioritise takeoff if there are more cancellation risks.
-            if arrival_priority > takeoff_priority:
-                arrival_priority = arrival_priority - 1
+            # Emergency risks should always be prioritised over everything else, as they are the most time sensitive and can cause loss of life
+            if emergency_count > 0:
+                emergency_count -= 1
+                amount_arriving -= 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
                 runway.save()
-            elif takeoff_priority > arrival_priority:
-                takeoff_priority = takeoff_priority - 1
+            # Prioritise landing if there are more emergency risks, otherwise prioritise takeoff if there are more cancellation risks.
+            elif arrival_risks > takeoff_risks:
+                arrival_risks -= 1
+                amount_arriving -= 1
+                runway.operating_mode = 'LANDING'
+                runway.temp_optimised = True
+                runway.save()
+            elif takeoff_risks > arrival_risks:
+                takeoff_risks -= 1
+                amount_departing -= 1
                 runway.operating_mode = 'TAKEOFF'
                 runway.temp_optimised = True
                 runway.save()
-            
             # No emergency or cancellation risks, so optimise based on which has more traffic
             elif amount_arriving > amount_departing:
-                amount_arriving = amount_arriving - 1
+                amount_arriving -= 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
                 runway.save()
             elif amount_departing > amount_arriving:
-                amount_departing = amount_departing - 1
+                amount_departing -= 1
                 runway.operating_mode = 'TAKEOFF'
                 runway.temp_optimised = True
                 runway.save()
-
             # Default to landing if there is a tie, as landing is generally more time sensitive
             else:
+                amount_arriving -= 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
                 runway.save()

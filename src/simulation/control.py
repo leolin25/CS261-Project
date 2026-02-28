@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.utils import timezone
-from .models import Aircraft
+from .models import Aircraft, Runway
 from .generation import Generator
 
 
@@ -57,4 +57,5 @@ class Controller:
 
     def setup_simulation(self):
         Aircraft.objects.all().delete()
+        Runway.objects.all().delete()
         self.generator.run_generation(self.simulation_time)

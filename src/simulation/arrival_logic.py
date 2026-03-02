@@ -170,7 +170,7 @@ class ArrivalManager:
         ArrivalManager.check_divertion(time)
 
         # Put the planes on the runway if possible so they can be landed on the next tick
-        for i in range(holding_pattern.length):
+        for i in range(ArrivalManager.holding_pattern.length):
             assigned_runway = runway_controller.assign_runway(ArrivalManager.holding_pattern.look())
 
             if assigned_runway:

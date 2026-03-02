@@ -8,13 +8,13 @@ class RunwayController:
     def __init__(self):
         self.runways = list(Runway.objects.all())
 
-    # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns the assigned runway or None if no suitable runway is available. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
-    def assign_runway(self, a: Aircraft) -> Runway:
-        available_runways = Runway.objects.filter(operational_status='AVAILABLE')
+    # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
+    def assign_runway(self, a: Aircraft) -> bool:
+        available_runways = Runway.objects.filter(operational_status='AVAILABLE',occupied_by__isnull=True)
 
-        # No runways available, return None
+        # No runways available, return False
         if not available_runways.exists():
-            return None
+            return False
         
         assigned_runway = None
 
@@ -31,15 +31,19 @@ class RunwayController:
         # Lock the runway
         if assigned_runway:
             assigned_runway.operational_status = 'OCCUPIED'
+            
+            # Now saves the plane that occupies it and the time at which it starting occupying it. 
+            assigned_runway.occupied_by = a
+            assigned_runway.time_occupied = timezone.now()
             assigned_runway.save()
             
             # Tell the plane which runway it got
             a.assigned_runway = assigned_runway.runway_number
             a.save()
             
-            return assigned_runway
+            return True
 
-        return None
+        return False
 
     # Takes an aircraft, finds the runway it was holding, and unlocks it. True if successful, False if the plane had no runway assigned or if the runway was not found.
     def free_runway(self, a: Aircraft) -> bool:
@@ -49,7 +53,19 @@ class RunwayController:
         try:
             # Find the runway and unlock it
             r = Runway.objects.get(runway_number=a.assigned_runway)
+
+            duration = timedelta(seconds=45)
+            if not r.time_occupied:
+                return False
+            
+            if timezone.now() - r.time_occupied < duration:
+                return False
+
+            #Free the runway
+            
             r.operational_status = 'AVAILABLE'
+            r.occupied_by = None
+            r.time_occupied = None
             r.save()
             
             # Erase the runway from the plane's memory

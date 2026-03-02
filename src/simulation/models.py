@@ -78,6 +78,17 @@ class Runway(models.Model):
         ('EQUIPFAIL', 'Equipment Failure'),
         ('OCCUPIED', 'Occupied'),
     ]
+    # Updated so runway now also tracks which aircraft is on it 
+    occupied_by = models.ForeignKey(
+        'Aircraft', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='current_runway'
+    )
+    # Updated so runway tracks when the aircraft started using the runway.
+    time_occupied = models.DateTimeField(null=True, blank=True)
+
     operational_status = models.CharField(max_length=20, choices=OPERATIONAL_CHOICES)
 
     temp_optimised = models.BooleanField(default=False)

@@ -104,13 +104,26 @@ class RunStats(models.Model):
     takeoff_queue_time_mins = models.FloatField(default=0.0)       # waiting time in takeoff queue
     arrival_delay_mins = models.FloatField(default=0.0)            # delay in arrival time
     departure_delay_mins = models.FloatField(default=0.0)          # delay in departure time
+
+    # Variance of the above stats
+    holding_time_variance = models.FloatField(default=0.0) 
+    takeoff_queue_time_variance = models.FloatField(default=0.0) 
+    arrival_delay_variance = models.FloatField(default=0.0) 
+    departure_delay_variance = models.FloatField(default=0.0) 
                                                                 
-    max_num_takeoff_queue = models.FloatField(default=0.0)         # max number of planes held in the takeoff queue
-    max_num_holding_pattern = models.FloatField(default=0.0)       # max number of planes held in holding pattern
-    max_arrival_delay_mins = models.FloatField(default=0.0)        # maximum arrival delay time
-    max_departure_delay = models.FloatField(default=0.0)           # maximum departure delay time
-    max_num_cancelled = models.FloatField(default=0.0)             # maximum number of planes cancelled
-    max_num_diverted = models.FloatField(default=0.0)              # maximum number of planes diverted
+    max_num_takeoff_queue = 0         # max number of planes held in the takeoff queue
+    max_num_holding_pattern = 0       # max number of planes held in holding pattern
+    max_arrival_delay_mins = 0        # maximum arrival delay time
+    max_departure_delay = 0           # maximum departure delay time
+    max_num_cancelled = 0             # maximum number of planes cancelled
+    max_num_diverted = 0              # maximum number of planes diverted
+    
+    min_num_takeoff_queue = 0         # min number of planes held in the takeoff queue
+    min_num_holding_pattern = 0       # min number of planes held in holding pattern
+    min_arrival_delay_mins = 0        # minimum arrival delay time
+    min_departure_delay = 0           # minimum departure delay time
+    min_num_cancelled = 0             # minimum number of planes cancelled
+    min_num_diverted = 0              # minimum number of planes diverted
     
     
     # Adds the new stats to the sum of stats

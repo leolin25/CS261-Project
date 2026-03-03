@@ -96,28 +96,65 @@ class Runway(models.Model):
     def __str__(self):
         status = "OPEN" if self.operational_status == "Available" else "CLOSED"
         return f"Runway {self.runway_number} ({status})"
+
+class RunStats(models.Model):
+    # A summation of all plane stats
     
-class FlightStats(models.Model):
-    # Django automatically creates 'id' for statsID
-
-    callsign = models.CharField(max_length=20)
+    holding_time_mins = models.FloatField(default=0.0)             # time spent in holding pattern
+    takeoff_queue_time_mins = models.FloatField(default=0.0)       # waiting time in takeoff queue
+    arrival_delay_mins = models.FloatField(default=0.0)            # delay in arrival time
+    departure_delay_mins = models.FloatField(default=0.0)          # delay in departure time
+                                                                
+    max_num_takeoff_queue = models.FloatField(default=0.0)         # max number of planes held in the takeoff queue
+    max_num_holding_pattern = models.FloatField(default=0.0)       # max number of planes held in holding pattern
+    max_arrival_delay_mins = models.FloatField(default=0.0)        # maximum arrival delay time
+    max_departure_delay = models.FloatField(default=0.0)           # maximum departure delay time
+    max_num_cancelled = models.FloatField(default=0.0)             # maximum number of planes cancelled
+    max_num_diverted = models.FloatField(default=0.0)              # maximum number of planes diverted
     
-    # The 4 Key Stats
-    holding_time_mins = models.FloatField(default=0.0)
-    takeoff_queue_time_mins = models.FloatField(default=0.0)
-    arrival_delay_mins = models.FloatField(default=0.0)
-    departure_delay_mins = models.FloatField(default=0.0)
-
-    # What happened to the flight (Landed, Departed, Cancelled, Diversion)
-    OUTCOME = [
-        ('LANDED', 'Landed'),
-        ('DEPARTED', 'Departed'),
-        ('CANCELLED', 'Cancelled'),
-        ('DIVERTED', 'Diverted'),
-    ]
-    outcome = models.CharField(max_length=20, choices=OUTCOME, default='LANDED')
-
-    time_recorded = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Stats for {self.callsign}"
+    
+    # Adds the new stats to the sum of stats
+    @staticmethod
+    def add_stats(holding_time, takeoff_queue_time, arrival_delay, departure_delay):
+        RunStats.holding_time_mins += holding_time 
+        RunStats.takeoff_queue_time_mins += takeoff_queue_time
+        RunStats.arrival_delay_mins += arrival_delay
+        RunStats.departure_delay_mins += departure_delay
+    
+    # Updates the maximum number of planes in the takeoff queue
+    @staticmethod
+    def update_max_takeoff_queue(new_num):
+        if new_num > RunStats.max_num_takeoff_queue:
+            RunStats.max_num_takeoff_queue
+    
+    # Updates the maximum number of planes in the holding pattern
+    @staticmethod
+    def update_max_holding_pattern(new_num):
+        if new_num > RunStats.max_num_holding_pattern:
+            RunStats.max_num_holding_pattern
+    
+    # Updates the maximum arrival delay
+    @staticmethod
+    def update_max_arrival_delay(new_num):
+        if new_num > RunStats.max_arrival_delay_mins:
+            RunStats.max_arrival_delay_mins
+    
+    # Updates the maximum departure delay
+    @staticmethod
+    def update_max_departure_delay(new_num):
+        if new_num > RunStats.max_departure_delay:
+            RunStats.max_departure_delay
+    
+    # Updates the maximum planes cancelled
+    @staticmethod
+    def update_max_cancelled(new_num):
+        if new_num > RunStats.max_num_cancelled:
+            RunStats.max_num_cancelled
+    
+    # Updates the maximum planes diverted
+    @staticmethod
+    def update_max_diverted(new_num):
+        if new_num > RunStats.max_num_diverted:
+            RunStats.max_num_diverted
+        
+    

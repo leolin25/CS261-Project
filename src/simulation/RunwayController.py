@@ -4,8 +4,9 @@ from .models import Aircraft, Runway
 
 
 class RunwayController:
-    def __init__(self):
-        pass
+    def __init__(self, landing_duration=45, takeoff_duration=45):
+        self.landing_duration = landing_duration
+        self.takeoff_duration = takeoff_duration
 
     # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
     @staticmethod
@@ -34,8 +35,7 @@ class RunwayController:
         return False
 
     # Takes an aircraft, finds the runway it was holding, and unlocks it. True if successful, False if the plane had no runway assigned or if the runway was not found.
-    @staticmethod
-    def free_runway(aircraft, simulation_time):
+    def free_runway(self, aircraft, simulation_time):
         if not aircraft.assigned_runway:
             return False
 
@@ -45,7 +45,11 @@ class RunwayController:
             if not runway.time_occupied:
                 return False
 
-            duration = timedelta(seconds=45)
+            if aircraft.scheduled_arrival:
+                duration = timedelta(seconds=self.landing_duration)
+            else:
+                duration = timedelta(seconds=self.takeoff_duration)
+
             if simulation_time - runway.time_occupied < duration:
                 return False # Has not been on the runway for long enough
 

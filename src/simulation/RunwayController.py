@@ -1,112 +1,99 @@
-from .models import Aircraft, Runway
-from django.utils import timezone
 from datetime import timedelta
+from .models import Aircraft, Runway
 
-from simulation import models
 
 class RunwayController:
-    def __init__(self):
-        self.runways = list(Runway.objects.all())
+    def __init__(self, landing_duration=45, takeoff_duration=45, fuel_risk_threshold=20, takeoff_risk_threshold=25):
+        self.landing_duration = landing_duration
+        self.takeoff_duration = takeoff_duration
+        self.fuel_risk_threshold = fuel_risk_threshold
+        self.takeoff_risk_threshold = takeoff_risk_threshold
 
     # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
-    def assign_runway(self, a: Aircraft) -> bool:
-        available_runways = Runway.objects.filter(operational_status='AVAILABLE',occupied_by__isnull=True)
-
-        # No runways available, return False
+    @staticmethod
+    def assign_runway(aircraft, simulation_time):
+        available_runways = Runway.objects.filter(operational_status='AVAILABLE', occupied_by__isnull=True)
         if not available_runways.exists():
-            return False
+            return False # No runways available, return False
         
         assigned_runway = None
+        if aircraft.zone_status == 'QUEUE_LA': # Arriving flights
+            assigned_runway = available_runways.filter(operating_mode__icontains='LANDING').first()
+            aircraft.zone_status = 'RUNWAY_LA'
+        elif aircraft.zone_status == 'QUEUE_TO': # Departing flights
+            assigned_runway = available_runways.filter(operating_mode__icontains='TAKEOFF').first()
+            aircraft.zone_status = 'RUNWAY_TO'
 
-        # Arriving flights
-        if a.zone_status == 'QUEUE_LA':
-            landing = available_runways.filter(operating_mode__icontains='LANDING').first()
-            assigned_runway = landing if landing else available_runways.filter(operating_mode__icontains='MIXED').first()
-            
-        # Departing flights
-        elif a.zone_status == 'QUEUE_TO':
-            takeoff = available_runways.filter(operating_mode__icontains='TAKEOFF').first()
-            assigned_runway = takeoff if takeoff else available_runways.filter(operating_mode__icontains='MIXED').first()
-
-        # Lock the runway
-        if assigned_runway:
+        if assigned_runway: # Lock the runway
             assigned_runway.operational_status = 'OCCUPIED'
-            
-            # Now saves the plane that occupies it and the time at which it starting occupying it. 
-            assigned_runway.occupied_by = a
-            assigned_runway.time_occupied = timezone.now()
+            # Now saves the plane that occupies it and the time at which it started occupying it.
+            assigned_runway.occupied_by = aircraft
+            assigned_runway.time_occupied = simulation_time
             assigned_runway.save()
             
             # Tell the plane which runway it got
-            a.assigned_runway = assigned_runway.runway_number
-            a.save()
-            
+            aircraft.assigned_runway = assigned_runway.runway_number
+            aircraft.save()
             return True
-
         return False
 
     # Takes an aircraft, finds the runway it was holding, and unlocks it. True if successful, False if the plane had no runway assigned or if the runway was not found.
-    def free_runway(self, a: Aircraft) -> bool:
-        if not a.assigned_runway:
+    def free_runway(self, aircraft, simulation_time):
+        if not aircraft.assigned_runway:
             return False
 
         try:
             # Find the runway and unlock it
-            r = Runway.objects.get(runway_number=a.assigned_runway)
-
-            duration = timedelta(seconds=45)
-            if not r.time_occupied:
-                return False
-            
-            if timezone.now() - r.time_occupied < duration:
+            runway = Runway.objects.get(runway_number=aircraft.assigned_runway)
+            if not runway.time_occupied:
                 return False
 
-            #Free the runway
-            
-            r.operational_status = 'AVAILABLE'
-            r.occupied_by = None
-            r.time_occupied = None
-            r.save()
+            if aircraft.scheduled_arrival:
+                duration = timedelta(seconds=self.landing_duration)
+            else:
+                duration = timedelta(seconds=self.takeoff_duration)
+
+            if simulation_time - runway.time_occupied < duration:
+                return False # Has not been on the runway for long enough
+
+            # Free the runway
+            runway.operational_status = 'AVAILABLE'
+            runway.occupied_by = None
+            runway.time_occupied = None
+            runway.save()
             
             # Erase the runway from the plane's memory
-            a.assigned_runway = None
-            a.save()
-
+            aircraft.assigned_runway = None
             # Move the plane to the next zone
-            if (a.zone_status == 'RUNWAY_LA'):
-                a.zone_status = 'LANDED'
-            if (a.zone_status == 'RUNWAY_TO'):
-                a.zone_status = 'DEPARTED'
-            a.save()
+            if aircraft.zone_status == 'RUNWAY_LA':
+                aircraft.zone_status = 'LANDED'
+            if aircraft.zone_status == 'RUNWAY_TO':
+                aircraft.zone_status = 'DEPARTED'
+            aircraft.save()
             
-            print(f"Runway {r.runway_number} has been freed.")
+            print(f"Runway {runway.runway_number} has been freed.")
             return True
-            
         except Runway.DoesNotExist:
             return False
         
-    # This function is called every minute to update the mixed runways based on current traffic, mixed runways are put in a temporary new optimised mode that suits the sitation
-    def optimise_runway_mode(self) -> None:
-        now = timezone.now()
-        twenty_five_mins_ago = now - timedelta(minutes=25)
+    # This function is called every minute to update the mixed runways based on current traffic, mixed runways are put in a temporary new optimised mode that suits the situation
+    def optimise_runway_mode(self, simulation_time):
+        risk_time = simulation_time - timedelta(minutes=self.takeoff_risk_threshold)
 
         # In case of any bugs we can reset runways right here
         self.reset_optimised_runways()
 
         # Find all mixed runways that are currently available
-        mixed_runways = Runway.objects.filter(operational_status='AVAILABLE', operating_mode__icontains='MIXED')
+        mixed_runways = Runway.objects.filter(operational_status='AVAILABLE', operating_mode__icontains='MIXED', occupied_by__isnull=True)
         if not mixed_runways.exists():
             return
         
         # Emergency risks are the most important, calculate them first and that sets the lower bound of landing runways
         emergency_count = Aircraft.objects.filter(zone_status='QUEUE_LA').exclude(emergency_status='NONE').count()
-        
         # Calculate the number of diversion risks for arrivals 
-        arrival_risks = Aircraft.objects.filter(zone_status='QUEUE_LA', queue_entry_time__lte=twenty_five_mins_ago).count()
-        
+        arrival_risks = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=self.fuel_risk_threshold).count()
         # Cancellation risks are only relevant for takeoff
-        takeoff_risks = Aircraft.objects.filter(zone_status='QUEUE_TO', queue_entry_time__lte=twenty_five_mins_ago).count()
-
+        takeoff_risks = Aircraft.objects.filter(zone_status='QUEUE_TO', queue_entry_time__lte=risk_time).count()
         # Calculate the total amount of arriving and departing planes in the queues to use as a tiebreaker if there are no emergency or cancellation risks. We prioritise the one with more traffic to try and reduce the queues overall, as well as prioritising takeoff if there is a tie to try and reduce congestion on the runways, as planes that are about to takeoff have already been waiting on the runway and are more likely to have been delayed by other planes, whereas arriving planes have not yet reached the runway and so are less likely to have been delayed by other planes.
         amount_arriving = Aircraft.objects.filter(zone_status='QUEUE_LA').count()
         amount_departing = Aircraft.objects.filter(zone_status='QUEUE_TO').count()
@@ -118,42 +105,33 @@ class RunwayController:
                 amount_arriving -= 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
-                runway.save()
             # Prioritise landing if there are more emergency risks, otherwise prioritise takeoff if there are more cancellation risks.
-            elif arrival_risks > takeoff_risks:
+            elif arrival_risks >= takeoff_risks:
                 arrival_risks -= 1
                 amount_arriving -= 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
-                runway.save()
             elif takeoff_risks > arrival_risks:
                 takeoff_risks -= 1
                 amount_departing -= 1
                 runway.operating_mode = 'TAKEOFF'
                 runway.temp_optimised = True
-                runway.save()
             # No emergency or cancellation risks, so optimise based on which has more traffic
-            elif amount_arriving > amount_departing:
+            elif amount_arriving >= amount_departing:
                 amount_arriving -= 1
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
-                runway.save()
             elif amount_departing > amount_arriving:
                 amount_departing -= 1
                 runway.operating_mode = 'TAKEOFF'
                 runway.temp_optimised = True
-                runway.save()
-            # Default to landing if there is a tie, as landing is generally more time sensitive
-            else:
-                amount_arriving -= 1
-                runway.operating_mode = 'LANDING'
-                runway.temp_optimised = True
-                runway.save()
+        Runway.objects.bulk_update(mixed_runways, ['operating_mode', 'temp_optimised'])
 
     # This function resets all runways back to mixed if they have been optimised
-    def reset_optimised_runways(self) -> None:
-        optimised_runways = Runway.objects.filter(temp_optimised=True)
+    @staticmethod
+    def reset_optimised_runways():
+        optimised_runways = Runway.objects.filter(temp_optimised=True, occupied_by__isnull=True)
         for runway in optimised_runways:
             runway.operating_mode = 'MIXED'
             runway.temp_optimised = False
-            runway.save()
+        Runway.objects.bulk_update(optimised_runways, ['operating_mode', 'temp_optimised'])

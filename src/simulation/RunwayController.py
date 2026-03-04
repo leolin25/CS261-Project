@@ -1,87 +1,71 @@
-from .models import Aircraft, Runway
-from django.utils import timezone
 from datetime import timedelta
+from django.utils import timezone
+from .models import Aircraft, Runway
 
-from simulation import models
 
 class RunwayController:
     def __init__(self):
-        self.runways = list(Runway.objects.all())
+        pass
 
     # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
-    def assign_runway(self, a: Aircraft) -> bool:
-        available_runways = Runway.objects.filter(operational_status='AVAILABLE',occupied_by__isnull=True)
-
-        # No runways available, return False
+    @staticmethod
+    def assign_runway(aircraft, simulation_time):
+        available_runways = Runway.objects.filter(operational_status='AVAILABLE', occupied_by__isnull=True)
         if not available_runways.exists():
-            return False
+            return False # No runways available, return False
         
         assigned_runway = None
+        if aircraft.zone_status == 'QUEUE_LA': # Arriving flights
+            assigned_runway = available_runways.filter(operating_mode__icontains='LANDING').first()
+        elif aircraft.zone_status == 'QUEUE_TO': # Departing flights
+            assigned_runway = available_runways.filter(operating_mode__icontains='TAKEOFF').first()
 
-        # Arriving flights
-        if a.zone_status == 'QUEUE_LA':
-            landing = available_runways.filter(operating_mode__icontains='LANDING').first()
-            assigned_runway = landing if landing else available_runways.filter(operating_mode__icontains='MIXED').first()
-            
-        # Departing flights
-        elif a.zone_status == 'QUEUE_TO':
-            takeoff = available_runways.filter(operating_mode__icontains='TAKEOFF').first()
-            assigned_runway = takeoff if takeoff else available_runways.filter(operating_mode__icontains='MIXED').first()
-
-        # Lock the runway
-        if assigned_runway:
+        if assigned_runway: # Lock the runway
             assigned_runway.operational_status = 'OCCUPIED'
-            
-            # Now saves the plane that occupies it and the time at which it starting occupying it. 
-            assigned_runway.occupied_by = a
-            assigned_runway.time_occupied = timezone.now()
+            # Now saves the plane that occupies it and the time at which it started occupying it.
+            assigned_runway.occupied_by = aircraft
+            assigned_runway.time_occupied = simulation_time
             assigned_runway.save()
             
             # Tell the plane which runway it got
-            a.assigned_runway = assigned_runway.runway_number
-            a.save()
-            
+            aircraft.assigned_runway = assigned_runway.runway_number
+            aircraft.save()
             return True
-
         return False
 
     # Takes an aircraft, finds the runway it was holding, and unlocks it. True if successful, False if the plane had no runway assigned or if the runway was not found.
-    def free_runway(self, a: Aircraft) -> bool:
-        if not a.assigned_runway:
+    @staticmethod
+    def free_runway(aircraft, simulation_time):
+        if not aircraft.assigned_runway:
             return False
 
         try:
             # Find the runway and unlock it
-            r = Runway.objects.get(runway_number=a.assigned_runway)
+            runway = Runway.objects.get(runway_number=aircraft.assigned_runway)
+            if not runway.time_occupied:
+                return False
 
             duration = timedelta(seconds=45)
-            if not r.time_occupied:
-                return False
-            
-            if timezone.now() - r.time_occupied < duration:
-                return False
+            if simulation_time - runway.time_occupied < duration:
+                return False # Has not been on the runway for long enough
 
-            #Free the runway
-            
-            r.operational_status = 'AVAILABLE'
-            r.occupied_by = None
-            r.time_occupied = None
-            r.save()
+            # Free the runway
+            runway.operational_status = 'AVAILABLE'
+            runway.occupied_by = None
+            runway.time_occupied = None
+            runway.save()
             
             # Erase the runway from the plane's memory
-            a.assigned_runway = None
-            a.save()
-
+            aircraft.assigned_runway = None
             # Move the plane to the next zone
-            if (a.zone_status == 'RUNWAY_LA'):
-                a.zone_status = 'LANDED'
-            if (a.zone_status == 'RUNWAY_TO'):
-                a.zone_status = 'DEPARTED'
-            a.save()
+            if aircraft.zone_status == 'RUNWAY_LA':
+                aircraft.zone_status = 'LANDED'
+            if aircraft.zone_status == 'RUNWAY_TO':
+                aircraft.zone_status = 'DEPARTED'
+            aircraft.save()
             
-            print(f"Runway {r.runway_number} has been freed.")
+            print(f"Runway {runway.runway_number} has been freed.")
             return True
-            
         except Runway.DoesNotExist:
             return False
         

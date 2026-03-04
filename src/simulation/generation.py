@@ -2,8 +2,9 @@ from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
 from numpy import random
+from random import randint
 import pandas as pd
-from .models import Aircraft
+from .models import Aircraft, Runway
 
 
 class Generator:
@@ -54,6 +55,18 @@ class Generator:
         else:
             self.last_generated_outbound = scheduled_time
         return aircraft
+
+    @staticmethod
+    def generate_runway(mode="MIXED", status="AVAILABLE"):
+        bearing = randint(0, 35)
+        length = randint(2000, 4000)
+        Runway.objects.create(
+            bearing=bearing,
+            length=length,
+            operating_mode=mode,
+            operational_status=status,
+        )
+        print("Runway created with bearing {} and length {}".format(bearing, length))
 
     def run_generation(self, simulation_time=timezone.now()):
         while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_inbound and

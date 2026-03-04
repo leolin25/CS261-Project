@@ -72,7 +72,7 @@ def stream(request):
             data = f"data: {json.dumps(serializer.data)}\n\n" #need to define data, should just be a json file
             yield data
 
-    controller = Controller(10, 1, timescale=1, schedule_limit=2)
+    controller = Controller(2, 10, 1, timescale=1, schedule_limit=2)
     controller.setup_simulation()
     response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
     response['Cache-Control'] = 'no-cache'

@@ -6,8 +6,9 @@ from .RunwayController import RunwayController
 
 
 class Controller:
-    def __init__(self, inbound_per_hour, outbound_per_hour, launch_time=None, timescale=1, schedule_limit=12, max_wait=30):
+    def __init__(self, runways, inbound_per_hour, outbound_per_hour, launch_time=None, timescale=1, schedule_limit=12, max_wait=30):
         start_time = launch_time if launch_time else timezone.now()
+        self.runways = runways
         self.inbound_per_hour = inbound_per_hour
         self.outbound_per_hour = outbound_per_hour
         self.last_update_time = start_time
@@ -62,4 +63,6 @@ class Controller:
     def setup_simulation(self):
         Aircraft.objects.all().delete()
         Runway.objects.all().delete()
+        for _ in range(self.runways):
+            self.generator.generate_runway()
         self.generator.run_generation(self.simulation_time)

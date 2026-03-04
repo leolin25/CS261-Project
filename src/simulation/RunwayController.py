@@ -79,7 +79,6 @@ class RunwayController:
     # This function is called every minute to update the mixed runways based on current traffic, mixed runways are put in a temporary new optimised mode that suits the situation
     def optimise_runway_mode(self, simulation_time):
         risk_time = simulation_time - timedelta(minutes=self.takeoff_risk_threshold)
-        fuel_risk_remaining = timedelta(minutes=self.fuel_risk_threshold)
 
         # In case of any bugs we can reset runways right here
         self.reset_optimised_runways()
@@ -92,7 +91,7 @@ class RunwayController:
         # Emergency risks are the most important, calculate them first and that sets the lower bound of landing runways
         emergency_count = Aircraft.objects.filter(zone_status='QUEUE_LA').exclude(emergency_status='NONE').count()
         # Calculate the number of diversion risks for arrivals 
-        arrival_risks = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=fuel_risk_remaining).count()
+        arrival_risks = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=self.fuel_risk_threshold).count()
         # Cancellation risks are only relevant for takeoff
         takeoff_risks = Aircraft.objects.filter(zone_status='QUEUE_TO', queue_entry_time__lte=risk_time).count()
         # Calculate the total amount of arriving and departing planes in the queues to use as a tiebreaker if there are no emergency or cancellation risks. We prioritise the one with more traffic to try and reduce the queues overall, as well as prioritising takeoff if there is a tie to try and reduce congestion on the runways, as planes that are about to takeoff have already been waiting on the runway and are more likely to have been delayed by other planes, whereas arriving planes have not yet reached the runway and so are less likely to have been delayed by other planes.

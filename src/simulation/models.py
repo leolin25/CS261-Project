@@ -1,8 +1,8 @@
 from django.db import models
 
+
 class Aircraft(models.Model):
     # Note: Django automatically creates an 'id' field for aircraftID
-    
     callsign = models.CharField(max_length=20)
     operator = models.CharField(max_length=100)  
     origin = models.CharField(max_length=4)
@@ -57,8 +57,6 @@ class Aircraft(models.Model):
 
 class Runway(models.Model):
     # Django automatically creates 'id' for runwayID
-    
-    runway_number = models.CharField(max_length=20, unique=True)
     length = models.IntegerField(help_text="Length in meters")
     bearing = models.IntegerField(help_text="Heading in degrees")
     
@@ -97,9 +95,9 @@ class Runway(models.Model):
         status = "OPEN" if self.operational_status == "Available" else "CLOSED"
         return f"Runway {self.runway_number} ({status})"
 
+
 class RunStats(models.Model):
     # A summation of all plane stats
-    
     holding_time_mins = models.FloatField(default=0.0)             # time spent in holding pattern
     takeoff_queue_time_mins = models.FloatField(default=0.0)       # waiting time in takeoff queue
     arrival_delay_mins = models.FloatField(default=0.0)            # delay in arrival time

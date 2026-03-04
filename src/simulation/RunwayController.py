@@ -18,8 +18,10 @@ class RunwayController:
         assigned_runway = None
         if aircraft.zone_status == 'QUEUE_LA': # Arriving flights
             assigned_runway = available_runways.filter(operating_mode__icontains='LANDING').first()
+            aircraft.zone_status = 'RUNWAY_LA'
         elif aircraft.zone_status == 'QUEUE_TO': # Departing flights
             assigned_runway = available_runways.filter(operating_mode__icontains='TAKEOFF').first()
+            aircraft.zone_status = 'RUNWAY_TO'
 
         if assigned_runway: # Lock the runway
             assigned_runway.operational_status = 'OCCUPIED'

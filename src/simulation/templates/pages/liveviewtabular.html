@@ -11,7 +11,7 @@
     <table>
         <tr>
             <td> Runway {{x}}</td>
-            <td> Callsign</td>
+            <td> callsign</td>
         </tr>
     </table>
     </div>
@@ -101,7 +101,7 @@ if(typeof(EventSource) !== "undefined") {
       for(let i = 0; i < payload.length; i++){
         let flight = payload[i];
 
-        //If flight has a scheduled departure put it in takeoffTable
+        //If flight has a scheduled departure put it in takeoffQ
         if(flight.scheduled_departure != null){
           var row =takeoffTable.insertRow(-1);
           var c0 = row.insertCell(0);

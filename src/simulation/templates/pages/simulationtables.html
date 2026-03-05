@@ -8,7 +8,7 @@
 
 <div class="simulationcontainer">
   <div>
-    <table id="takeoffScheduletable">
+    <table id="takeoffScheduleTable">
         <caption>Take-Off Schedule</caption>
         <tr>
             <th>Callsign</th>
@@ -61,8 +61,8 @@
 
 
 <script>
-const takeoffSchedule = document.getElementById("takeoffSchedule");
-const landingSchedule = document.getElementById("landingSchedule");
+const takeoffSchedule = document.getElementById("takeoffScheduleTable");
+const landingSchedule = document.getElementById("landingScheduleTable");
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
@@ -88,7 +88,7 @@ if(typeof(EventSource) !== "undefined") {
         let flight = payload[i];
 
         //If flight has a scheduled departure put it in takeoffQ
-        if(flight.scheduled_departure != null){
+        if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
           var row =takeoffSchedule.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
@@ -100,7 +100,7 @@ if(typeof(EventSource) !== "undefined") {
           c2.innerText = flight.destination
           c3.innerText = flight.queue_entry_time
 
-        }else{
+        }else if (flight.zone_status == "SCHEDULED"){
           //Otherwise put it in landing Queue
           var row =landingSchedule.insertRow(-1);
           var c0 = row.insertCell(0);

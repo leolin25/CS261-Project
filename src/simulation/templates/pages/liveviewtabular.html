@@ -5,11 +5,25 @@
 <h2>Active Simulation</h2>
     
 
+<div class="runwayscontainer">
+    {% for x in runway_range %}
+    <div>
+    <table>
+        <tr>
+            <td> Runway {{x}}</td>
+            <td> Callsign</td>
+        </tr>
+    </table>
+    </div>
+    {% endfor %}
+
+</div>
+
 
 <div class="simulationcontainer">
   <div>
-    <table id="takeoffScheduletable">
-        <caption>Take-Off Schedule</caption>
+    <table id="takeoffTable">
+        <caption>Take-Off Queue</caption>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -18,7 +32,7 @@
 
         </tr>
         <tbody>
-        {% for x in takeoffSchedule %}
+        {% for x in takeoffQ %}
         <tr>
             <td>{{x.callsign}}</td>
             <td>{{x.operator}}</td>
@@ -30,8 +44,8 @@
     </table>
   </div>
   <div>
-    <table id="landingScheduleTable">
-        <caption>Landing Schedule</caption>
+    <table id="holdingpatternTable">
+        <caption>Holding pattern</caption>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -42,7 +56,7 @@
             <th>Emergency Status</th>
         </tr>
         <tbody>
-        {% for x in landingSchedule %}
+        {% for x in holdingpattern %}
         <tr>
             <td>{{x.callsign}}</td>
             <td>{{x.operator}}</td>
@@ -61,8 +75,8 @@
 
 
 <script>
-const takeoffSchedule = document.getElementById("takeoffSchedule");
-const landingSchedule = document.getElementById("landingSchedule");
+const takeoffTable = document.getElementById("takeoffTable");
+const holdingpattern = document.getElementById("holdingpatternTable");
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
@@ -75,21 +89,21 @@ if(typeof(EventSource) !== "undefined") {
     lastUpdate = now;
     try {
       //Delete all existing rows
-      while (takeoffSchedule.rows.length > 1) {
-          takeoffSchedule.deleteRow(1);
+      while (takeoffTable.rows.length > 1) {
+          takeoffTable.deleteRow(1);
       }
 
-      while (landingSchedule.rows.length > 1) {
-          landingSchedule.deleteRow(1);
+      while (holdingpattern.rows.length > 1) {
+          holdingpattern.deleteRow(1);
       }
       var payload = JSON.parse(event.data);
       //For each flight in json
       for(let i = 0; i < payload.length; i++){
         let flight = payload[i];
 
-        //If flight has a scheduled departure put it in takeoffQ
+        //If flight has a scheduled departure put it in takeoffTable
         if(flight.scheduled_departure != null){
-          var row =takeoffSchedule.insertRow(-1);
+          var row =takeoffTable.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
@@ -102,7 +116,7 @@ if(typeof(EventSource) !== "undefined") {
 
         }else{
           //Otherwise put it in landing Queue
-          var row =landingSchedule.insertRow(-1);
+          var row =holdingpattern.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
@@ -131,7 +145,7 @@ if(typeof(EventSource) !== "undefined") {
 
   };
 } else {
-  landingSchedule.innerHTML = "SSE Error";
+  holdingpattern.innerHTML = "SSE Error";
 }
 </script>
 

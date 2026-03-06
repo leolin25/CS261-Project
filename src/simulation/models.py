@@ -16,7 +16,12 @@ class Aircraft(models.Model):
     queue_entry_time = models.DateTimeField(null=True, blank=True)
 
     # Record the runway this plane has been assigned
-    assigned_runway = models.CharField(max_length=20, null=True, blank=True)
+    assigned_runway = models.ForeignKey(
+        'Runway',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     
     altitude = models.IntegerField(default=0)
     fuel_mins = models.IntegerField(default=0)
@@ -93,7 +98,7 @@ class Runway(models.Model):
 
     def __str__(self):
         status = "OPEN" if self.operational_status == "Available" else "CLOSED"
-        return f"Runway {self.runway_number} ({status})"
+        return f"Runway {self.bearing} ({status})"
 
 
 class RunStats(models.Model):

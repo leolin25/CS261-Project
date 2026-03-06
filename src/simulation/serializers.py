@@ -12,7 +12,7 @@ class SampleDataSerializer(serializers.ModelSerializer):
             'scheduled_arrival',
             'scheduled_departure',
             'queue_entry_time',
-            'altitude',
+            'assigned_runway',
             'fuel_mins',
             'emergency_status',
             'zone_status',

@@ -32,7 +32,7 @@ class RunwayController:
             assigned_runway.save()
             
             # Tell the plane which runway it got
-            aircraft.assigned_runway = assigned_runway.runway_number
+            aircraft.assigned_runway = assigned_runway
             aircraft.save()
             return True
         return False
@@ -44,7 +44,7 @@ class RunwayController:
 
         try:
             # Find the runway and unlock it
-            runway = Runway.objects.get(runway_number=aircraft.assigned_runway)
+            runway = Runway.objects.get(id=aircraft.assigned_runway)
             if not runway.time_occupied:
                 return False
 
@@ -71,7 +71,7 @@ class RunwayController:
                 aircraft.zone_status = 'DEPARTED'
             aircraft.save()
             
-            print(f"Runway {runway.runway_number} has been freed.")
+            print(f"Runway {runway.bearing} has been freed.")
             return True
         except Runway.DoesNotExist:
             return False

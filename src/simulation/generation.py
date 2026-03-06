@@ -44,6 +44,7 @@ class Generator:
             scheduled_arrival=scheduled_time if is_arrival else None,
             scheduled_departure=scheduled_time if not is_arrival else None,
             queue_entry_time=expected_time,
+            assigned_runway=None,
             altitude=1000 if is_arrival else 0, #Default altitude for new aircraft
             fuel_mins=fuel,
             emergency_status='NONE',

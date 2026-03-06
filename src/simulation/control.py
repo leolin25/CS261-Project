@@ -7,7 +7,20 @@ from .departure_logic import DepartureController
 
 
 class Controller:
-    def __init__(self, runways, inbound_per_hour, outbound_per_hour, launch_time=None, timescale=1, schedule_limit=12, max_wait=30):
+    def __init__(
+            self,
+            runways,
+            inbound_per_hour,
+            outbound_per_hour,
+            launch_time=None,
+            timescale=1,
+            schedule_limit=12,
+            max_wait=30,
+            landing_duration=45,
+            takeoff_duration=45,
+            fuel_risk_threshold=20,
+            takeoff_risk_threshold=25,
+    ):
         start_time = launch_time if launch_time else timezone.now()
         self.runways = runways
         self.inbound_per_hour = inbound_per_hour
@@ -17,8 +30,22 @@ class Controller:
         self.timescale = timescale #1 second to 1 minute by default
         self.schedule_limit = schedule_limit
         self.max_wait = max_wait
-        self.generator = Generator(self.schedule_limit, self.inbound_per_hour, self.outbound_per_hour, start_time)
-        self.runway_controller = RunwayController()
+        self.landing_duration = landing_duration
+        self.takeoff_duration = takeoff_duration
+        self.fuel_risk_threshold = fuel_risk_threshold
+        self.takeoff_risk_threshold = takeoff_risk_threshold
+        self.generator = Generator(
+            self.schedule_limit,
+            self.inbound_per_hour,
+            self.outbound_per_hour,
+            start_time,
+        )
+        self.runway_controller = RunwayController(
+            self.landing_duration,
+            self.takeoff_duration,
+            self.fuel_risk_threshold,
+            self.takeoff_risk_threshold
+        )
         self.departure_controller = DepartureController(self.runway_controller)
 
     def calculate_new_time(self, time_elapsed):

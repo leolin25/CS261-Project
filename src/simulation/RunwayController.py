@@ -3,7 +3,7 @@ from .models import Aircraft, Runway
 
 
 class RunwayController:
-    def __init__(self, landing_duration=45, takeoff_duration=45, fuel_risk_threshold=20, takeoff_risk_threshold=25):
+    def __init__(self, landing_duration, takeoff_duration, fuel_risk_threshold, takeoff_risk_threshold):
         self.landing_duration = landing_duration
         self.takeoff_duration = takeoff_duration
         self.fuel_risk_threshold = fuel_risk_threshold

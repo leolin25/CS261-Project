@@ -1,0 +1,63 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Realm | 3D Visualization</title>
+    <link rel="stylesheet" href="{% static 'css/visualization.css' %}">
+</head>
+<body>
+    <header class="airrealm-header">
+        <div>
+            <h1>Air Realm</h1>
+            <p>Dummy 3D airport visualization</p>
+        </div>
+        <a class="back-link" href="{% url 'home' %}">Back to simulation setup</a>
+    </header>
+
+    <main class="visualization-shell">
+        <aside class="hud-panel left-panel">
+            <h2>Scene</h2>
+            <p>This page is intentionally backend-free for now. It is a styled dummy visualization layer that we can later connect to your simulation state.</p>
+            <div class="legend-row"><span class="legend-dot cyan"></span> Arrivals</div>
+            <div class="legend-row"><span class="legend-dot amber"></span> Departures</div>
+            <div class="legend-row"><span class="legend-dot red"></span> Priority</div>
+        </aside>
+
+        <section class="canvas-wrap">
+            <div id="scene-root"></div>
+            <div class="overlay-title">
+                <span>Interactive airfield view</span>
+                <small>Drag to orbit · Scroll to zoom · Right click to pan</small>
+            </div>
+        </section>
+
+        <aside class="hud-panel right-panel">
+            <h2>Live Dummy Feed</h2>
+            <div class="metric-card">
+                <span>Runways active</span>
+                <strong>2</strong>
+            </div>
+            <div class="metric-card">
+                <span>Aircraft on screen</span>
+                <strong>6</strong>
+            </div>
+            <div class="metric-card">
+                <span>Mode</span>
+                <strong>Demo</strong>
+            </div>
+            <p class="hint">Next step: bind aircraft positions, runway state, queue data and labels to your Django backend API.</p>
+        </aside>
+    </main>
+            <script type="importmap">
+        {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+        }
+        </script>
+    <script type="module" src="{% static 'js/visualization.js' %}"></script>
+</body>
+</html>

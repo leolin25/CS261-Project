@@ -51,6 +51,10 @@ def simulation(request):
     return HttpResponse(template.render(context, request))
 
 
+def visualization(request):
+    return render(request, 'pages/visualization.html')
+
+
 class GetSampleData(APIView):
     serializer_class = SampleDataSerializer
 

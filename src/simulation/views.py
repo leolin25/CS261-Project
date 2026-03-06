@@ -42,13 +42,15 @@ def simulation(request):
     #Loads simulation page
     #takeoffQ = Member.objects.all().values()
     #landingQ = Member.objects.all().values()
+    num_runways = 7
 
     template = loader.get_template('pages/simulationtables.html')
     context = {
-       #'takeoffQ': takeoffQ,
-       #'landingQ': landingQ,
+        'runway_range': range(1, num_runways + 1)
+
     }
     return HttpResponse(template.render(context, request))
+
 
 
 class GetSampleData(APIView):

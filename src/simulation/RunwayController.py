@@ -3,7 +3,7 @@ from .models import Aircraft, Runway
 
 
 class RunwayController:
-    def __init__(self, landing_duration=45, takeoff_duration=45, fuel_risk_threshold=20, takeoff_risk_threshold=25):
+    def __init__(self, landing_duration, takeoff_duration, fuel_risk_threshold, takeoff_risk_threshold):
         self.landing_duration = landing_duration
         self.takeoff_duration = takeoff_duration
         self.fuel_risk_threshold = fuel_risk_threshold
@@ -32,7 +32,7 @@ class RunwayController:
             assigned_runway.save()
             
             # Tell the plane which runway it got
-            aircraft.assigned_runway = assigned_runway.runway_number
+            aircraft.assigned_runway = assigned_runway
             aircraft.save()
             return True
         return False
@@ -44,7 +44,7 @@ class RunwayController:
 
         try:
             # Find the runway and unlock it
-            runway = Runway.objects.get(runway_number=aircraft.assigned_runway)
+            runway = Runway.objects.get(id=aircraft.assigned_runway.id)
             if not runway.time_occupied:
                 return False
 
@@ -71,7 +71,7 @@ class RunwayController:
                 aircraft.zone_status = 'DEPARTED'
             aircraft.save()
             
-            print(f"Runway {runway.runway_number} has been freed.")
+            print(f"Runway {runway.bearing} has been freed.")
             return True
         except Runway.DoesNotExist:
             return False

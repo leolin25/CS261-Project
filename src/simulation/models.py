@@ -136,41 +136,82 @@ class RunStats(models.Model):
         RunStats.takeoff_queue_time_mins += takeoff_queue_time
         RunStats.arrival_delay_mins += arrival_delay
         RunStats.departure_delay_mins += departure_delay
-    
+
+    # Update maximum values ------------------------------------------
+
     # Updates the maximum number of planes in the takeoff queue
     @staticmethod
     def update_max_takeoff_queue(new_num):
         if new_num > RunStats.max_num_takeoff_queue:
-            RunStats.max_num_takeoff_queue
+            RunStats.max_num_takeoff_queue = new_num
     
     # Updates the maximum number of planes in the holding pattern
     @staticmethod
     def update_max_holding_pattern(new_num):
         if new_num > RunStats.max_num_holding_pattern:
-            RunStats.max_num_holding_pattern
+            RunStats.max_num_holding_pattern = new_num
     
     # Updates the maximum arrival delay
     @staticmethod
     def update_max_arrival_delay(new_num):
         if new_num > RunStats.max_arrival_delay_mins:
-            RunStats.max_arrival_delay_mins
+            RunStats.max_arrival_delay_mins = new_num
     
     # Updates the maximum departure delay
     @staticmethod
     def update_max_departure_delay(new_num):
         if new_num > RunStats.max_departure_delay:
-            RunStats.max_departure_delay
+            RunStats.max_departure_delay = new_num
     
     # Updates the maximum planes cancelled
     @staticmethod
     def update_max_cancelled(new_num):
         if new_num > RunStats.max_num_cancelled:
-            RunStats.max_num_cancelled
+            RunStats.max_num_cancelled = new_num
     
     # Updates the maximum planes diverted
     @staticmethod
     def update_max_diverted(new_num):
         if new_num > RunStats.max_num_diverted:
-            RunStats.max_num_diverted
+            RunStats.max_num_diverted = new_num
+    
+    
+    # Update minimum values ------------------------------------------
+    
+    # Updates the minimum number of planes in the takeoff queue
+    @staticmethod
+    def update_max_takeoff_queue(new_num):
+        if new_num < RunStats.min_num_takeoff_queue:
+            RunStats.min_num_takeoff_queue = new_num
+    
+    # Updates the minimum number of planes in the holding pattern
+    @staticmethod
+    def update_min_holding_pattern(new_num):
+        if new_num < RunStats.min_num_holding_pattern:
+            RunStats.min_num_holding_pattern = new_num
+    
+    # Updates the minimum arrival delay
+    @staticmethod
+    def update_min_arrival_delay(new_num):
+        if new_num < RunStats.min_arrival_delay_mins:
+            RunStats.min_arrival_delay_mins = new_num
+    
+    # Updates the minimum departure delay
+    @staticmethod
+    def update_min_departure_delay(new_num):
+        if new_num < RunStats.min_departure_delay:
+            RunStats.min_departure_delay = new_num
+    
+    # Updates the minimum planes cancelled
+    @staticmethod
+    def update_min_cancelled(new_num):
+        if new_num < RunStats.min_num_cancelled:
+            RunStats.min_num_cancelled = new_num
+    
+    # Updates the minimum planes diverted
+    @staticmethod
+    def update_min_diverted(new_num):
+        if new_num < RunStats.min_num_diverted:
+            RunStats.min_num_diverted = new_num
         
     

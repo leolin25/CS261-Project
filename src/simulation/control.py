@@ -74,9 +74,8 @@ class Controller:
 
     @staticmethod
     def get_stream_data():
-        inbound_schedule = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_departure=None).order_by('queue_entry_time')
-        outbound_schedule = Aircraft.objects.filter(zone_status="SCHEDULED", scheduled_arrival=None).order_by('queue_entry_time')
-        return list(inbound_schedule) + list(outbound_schedule)
+        flights = Aircraft.objects.all().exclude(zone_status__in=["CANCELLED", "DIVERTED", "LANDED", "DEPARTED"])
+        return list(flights)
 
     def run_simulation(self):
         update_start_time = timezone.now()

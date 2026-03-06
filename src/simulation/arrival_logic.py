@@ -95,7 +95,6 @@ class ArrivalManager:
     """
     @staticmethod
     def check_divertion(time):
-        in_queue = Aircraft.objects.filter(zone_status = 'QUEUE_LA')
         num_diverted_planes = 0 
 
         # Divert the plane if it has waited for more than 30min

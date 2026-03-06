@@ -2,10 +2,94 @@
 
 {% block content %}
     
-<h2>Active Simulation</h2>
+<h2>Runways</h2>
     
 
+<div class="runwayscontainer">
+    {% for x in runway_range %}
+    <div>
+    <table>
+        <tr>
+            <td> Runway {{x}}</td>
+            <td> callsign</td>
+        </tr>
+    </table>
+    </div>
+    {% endfor %}
 
+</div>
+  <div>
+    <table id="runwayTestTable">
+        <caption>Runways</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Runway</th>
+        </tr>
+        <tbody>
+        {% for x in runwayTest %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.assigned_runway}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+
+<h2>Active flights in simulation</h2>
+<div class="simulationcontainer">
+  <div>
+    <table id="takeoffTable">
+        <caption>Take-Off Queue</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Destination</th>
+            <th>Expected Departure Time</th>
+
+        </tr>
+        <tbody>
+        {% for x in takeoffQ %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.destination}}</td>
+            <td>{{x.scheduledDeparture}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+  <div>
+    <table id="holdingpatternTable">
+        <caption>Holding pattern</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Origin</th>
+            <th>Expected Arrival Time</th>
+            <th>Altitude</th>
+            <th>Fuel Remaining</th>
+            <th>Emergency Status</th>
+        </tr>
+        <tbody>
+        {% for x in holdingpattern %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.origin}}</td>
+            <td>{{x.scheduledArrival}}</td>
+            <td>{{x.altitude}}</td>
+            <td>{{x.fuelRemaining}}</td>
+            <td>{{x.emergencyStatus}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
+
+<h2>Schedule</h2>
 <div class="simulationcontainer">
   <div>
     <table id="takeoffScheduleTable">
@@ -60,9 +144,15 @@
 
 
 
+
+
 <script>
+const takeoffQ = document.getElementById("takeoffTable");
+const holdingpattern = document.getElementById("holdingpatternTable");
 const takeoffSchedule = document.getElementById("takeoffScheduleTable");
 const landingSchedule = document.getElementById("landingScheduleTable");
+const runwayTest = document.getElementById("runwayTestTable");
+
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
@@ -75,6 +165,14 @@ if(typeof(EventSource) !== "undefined") {
     lastUpdate = now;
     try {
       //Delete all existing rows
+      while (takeoffQ.rows.length > 1) {
+          takeoffQ.deleteRow(1);
+      }
+
+      while (holdingpattern.rows.length > 1) {
+          holdingpattern.deleteRow(1);
+      }
+
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
       }
@@ -82,13 +180,50 @@ if(typeof(EventSource) !== "undefined") {
       while (landingSchedule.rows.length > 1) {
           landingSchedule.deleteRow(1);
       }
+      while (runwayTest.rows.length > 1) {
+          runwayTest.deleteRow(1);
+      }
+
       var payload = JSON.parse(event.data);
       //For each flight in json
       for(let i = 0; i < payload.length; i++){
         let flight = payload[i];
 
-        //If flight has a scheduled departure put it in takeoffQ
-        if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
+        //If flight is in takeoff zone put it in takeoffQ
+        if(flight.zone_status == "QUEUE_TO"){
+          var row =takeoffQ.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.destination
+          c3.innerText = flight.queue_entry_time
+
+        }else if(flight.zone_status == "QUEUE_LA"){
+            //If flight in landing zone put in holding pattern
+          var row =holdingpattern.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
+          var c5 = row.insertCell(5);
+          var c6 = row.insertCell(6);
+
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.origin
+          c3.innerText = flight.queue_entry_time
+          c4.innerText = flight.altitude
+          c5.innerText = flight.fuel_mins
+          c6.innerText = flight.emergency_status
+
+        } else if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
+            //If scheduled and no departure, put in takeoff schedule
           var row =takeoffSchedule.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
@@ -101,7 +236,7 @@ if(typeof(EventSource) !== "undefined") {
           c3.innerText = flight.queue_entry_time
 
         }else if (flight.zone_status == "SCHEDULED"){
-          //Otherwise put it in landing Queue
+          //Otherwise put it in landing schedule
           var row =landingSchedule.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
@@ -120,6 +255,14 @@ if(typeof(EventSource) !== "undefined") {
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
 
+        }else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
+          var row =runwayTest.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.assigned_runway
+
         }
 
       }
@@ -131,7 +274,7 @@ if(typeof(EventSource) !== "undefined") {
 
   };
 } else {
-  landingSchedule.innerHTML = "SSE Error";
+  holdingpattern.innerHTML = "SSE Error";
 }
 </script>
 

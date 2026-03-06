@@ -1,7 +1,7 @@
 import random
 from datetime import timedelta
 from django.db.models import Avg, Max
-from .models import Aircraft, FlightStats
+from .models import Aircraft
 from .logic import create_flight_stats
 
 
@@ -179,27 +179,6 @@ class ArrivalManager:
                 print(f"Flight {plane.callsign} preparing for landing on runway {assigned_runway.runway_number}")
             else:
                 break
-
-    """
-    Finding maximum and average delay between scheduled departure time and actual departure time as per requirements
-    """
-    @staticmethod
-    def get_stats():    
-        stats = FlightStats.objects.filter(outcome='LANDED')
-
-        if not stats.exists():
-            return {"peak_queue": ArrivalManager.max_queue_size, "status": "No arrivals recorded."}
-        
-
-        results = stats.aggregate(
-            avg_wait = Avg('takeoff_queue_time_mins'),
-            avg_delay = Avg('departure_delay_mins'),
-            max_wait = Max('takeoff_queue_time_mins'),
-            max_delay = Max('departure_delay_mins')
-
-        )
-        results['peak_queue_size'] = ArrivalManager.max_queue_size
-        return results
     
     """
     Decrease the fuel level of all planes in the holding pattern by 1 min, this function should be called by main every minute tick

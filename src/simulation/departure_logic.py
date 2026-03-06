@@ -4,7 +4,6 @@ from .models import Aircraft
 class DepartureController:
     """
     Main logic loop for simulation
-    This runs under the assumption that planes take off as soon as they receive a runway slot. 
     """
     def __init__(self, runway_controller):
         self.runway_controller = runway_controller

@@ -102,6 +102,7 @@ class Runway(models.Model):
 
 
 class RunStats(models.Model):
+    
     # A summation of all plane stats
     holding_time_mins = models.FloatField(default=0.0)             # time spent in holding pattern
     takeoff_queue_time_mins = models.FloatField(default=0.0)       # waiting time in takeoff queue
@@ -110,9 +111,17 @@ class RunStats(models.Model):
 
     # Variance of the above stats
     holding_time_variance = models.FloatField(default=0.0) 
+    holding_num = 0 # Count the total number of planes, used in calculating variance
+    holding_mean = 0
     takeoff_queue_time_variance = models.FloatField(default=0.0) 
+    takeoff_num = 0 
+    takeoff_mean = 0
     arrival_delay_variance = models.FloatField(default=0.0) 
+    arrival_num = 0 
+    arrival_mean = 0
     departure_delay_variance = models.FloatField(default=0.0) 
+    departure_num = 0 
+    departure_mean = 0
                                                                 
     max_num_takeoff_queue = 0         # max number of planes held in the takeoff queue
     max_num_holding_pattern = 0       # max number of planes held in holding pattern
@@ -130,12 +139,45 @@ class RunStats(models.Model):
     
     
     # Adds the new stats to the sum of stats
+    # Updates the variance and mean at the same time
+    # The meaning of the value held by "new_num" is determined by "indicator"
+    # The second parameter "indicator", can be set between 0-3 corresponding to 
+    # holding time, takeoff queue time, arrival delay, departure delay.
     @staticmethod
-    def add_stats(holding_time, takeoff_queue_time, arrival_delay, departure_delay):
-        RunStats.holding_time_mins += holding_time 
-        RunStats.takeoff_queue_time_mins += takeoff_queue_time
-        RunStats.arrival_delay_mins += arrival_delay
-        RunStats.departure_delay_mins += departure_delay
+    def add_stats(new_num, indicator):
+        delta = 0
+        
+        # Indicator = 0 means input parameter stores holding time value
+        if indicator == 0:
+            RunStats.holding_time_mins += new_num 
+            RunStats.holding_num += 1
+            delta = (new_num - RunStats.holding_mean)
+            RunStats.holding_mean += delta / RunStats.holding_num
+            RunStats.holding_time_variance += (new_num - RunStats.holding_mean) * delta
+        
+        # Indicator = 1 means input parameter stores takeoff queue wait time value
+        elif indicator == 1:
+            RunStats.takeoff_queue_time_mins += new_num
+            RunStats.takeoff_num += 1
+            delta = (new_num - RunStats.takeoff_mean)
+            RunStats.takeoff_mean += delta / RunStats.takeoff_num
+            RunStats.takeoff_queue_time_variance += (new_num - RunStats.takeoff_mean) * delta
+        
+        # Indicator = 2 means input parameter stores arrival delay value
+        elif indicator == 2:
+            RunStats.arrival_delay_mins += new_num
+            RunStats.arrival_num += 1
+            delta = (new_num - RunStats.arrival_mean)
+            RunStats.arrival_mean += delta / RunStats.arrival_num
+            RunStats.arrival_delay_variance += (new_num - RunStats.arrival_mean) * delta
+        
+        # Indicator = 3 means input parameter stores departure delay value
+        elif indicator == 3:
+            RunStats.departure_delay_mins += new_num
+            RunStats.departure_num += 1
+            delta = (new_num - RunStats.departure_mean)
+            RunStats.departure_mean += delta / RunStats.departure_num
+            RunStats.departure_delay_variance += (new_num - RunStats.departure_mean) * delta
 
     # Update maximum values ------------------------------------------
 

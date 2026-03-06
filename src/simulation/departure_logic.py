@@ -1,116 +1,25 @@
-import random
-from datetime import timedelta
-from django.db.models import Avg, Max
-from .models import Aircraft, FlightStats
-from .logic import create_flight_stats
+from .models import Aircraft
 
 
-
-class DepartureManager:
-
-
-    max_planes_in_queue = 0 
-
-
-
-    """Applying normal distribution for queue entry
-    Mean = Scheduled departure time
-    S.D = 5m
-    """
-    # @staticmethod
-    # def entry_variance(plane):
-    #     if plane.scheduled_departure and not plane.queue_entry_time:
-    #         variance = random.gauss(0,5) 
-    #         plane.queue_entry_time = plane.scheduled_departure+timedelta(minutes=variance)
-    #         plane.save()
-    #     return plane
-
-
-
-    
-    """
-    Cancel flights that have waited longer than 30 minutes in the queue
-    """
-    @staticmethod
-    def check_cancellations(time):
-        in_queue = Aircraft.objects.filter(zone_status='QUEUE_TO')
-        no_cancelled = 0 
-        for plane in in_queue:
-            
-            wait_duration= (time-plane.queue_entry_time).total_seconds()/60
-            
-            if wait_duration>30:
-                plane.zone_status = 'CANCELLED'
-                plane.save()
-                create_flight_stats(plane,time)
-                no_cancelled+=1
-                print(f"Flight {plane.callsign} cancelled")
-
-        return no_cancelled
+class DepartureController:
     """
     Main logic loop for simulation
     This runs under the assumption that planes take off as soon as they receive a runway slot. 
     """
-    @staticmethod
-    def process_departures(time,runway_controller):
-        
+    def __init__(self, runway_controller):
+        self.runway_controller = runway_controller
 
-        '''ideally want planes on runway for 45s, but simulation ticks every minute, 
-        so this makes planes stay on runway for 60s as planes on the runway are removed every tick.
-        free the runway the plane was on.
-        '''
-        departed = Aircraft.objects.filter(zone_status='RUNWAY_TO')
-        for plane in departed:
-            plane.zone_status = 'DEPARTED'
-            print(f"Flight {plane.callsign} has taken off")
-            plane.save()
-            runway_controller.free_runway(plane)
-            create_flight_stats(plane, time)
-
-
-        ready_to_queue = Aircraft.objects.filter(zone_status='SCHEDULED',queue_entry_time__lte=time)
-        for plane in ready_to_queue:
-            plane.zone_status = 'QUEUE_TO' 
-            plane.save()
-                
-        # Keep count of the most number of planes in queue at a time. 
-        current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_TO').count()
-        if current_queue_count > DepartureManager.max_planes_in_queue:
-            DepartureManager.max_planes_in_queue=current_queue_count
-
-        #Clear planes which have been waiting for longer than 30 minutes
-        DepartureManager.check_cancellations(time)
+    def process_departures(self, simulation_time):
+        departed_aircrafts = Aircraft.objects.filter(zone_status='RUNWAY_TO')
+        for aircraft in departed_aircrafts:
+            success = self.runway_controller.free_runway(aircraft, simulation_time)
+            if success:
+                print(f"Flight {aircraft.callsign} has departed.")
 
         #Attempt to assign runways to planes in queue, ensuring FIFO ordering
         queue = Aircraft.objects.filter(zone_status='QUEUE_TO').order_by('queue_entry_time')
-
-        for plane in queue:
-            assigned_runway = runway_controller.assign_runway(plane)
-
-            if assigned_runway:
-                plane.zone_status = 'RUNWAY_TO'
-                plane.save()
-                print(f"Flight {plane.callsign} preparing for takeoff on runway {assigned_runway.runway_number}")
-        
-
-
-    """
-    Finding maximum and average delay between scheduled departure time and actual departure time as per requirements
-    """
-    @staticmethod
-    def get_stats():    
-        stats = FlightStats.objects.filter(outcome='DEPARTED')
-
-        if not stats.exists():
-            return {"peak_queue": DepartureManager.max_planes_in_queue, "status": "No departures recorded."}
-        
-
-        results=  stats.aggregate(
-            avg_wait = Avg('takeoff_queue_time_mins'),
-            avg_delay = Avg('departure_delay_mins'),
-            max_wait=Max('takeoff_queue_time_mins'),
-            max_delay=Max('departure_delay_mins')
-
-        )
-        results['peak_queue_size'] = DepartureManager.max_planes_in_queue
-        return results
+        for aircraft in queue:
+            success = self.runway_controller.assign_runway(aircraft, simulation_time)
+            if success:
+                aircraft.refresh_from_db()
+                print(f"Flight {aircraft.callsign} preparing for takeoff on runway {aircraft.assigned_runway.bearing}")

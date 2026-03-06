@@ -3,6 +3,7 @@ from django.utils import timezone
 from .models import Aircraft, Runway
 from .generation import Generator
 from .RunwayController import RunwayController
+from .departure_logic import DepartureController
 
 
 class Controller:
@@ -18,6 +19,7 @@ class Controller:
         self.max_wait = max_wait
         self.generator = Generator(self.schedule_limit, self.inbound_per_hour, self.outbound_per_hour, start_time)
         self.runway_controller = RunwayController()
+        self.departure_controller = DepartureController(self.runway_controller)
 
     def calculate_new_time(self, time_elapsed):
         self.simulation_time += timedelta(minutes=(time_elapsed * self.timescale))
@@ -57,6 +59,7 @@ class Controller:
         self.update_aircraft_statuses()
         self.update_aircraft_cancellations()
         self.runway_controller.optimise_runway_mode(self.simulation_time)
+        self.departure_controller.process_departures(self.simulation_time)
         self.runway_controller.reset_optimised_runways()
         self.last_update_time = update_start_time
 

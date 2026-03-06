@@ -44,7 +44,7 @@ class RunwayController:
 
         try:
             # Find the runway and unlock it
-            runway = Runway.objects.get(id=aircraft.assigned_runway)
+            runway = Runway.objects.get(id=aircraft.assigned_runway.id)
             if not runway.time_occupied:
                 return False
 

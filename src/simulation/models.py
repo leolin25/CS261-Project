@@ -110,6 +110,7 @@ class RunStats(models.Model):
     departure_delay_mins = models.FloatField(default=0.0)          # delay in departure time
 
     # Variance of the above stats
+    # The variances here aren't actually the true variance, the actual variance is calculated through (variance/num - 1)
     holding_time_variance = models.FloatField(default=0.0) 
     holding_num = 0 # Count the total number of planes, used in calculating variance
     holding_mean = 0

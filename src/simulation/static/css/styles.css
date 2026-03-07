@@ -159,8 +159,12 @@ caption{
   display: flex;
   background-color: #ffffff;
   justify-content: space-evenly;
-
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
+
+
 
 .simulationcontainer div {
   background-color: white;
@@ -179,7 +183,9 @@ caption{
   display: flex;
   background-color: #ffffff;
   justify-content: space-evenly;
-
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
 }
 
 .runwayscontainer div {
@@ -195,3 +201,31 @@ caption{
     background-color: #f2f2f2;
 }
 
+.collapsible {
+    width: 100%;
+    text-align: center;
+    font-size: 25px;
+    background-color: navy;
+    padding: 15px;
+    margin: 0px;
+    color: white;
+}
+
+.active, .collapsible:hover {
+    background-color: #0c13d7;
+}
+
+.collapsible:after {
+  content: '\0002B'; 
+  font-size: 13px;
+  color: white;
+  margin-left: 5px;
+}
+
+.active:after {
+  content: "\02212"; 
+}
+
+.individualTables {
+    margin-bottom: 20px;
+}

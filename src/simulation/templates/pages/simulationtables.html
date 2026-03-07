@@ -2,8 +2,8 @@
 
 {% block content %}
     
-<h2>Runways</h2>
     
+<button type="button" class="collapsible">Runways</button>
 
 <div class="runwayscontainer">
     {% for x in runway_range %}
@@ -19,7 +19,7 @@
 
 </div>
   <div>
-    <table id="runwayTestTable">
+    <table id="runwayTestTable" class="individualTables">
         <caption>Runways</caption>
         <tr>
             <th>Callsign</th>
@@ -36,10 +36,10 @@
     </table>
   </div>
 
-<h2>Active flights in simulation</h2>
+<button type="button" class="collapsible">Flights in Simulation</button>
 <div class="simulationcontainer">
   <div>
-    <table id="takeoffTable">
+    <table id="takeoffTable" class="individualTables">
         <caption>Take-Off Queue</caption>
         <tr>
             <th>Callsign</th>
@@ -61,7 +61,7 @@
     </table>
   </div>
   <div>
-    <table id="holdingpatternTable">
+    <table id="holdingpatternTable" class="individualTables">
         <caption>Holding pattern</caption>
         <tr>
             <th>Callsign</th>
@@ -89,10 +89,11 @@
   </div>
 </div>
 
-<h2>Schedule</h2>
+<button type="button" class="collapsible">Schedule</button>
+
 <div class="simulationcontainer">
   <div>
-    <table id="takeoffScheduleTable">
+    <table id="takeoffScheduleTable" class="individualTables">
         <caption>Take-Off Schedule</caption>
         <tr>
             <th>Callsign</th>
@@ -114,7 +115,7 @@
     </table>
   </div>
   <div>
-    <table id="landingScheduleTable">
+    <table id="landingScheduleTable" class="individualTables">
         <caption>Landing Schedule</caption>
         <tr>
             <th>Callsign</th>
@@ -147,6 +148,8 @@
 
 
 <script>
+
+//DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
 const holdingpattern = document.getElementById("holdingpatternTable");
 const takeoffSchedule = document.getElementById("takeoffScheduleTable");
@@ -266,6 +269,16 @@ if(typeof(EventSource) !== "undefined") {
         }
 
       }
+      //Reset the collapsables
+      var collapsables = document.getElementsByClassName("collapsible");
+      for (let i = 0; i < content.length; i++) {
+        if (collapsibles[i].classList.contains("active")) {
+            let contentContainer = collapsibles[i].nextElementSibling;
+            contentContainer.style.maxHeight = "none"; 
+            contentContainer.style.maxHeight = contentContainer.scrollHeight + "px";
+        }
+
+      }
 
 
     } catch (e){
@@ -275,6 +288,24 @@ if(typeof(EventSource) !== "undefined") {
   };
 } else {
   holdingpattern.innerHTML = "SSE Error";
+}
+
+
+//COLLAPSABLES
+
+var collapsible = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < collapsible.length; i++) {
+  collapsible[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  });
 }
 </script>
 

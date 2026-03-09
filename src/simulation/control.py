@@ -4,6 +4,7 @@ from .models import Aircraft, Runway
 from .generation import Generator
 from .RunwayController import RunwayController
 from .departure_logic import DepartureController
+from .arrival_logic import ArrivalController
 
 
 class Controller:
@@ -50,6 +51,7 @@ class Controller:
             self.runway_controller,
             self.max_wait,
         )
+        self.arrival_controller = ArrivalController(self.runway_controller)
 
     def calculate_new_time(self, time_elapsed):
         self.simulation_time += timedelta(minutes=(time_elapsed * self.timescale))
@@ -75,6 +77,7 @@ class Controller:
         self.generator.run_generation(self.simulation_time)
         self.update_aircraft_statuses()
         self.departure_controller.update_aircraft_cancellations(self.simulation_time)
+        self.arrival_controller.update_aircraft_fuel(self.simulation_time)
         self.runway_controller.optimise_runway_mode(self.simulation_time)
         self.departure_controller.process_departures(self.simulation_time)
         self.runway_controller.reset_optimised_runways()

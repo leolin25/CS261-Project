@@ -81,19 +81,5 @@ def stream(request):
     response['X-Accel-Buffering'] = 'no'
     return response
 
-def streamRecent(request):
-    def event_stream():
-        while True:
-            controller.run_simulation()
-            flight_data = controller.get_stream_data_recent()
-            serializer = SampleDataSerializer(flight_data, many=True)
-            data = f"data: {json.dumps(serializer.data)}\n\n" 
-            yield data
 
-    controller = Controller(2, 1, 10, timescale=1, schedule_limit=2)
-    controller.setup_simulation()
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    response['X-Accel-Buffering'] = 'no'
-    return response
 

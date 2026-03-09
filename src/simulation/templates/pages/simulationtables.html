@@ -247,6 +247,11 @@ const takeoffSchedule = document.getElementById("takeoffScheduleTable");
 const landingSchedule = document.getElementById("landingScheduleTable");
 const runwayTest = document.getElementById("runwayTestTable");
 
+const departed = document.getElementById("departedTable");
+const landed = document.getElementById("landedTable");
+const cancelled = document.getElementById("cancelledTable");
+const diverted = document.getElementById("divertedTable");
+
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
@@ -276,6 +281,22 @@ if(typeof(EventSource) !== "undefined") {
       }
       while (runwayTest.rows.length > 1) {
           runwayTest.deleteRow(1);
+      }
+
+      while (departed.rows.length > 1) {
+          departed.deleteRow(1);
+      }
+
+      while (landed.rows.length > 1) {
+          landed.deleteRow(1);
+      }
+
+      while (cancelled.rows.length > 1) {
+          cancelled.deleteRow(1);
+      }
+
+      while (diverted.rows.length > 1) {
+          diverted.deleteRow(1);
       }
 
       var payload = JSON.parse(event.data);
@@ -357,72 +378,8 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.assigned_runway
 
-        }
-
-      }
-      //Reset the collapsables
-      let activeCollapsables = document.getElementsByClassName("collapsible");
-      for (let i = 0; i < activeCollapsables.length; i++) {
-        if (activeCollapsables[i].classList.contains("active")) {
-            let contentContainer = activeCollapsables[i].nextElementSibling;
-            contentContainer.style.maxHeight = "none"; 
-            contentContainer.style.maxHeight = contentContainer.scrollHeight + "px";
-        }
-
-      }
-
-
-    } catch (e){
-      console.error("Error in JSON parsing:",e,event.data)
-    }
-
-  };
-} else {
-  holdingpattern.innerHTML = "SSE Error";
-}
-
-//Out of simulation data stream
-const departed = document.getElementById("departedTable");
-const landed = document.getElementById("landedTable");
-const cancelled = document.getElementById("cancelledTable");
-const diverted = document.getElementById("divertedTable");
-
-let lastUpdate2 = 0;
-console.log("Hello, world1!");
-if(typeof(EventSource) !== "undefined") {
-  console.log("Hello, world2!");
-  var source = new EventSource("/streamRecent/"); 
-  source.onmessage = function(event) {
-    //x.innerHTML += event.data + "<br>";
-    const now = new Date().getTime();
-    if (now - lastUpdate2 < 25) return; // Throttle updates to at most 40FPS
-    lastUpdate2 = now;
-    try {
-      //Delete all existing rows
-      while (departed.rows.length > 1) {
-          departed.deleteRow(1);
-      }
-
-      while (landed.rows.length > 1) {
-          landed.deleteRow(1);
-      }
-
-      while (cancelled.rows.length > 1) {
-          cancelled.deleteRow(1);
-      }
-
-      while (diverted.rows.length > 1) {
-          diverted.deleteRow(1);
-      }
-
-      var payload = JSON.parse(event.data);
-      //For each flight in json
-      for(let i = 0; i < payload.length; i++){
-        let flight = payload[i];
-        console.log("Hello, world3!");
-
-        //Departed table
-        if(flight.zone_status == "DEPARTED"){
+        }else if(flight.zone_status == "DEPARTED"){
+          //Departed table
           var row =departed.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
@@ -477,6 +434,7 @@ if(typeof(EventSource) !== "undefined") {
 
         }
 
+
       }
       //Reset the collapsables
       let activeCollapsables = document.getElementsByClassName("collapsible");
@@ -498,6 +456,10 @@ if(typeof(EventSource) !== "undefined") {
 } else {
   holdingpattern.innerHTML = "SSE Error";
 }
+
+
+
+
 
 
 

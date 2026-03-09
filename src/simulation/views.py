@@ -71,7 +71,7 @@ def stream(request):
             controller.run_simulation()
             flight_data = controller.get_stream_data()
             serializer = SampleDataSerializer(flight_data, many=True)
-            data = f"data: {json.dumps(serializer.data)}\n\n" #need to define data, should just be a json file
+            data = f"data: {json.dumps(serializer.data)}\n\n" 
             yield data
 
     controller = Controller(2, 1, 10, timescale=1, schedule_limit=2)
@@ -80,3 +80,6 @@ def stream(request):
     response['Cache-Control'] = 'no-cache'
     response['X-Accel-Buffering'] = 'no'
     return response
+
+
+

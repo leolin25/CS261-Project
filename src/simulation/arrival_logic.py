@@ -86,7 +86,7 @@ class Queue:
 This class manages the arrival of planes, including the holding pattern and diverting planes that have been waiting for too long or have low fuel.
 """
 class ArrivalManager:
-    max_queue_size = 0 
+    max_planes_in_queue = 0 
     holding_pattern = Queue()
     min_fuel_level = 11 # Minimum fuel level before diverting
     

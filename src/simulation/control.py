@@ -44,9 +44,12 @@ class Controller:
             self.landing_duration,
             self.takeoff_duration,
             self.fuel_risk_threshold,
-            self.takeoff_risk_threshold
+            self.takeoff_risk_threshold,
         )
-        self.departure_controller = DepartureController(self.runway_controller)
+        self.departure_controller = DepartureController(
+            self.runway_controller,
+            self.max_wait,
+        )
 
     def calculate_new_time(self, time_elapsed):
         self.simulation_time += timedelta(minutes=(time_elapsed * self.timescale))
@@ -60,18 +63,6 @@ class Controller:
                 aircraft.zone_status = "QUEUE_TO"
         Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
 
-    def update_aircraft_cancellations(self):
-        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_TO')
-        number_cancelled = 0
-        for aircraft in aircrafts:
-            wait_duration = (self.simulation_time - aircraft.queue_entry_time).total_seconds() / 60
-            if wait_duration > self.max_wait:
-                aircraft.zone_status = 'CANCELLED'
-                number_cancelled += 1
-                print("Flight {} cancelled".format(aircraft.callsign))
-        Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
-        return number_cancelled
-
     @staticmethod
     def get_stream_data():
         flights = Aircraft.objects.all().exclude(zone_status__in=["CANCELLED", "DIVERTED", "LANDED", "DEPARTED"])
@@ -83,7 +74,7 @@ class Controller:
         #print(f"Simulation Time: {self.simulation_time}, Real Time: {update_start_time}")
         self.generator.run_generation(self.simulation_time)
         self.update_aircraft_statuses()
-        self.update_aircraft_cancellations()
+        self.departure_controller.update_aircraft_cancellations(self.simulation_time)
         self.runway_controller.optimise_runway_mode(self.simulation_time)
         self.departure_controller.process_departures(self.simulation_time)
         self.runway_controller.reset_optimised_runways()

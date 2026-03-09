@@ -5,8 +5,21 @@ class DepartureController:
     """
     Main logic loop for simulation
     """
-    def __init__(self, runway_controller):
+    def __init__(self, runway_controller, max_wait):
         self.runway_controller = runway_controller
+        self.max_wait = max_wait
+
+    def update_aircraft_cancellations(self, simulation_time):
+        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_TO')
+        number_cancelled = 0
+        for aircraft in aircrafts:
+            wait_duration = (simulation_time - aircraft.queue_entry_time).total_seconds() / 60
+            if wait_duration > self.max_wait:
+                aircraft.zone_status = 'CANCELLED'
+                number_cancelled += 1
+                print("Flight {} cancelled".format(aircraft.callsign))
+        Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+        return number_cancelled
 
     def process_departures(self, simulation_time):
         departed_aircrafts = Aircraft.objects.filter(zone_status='RUNWAY_TO')

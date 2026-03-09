@@ -388,10 +388,10 @@ const cancelled = document.getElementById("cancelledTable");
 const diverted = document.getElementById("divertedTable");
 
 let lastUpdate2 = 0;
-
+console.log("Hello, world1!");
 if(typeof(EventSource) !== "undefined") {
-
-  var source = new EventSource("/stream/"); 
+  console.log("Hello, world2!");
+  var source = new EventSource("/streamRecent/"); 
   source.onmessage = function(event) {
     //x.innerHTML += event.data + "<br>";
     const now = new Date().getTime();
@@ -419,6 +419,7 @@ if(typeof(EventSource) !== "undefined") {
       //For each flight in json
       for(let i = 0; i < payload.length; i++){
         let flight = payload[i];
+        console.log("Hello, world3!");
 
         //Departed table
         if(flight.zone_status == "DEPARTED"){
@@ -447,7 +448,7 @@ if(typeof(EventSource) !== "undefined") {
           c3.innerText = flight.queue_entry_time
 
 
-        } else if(flight.zone_status == "CALNCELLED"){
+        } else if(flight.zone_status == "CANCELLED"){
             //If cancelled, cancelled table
           var row =takeoffSchedule.insertRow(-1);
           var c0 = row.insertCell(0);

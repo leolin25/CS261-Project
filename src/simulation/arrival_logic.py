@@ -20,6 +20,14 @@ class ArrivalController:
             aircraft.last_update += timedelta(minutes=1)
         Aircraft.objects.bulk_update(aircrafts, ['fuel_mins', 'last_update'])
 
+    @staticmethod
+    def update_aircraft_diversions():
+        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=10)
+        for aircraft in aircrafts:
+            aircraft.zone_status = 'DIVERTED'
+            print(f"Flight {aircraft.callsign} diverted due to low fuel")
+        Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+
     # """
     # Divert flights that have waited longer than 30 minutes in the holding pattern, or have fuel <= 11min
     # """

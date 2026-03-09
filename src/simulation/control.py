@@ -78,6 +78,7 @@ class Controller:
         self.update_aircraft_statuses()
         self.departure_controller.update_aircraft_cancellations(self.simulation_time)
         self.arrival_controller.update_aircraft_fuel(self.simulation_time)
+        self.arrival_controller.update_aircraft_diversions()
         self.runway_controller.optimise_runway_mode(self.simulation_time)
         self.departure_controller.process_departures(self.simulation_time)
         self.runway_controller.reset_optimised_runways()

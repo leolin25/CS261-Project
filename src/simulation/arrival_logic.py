@@ -158,7 +158,7 @@ class ArrivalManager:
                 if plane.emergency_status.choices == "NONE":
                     ArrivalManager.holding_pattern.enqueue(plane)
                 else:
-                    ArrivalManager.holding_pattern.priority_enqueue(plane)
+                    ArrivalManager.holding_pattern.enqueue_priority(plane)
                 
         # Keep count of the most number of planes in queue at a time. 
         current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_LA').count()

@@ -147,7 +147,7 @@
 <!--Recently Cancelled, Diverted, Landed or taken off flights-->
 <button type="button" class="collapsible">Recently Departed, Landed, Cancelled or Diverted</button>
 
-<div class="simulationcontainer">
+<div class="recentcontainer">
   <div>
     <table id="departedTable" class="individualTables">
         <caption>Recent Departures</caption>
@@ -436,7 +436,7 @@ if(typeof(EventSource) !== "undefined") {
 
         }else if(flight.zone_status == "LANDED"){
             //Landed table
-          var row =holdingpattern.insertRow(-1);
+          var row =landed.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
@@ -450,7 +450,7 @@ if(typeof(EventSource) !== "undefined") {
 
         } else if(flight.zone_status == "CANCELLED"){
             //If cancelled, cancelled table
-          var row =takeoffSchedule.insertRow(-1);
+          var row =cancelled.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
@@ -463,7 +463,7 @@ if(typeof(EventSource) !== "undefined") {
 
         }else if (flight.zone_status == "DIVERTED"){
           //Diverted table
-          var row =landingSchedule.insertRow(-1);
+          var row =diverted.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);

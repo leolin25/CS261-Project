@@ -201,6 +201,32 @@ caption{
     background-color: #f2f2f2;
 }
 
+
+.recentcontainer {
+  display: flex;
+  background-color: #ffffff;
+  justify-content: space-evenly;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+
+
+.recentcontainer div {
+  background-color: white;
+  margin: 15px;
+  padding: 50px;
+  font-size: 15px;
+  flex: 1;
+  width: 0;
+}
+
+.recentcontainer tr:nth-child(odd) {
+    background-color: #f2f2f2;
+}
+
+
 .collapsible {
     width: 100%;
     text-align: center;

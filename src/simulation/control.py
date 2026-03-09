@@ -67,8 +67,10 @@ class Controller:
 
     @staticmethod
     def get_stream_data():
-        flights = Aircraft.objects.all().exclude(zone_status__in=["CANCELLED", "DIVERTED", "LANDED", "DEPARTED"])
+        flights = Aircraft.objects.all()
+        #.exclude(zone_status__in=["CANCELLED", "DIVERTED", "LANDED", "DEPARTED"])
         return list(flights)
+    
 
     def run_simulation(self):
         update_start_time = timezone.now()

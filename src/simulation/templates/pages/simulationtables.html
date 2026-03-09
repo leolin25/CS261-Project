@@ -2,8 +2,8 @@
 
 {% block content %}
     
-<h2>Runways</h2>
     
+<button type="button" class="collapsible">Runways</button>
 
 <div class="runwayscontainer">
     {% for x in runway_range %}
@@ -19,7 +19,7 @@
 
 </div>
   <div>
-    <table id="runwayTestTable">
+    <table id="runwayTestTable" class="individualTables">
         <caption>Runways</caption>
         <tr>
             <th>Callsign</th>
@@ -36,10 +36,10 @@
     </table>
   </div>
 
-<h2>Active flights in simulation</h2>
+<button type="button" class="collapsible">Flights in Simulation</button>
 <div class="simulationcontainer">
   <div>
-    <table id="takeoffTable">
+    <table id="takeoffTable" class="individualTables">
         <caption>Take-Off Queue</caption>
         <tr>
             <th>Callsign</th>
@@ -61,7 +61,7 @@
     </table>
   </div>
   <div>
-    <table id="holdingpatternTable">
+    <table id="holdingpatternTable" class="individualTables">
         <caption>Holding pattern</caption>
         <tr>
             <th>Callsign</th>
@@ -89,10 +89,11 @@
   </div>
 </div>
 
-<h2>Schedule</h2>
+<button type="button" class="collapsible">Schedule</button>
+
 <div class="simulationcontainer">
   <div>
-    <table id="takeoffScheduleTable">
+    <table id="takeoffScheduleTable" class="individualTables">
         <caption>Take-Off Schedule</caption>
         <tr>
             <th>Callsign</th>
@@ -114,7 +115,7 @@
     </table>
   </div>
   <div>
-    <table id="landingScheduleTable">
+    <table id="landingScheduleTable" class="individualTables">
         <caption>Landing Schedule</caption>
         <tr>
             <th>Callsign</th>
@@ -143,15 +144,113 @@
 </div>
 
 
+<!--Recently Cancelled, Diverted, Landed or taken off flights-->
+<button type="button" class="collapsible">Recently Departed, Landed, Cancelled or Diverted</button>
+
+<div class="recentcontainer">
+  <div>
+    <table id="departedTable" class="individualTables">
+        <caption>Recent Departures</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Destination</th>
+            <th>Departure Time</th>
+
+        </tr>
+        <tbody>
+        {% for x in departed %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.destination}}</td>
+            <td>{{x.scheduledDeparture}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+  <div>
+    <table id="landedTable" class="individualTables">
+        <caption>Recently Landed</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Origin</th>
+            <th>Arrival Time</th>
+        </tr>
+        <tbody>
+        {% for x in landed %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.origin}}</td>
+            <td>{{x.scheduledArrival}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+    <div>
+    <table id="cancelledTable" class="individualTables">
+        <caption>Recently Cancelled</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Destination</th>
+            <th>Previously Expected Departure Time</th>
+
+        </tr>
+        <tbody>
+        {% for x in cancelled %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.destination}}</td>
+            <td>{{x.scheduledDeparture}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+  <div>
+    <table id="divertedTable" class="individualTables">
+        <caption>Recently Diverted</caption>
+        <tr>
+            <th>Callsign</th>
+            <th>Operator</th>
+            <th>Origin</th>
+            <th>Previously Expected Arrival Time</th>
+        </tr>
+        <tbody>
+        {% for x in diverted %}
+        <tr>
+            <td>{{x.callsign}}</td>
+            <td>{{x.operator}}</td>
+            <td>{{x.origin}}</td>
+            <td>{{x.scheduledArrival}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+  </div>
+</div>
 
 
 
 <script>
+
+//DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
 const holdingpattern = document.getElementById("holdingpatternTable");
 const takeoffSchedule = document.getElementById("takeoffScheduleTable");
 const landingSchedule = document.getElementById("landingScheduleTable");
 const runwayTest = document.getElementById("runwayTestTable");
+
+const departed = document.getElementById("departedTable");
+const landed = document.getElementById("landedTable");
+const cancelled = document.getElementById("cancelledTable");
+const diverted = document.getElementById("divertedTable");
 
 let lastUpdate = 0;
 
@@ -182,6 +281,22 @@ if(typeof(EventSource) !== "undefined") {
       }
       while (runwayTest.rows.length > 1) {
           runwayTest.deleteRow(1);
+      }
+
+      while (departed.rows.length > 1) {
+          departed.deleteRow(1);
+      }
+
+      while (landed.rows.length > 1) {
+          landed.deleteRow(1);
+      }
+
+      while (cancelled.rows.length > 1) {
+          cancelled.deleteRow(1);
+      }
+
+      while (diverted.rows.length > 1) {
+          diverted.deleteRow(1);
       }
 
       var payload = JSON.parse(event.data);
@@ -233,7 +348,7 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          c3.innerText = flight.queue_entry_time
+          c3.innerText = flight.scheduled_departure
 
         }else if (flight.zone_status == "SCHEDULED"){
           //Otherwise put it in landing schedule
@@ -250,7 +365,7 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          c3.innerText = flight.queue_entry_time
+          c3.innerText = flight.scheduled_arrival
           c4.innerText = flight.altitude
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
@@ -263,6 +378,71 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.assigned_runway
 
+        }else if(flight.zone_status == "DEPARTED"){
+          //Departed table
+          var row =departed.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.destination
+          c3.innerText = flight.queue_entry_time
+
+        }else if(flight.zone_status == "LANDED"){
+            //Landed table
+          var row =landed.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.origin
+          c3.innerText = flight.queue_entry_time
+
+
+        } else if(flight.zone_status == "CANCELLED"){
+            //If cancelled, cancelled table
+          var row =cancelled.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.destination
+          c3.innerText = flight.queue_entry_time
+
+        }else if (flight.zone_status == "DIVERTED"){
+          //Diverted table
+          var row =diverted.insertRow(-1);
+          var c0 = row.insertCell(0);
+          var c1 = row.insertCell(1);
+          var c2 = row.insertCell(2);
+          var c3 = row.insertCell(3);
+
+          c0.innerText = flight.callsign
+          c1.innerText = flight.operator
+          c2.innerText = flight.origin
+          c3.innerText = flight.queue_entry_time
+
+
+        }
+
+
+      }
+      //Reset the collapsables
+      let activeCollapsables = document.getElementsByClassName("collapsible");
+      for (let i = 0; i < activeCollapsables.length; i++) {
+        if (activeCollapsables[i].classList.contains("active")) {
+            let contentContainer = activeCollapsables[i].nextElementSibling;
+            contentContainer.style.maxHeight = "none"; 
+            contentContainer.style.maxHeight = contentContainer.scrollHeight + "px";
         }
 
       }
@@ -275,6 +455,29 @@ if(typeof(EventSource) !== "undefined") {
   };
 } else {
   holdingpattern.innerHTML = "SSE Error";
+}
+
+
+
+
+
+
+
+//COLLAPSABLES
+
+var collapsible = document.getElementsByClassName("collapsible");
+var i;
+
+for (i = 0; i < collapsible.length; i++) {
+  collapsible[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var content = this.nextElementSibling;
+    if (content.style.maxHeight){
+      content.style.maxHeight = null;
+    } else {
+      content.style.maxHeight = content.scrollHeight + "px";
+    }
+  });
 }
 </script>
 

@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/sample-data/', GetSampleData.as_view(), name='sample-data'),
     path('stream/',stream, name='stream')
 
+
 ]

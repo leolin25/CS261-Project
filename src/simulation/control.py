@@ -5,6 +5,7 @@ from .generation import Generator
 from .RunwayController import RunwayController
 from .departure_logic import DepartureController
 
+from .models import Aircraft, Runway, RunStats
 
 class Controller:
     def __init__(
@@ -70,6 +71,12 @@ class Controller:
                 number_cancelled += 1
                 print("Flight {} cancelled".format(aircraft.callsign))
         Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+
+        # Stats update for cancellations
+        if number_cancelled > 0:
+            stats = RunStats.objects.get(id=1)
+            stats.update_max_cancelled(number_cancelled)
+        
         return number_cancelled
 
     @staticmethod
@@ -91,9 +98,25 @@ class Controller:
         self.runway_controller.reset_optimised_runways()
         self.last_update_time = update_start_time
 
+        stats = RunStats.objects.first()
+
+        # Track queue sizes
+        queue_la_size = Aircraft.objects.filter(zone_status='QUEUE_LA').count()
+        queue_to_size = Aircraft.objects.filter(zone_status='QUEUE_TO').count()
+        
+        stats.update_max_holding_pattern(queue_la_size)
+        stats.update_min_holding_pattern(queue_la_size)
+        stats.update_max_takeoff_queue(queue_to_size)
+        stats.update_min_takeoff_queue(queue_to_size)
+
     def setup_simulation(self):
+        RunStats.objects.all().delete()
         Aircraft.objects.all().delete()
         Runway.objects.all().delete()
+
+        # Create new RunStats object
+        RunStats.objects.create(id=1)
+
         for _ in range(self.runways):
             self.generator.generate_runway()
         self.generator.run_generation(self.simulation_time)

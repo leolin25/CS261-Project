@@ -1,191 +1,117 @@
-import random
 from datetime import timedelta
-from django.db.models import Avg, Max
-from .models import Aircraft
-from .logic import create_flight_stats
+from .models import Aircraft, RunStats
 
-
-class Queue:
-    """A queue data structure"""
-    
-    def __init__(self):
-        self.length = 0
-        self.array = []
-        self.priority_pointer = 0 # This points to the index position that the new emergency plane should be placed in
-
-    # Add the new airplane to the back of the queue
-    def enqueue(self, airplane):
-        self.length += 1
-        self.array.append(airplane)
-        
-    # Remove the airplane at the front of the queue
-    def dequeue(self):
-    
-        # Return False if the queue is empty
-        if self.isEmpty():
-            return False
-
-        # Decrease the pointer by 1 when there are airplanes with emergencies
-        elif self.priority_pointer > 0:
-            self.priority_pointer -= 1
-        
-        self.length -= 1
-        return self.array.pop(0)
-        
-    # Return the array itself
-    def get_array(self):
-        return self.array
-        
-    # Output the items within the queue  
-    def output(self):
-        print(self.array)
-        
-    # Look into the first plane in the holding pattern
-    def look(self):
-        if self.isEmpty():
-            return False
-        
-        return self.array[0]
-
-    # Check if the queue is empty
-    def isEmpty(self):
-        return self.length == 0
-
-    # Add to the front of the queue because of priority/emergency.
-    # If there are planes with emergency already in the queue, add the airplane behind the existing ones 
-    def enqueue_priority(self, airplane):
-
-        self.array.insert(self.priority_pointer, airplane)
-        self.priority_pointer += 1
-        self.length += 1
-
-    # Decrease the fuel level at each tick
-    def decrease_fuel_level(self):
-        for plane in self.array:
-            plane.fuel_mins -= 1
-            plane.save()
-
-    # Return a list of planes that have fuel level below a threshold 
-    def get_low_fuel_planes(self, min_fuel):
-        index = 0
-        output_list = []
-
-        # Check all planes if they have low fuel
-        while index < self.length:
-
-            # Remove the plane from the queue if the fuel is too low
-            if self.array[index].fuel_mins <= min_fuel:
-                output_list.append(self.array.pop(index))
-                self.length -= 1
-            else:
-                index += 1
-        
-        return output_list
-
-"""
-This class manages the arrival of planes, including the holding pattern and diverting planes that have been waiting for too long or have low fuel.
-"""
 class ArrivalManager:
-    max_planes_in_queue = 0 
-    holding_pattern = Queue()
-    min_fuel_level = 11 # Minimum fuel level before diverting
+    # Minimum fuel level before diverting
+    min_fuel_level = 11 
     
-    """
-    Divert flights that have waited longer than 30 minutes in the holding pattern, or have fuel <= 11min
-    """
     @staticmethod
     def check_divertion(time):
+        """
+        Divert flights that have waited longer than 30 minutes in the 
+        holding pattern, or have fuel <= 11min
+        """
+        in_queue = Aircraft.objects.filter(zone_status='QUEUE_LA')
         num_diverted_planes = 0 
+        stats = RunStats.objects.first() # Grab the stats tracker
 
-        # Divert the plane if it has waited for more than 30min
-        for i in range(ArrivalManager.holding_pattern.length):
-            wait_duration = (time - ArrivalManager.holding_pattern.look().queue_entry_time).total_seconds() / 60
+        for plane in in_queue:
+            wait_duration = (time - plane.queue_entry_time).total_seconds() / 60
 
-            if wait_duration > 30:
-                plane = ArrivalManager.holding_pattern.dequeue()
+            # Divert if wait is > 30mins OR fuel is critically low
+            if wait_duration > 30 or plane.fuel_mins <= ArrivalManager.min_fuel_level:
                 plane.zone_status = 'DIVERTED'
                 plane.save()
-                create_flight_stats(plane,time)
                 num_diverted_planes += 1
-                print(f"Flight {plane.callsign} diverted due to waiting time")
+                
+                reason = "waiting time" if wait_duration > 30 else "low fuel"
+                print(f"Flight {plane.callsign} diverted due to {reason}")
 
-        # Divert planes with not enough fuel
-        for plane in ArrivalManager.holding_pattern.get_low_fuel_planes(ArrivalManager.min_fuel_level):
-            plane.zone_status = 'DIVERTED'
-            plane.save()
-            create_flight_stats(plane,time)
-            num_diverted_planes += 1
-            print(f"Flight {plane.callsign} diverted duel to low fuel")
+        # Log the max diverted planes if any were diverted this minute
+        if num_diverted_planes > 0 and stats:
+            stats.update_max_diverted(num_diverted_planes)
 
         return num_diverted_planes
         
-
-    """
-    Main logic loop for simulation
-    This runs under the assumption that planes take off as soon as they receive a runway slot. 
-    """
-
-    '''
-    ideally want planes on runway for 45s, but simulation ticks every minute, 
-    so this makes planes stay on runway for 60s as planes on the runway are removed every tick.
-    free the runway the plane was on.
-    '''
     @staticmethod
-    def process_arrivals(time,runway_controller):
+    def decrease_fuel():
+        """
+        Decrease the fuel level of all planes in the holding pattern by 1 min.
+        """
+        in_queue = Aircraft.objects.filter(zone_status='QUEUE_LA')
+        for plane in in_queue:
+            plane.fuel_mins = max(0, plane.fuel_mins - 1)
+            plane.save()
 
-        # Land the planes that are already on the runway from last tick
+    @staticmethod
+    def process_arrivals(time, runway_controller):
+        """
+        Main logic loop for arrival simulation
+        """
+        stats = RunStats.objects.first()
+
+        # 1. Land the planes that are already on the runway from last tick
         set_to_land = Aircraft.objects.filter(zone_status='RUNWAY_LA')
         for plane in set_to_land:
             plane.zone_status = 'LANDED'
-            print(f"Flight {plane.callsign} has landed")
             plane.save()
-            runway_controller.free_runway(plane)
-            create_flight_stats(plane, time)
+            runway_controller.free_runway(plane, time) # Free the runway
+            print(f"Flight {plane.callsign} has landed")
+            
+            # --- STATS LOGGING ---
+            if stats:
+                wait_time = (time - plane.queue_entry_time).total_seconds() / 60
+                delay_time = (time - plane.scheduled_arrival).total_seconds() / 60
 
-        # Decrease fuel level of all planes in holding pattern by 1 min
-        ArrivalManager.holding_pattern.decrease_fuel_level()
+                stats.add_stats(wait_time, 0)
+                stats.add_stats(delay_time, 2)
+                stats.update_max_arrival_delay(delay_time)
+                stats.update_min_arrival_delay(delay_time)
 
-        # Get new planes that are on arrival
-        arrival_planes = Aircraft.objects.filter(zone_status='SCHEDULED',queue_entry_time__lte=time)
+        # 2. Decrease fuel level of all planes in holding pattern by 1 min
+        ArrivalManager.decrease_fuel()
+
+        # 3. Get new planes that are arriving and add them to the queue
+        arrival_planes = Aircraft.objects.filter(zone_status='SCHEDULED', queue_entry_time__lte=time)
         for plane in arrival_planes:
-
-            # Check if it is a arrival plane
-            if plane.scheduled_departure == None:
+            # If it doesn't have a departure time, it's an arrival plane
+            if plane.scheduled_departure is None:
                 plane.zone_status = 'QUEUE_LA' 
                 plane.save()
 
-                # Add the planes to the holding pattern
-                if plane.emergency_status.choices == "NONE":
-                    ArrivalManager.holding_pattern.enqueue(plane)
-                else:
-                    ArrivalManager.holding_pattern.enqueue_priority(plane)
-                
-        # Keep count of the most number of planes in queue at a time. 
-        current_queue_count = Aircraft.objects.filter(zone_status='QUEUE_LA').count()
-        if current_queue_count > ArrivalManager.max_planes_in_queue:
-            ArrivalManager.max_planes_in_queue=current_queue_count
-
-        # Clear planes which have been waiting for longer than 30 minutes, or with not enough fuel
+        # 4. Clear planes which have been waiting for longer than 30 minutes, or with not enough fuel
         ArrivalManager.check_divertion(time)
 
-        # Put the planes on the runway if possible so they can be landed on the next tick
-        for i in range(ArrivalManager.holding_pattern.length):
-            assigned_runway = runway_controller.assign_runway(ArrivalManager.holding_pattern.look())
+        # 5. Attempt to assign runways based on Priority and Time
+        # Filter emergencies and normal planes directly using Django ORM
+        emergencies = Aircraft.objects.filter(
+            zone_status='QUEUE_LA', 
+            emergency_status__in=['MEDICAL', 'MECHANICAL', 'FUEL']
+        ).order_by('queue_entry_time')
+        
+        low_fuel_planes = Aircraft.objects.filter(
+            zone_status='QUEUE_LA', 
+            emergency_status='NONE', 
+            fuel_mins__lte=ArrivalManager.min_fuel_level
+        ).order_by('queue_entry_time')
+        
+        general = Aircraft.objects.filter(
+            zone_status='QUEUE_LA', 
+            emergency_status='NONE', 
+            fuel_mins__gt=ArrivalManager.min_fuel_level
+        ).order_by('queue_entry_time')
+        
+        # Combine them into a strict queue (Emergencies -> Low Fuel -> General)
+        queue = list(emergencies) + list(low_fuel_planes) + list(general)
+
+        # Loop through our strictly ordered queue and assign runways
+        for plane in queue:
+            assigned_runway = runway_controller.assign_runway(plane, time)
 
             if assigned_runway:
-                plane = ArrivalManager.holding_pattern.dequeue()
                 plane.zone_status = 'RUNWAY_LA'
                 plane.save()
-                print(f"Flight {plane.callsign} preparing for landing on runway {assigned_runway.runway_number}")
+                print(f"Flight {plane.callsign} preparing for landing on runway {assigned_runway.bearing}")
             else:
+                # Runways are full, stop assigning for this minute
                 break
-    
-    """
-    Decrease the fuel level of all planes in the holding pattern by 1 min, this function should be called by main every minute tick
-    """
-    @staticmethod
-    def decrease_fuel():
-        holding_pattern = ArrivalManager.holding_pattern
-        for plane in holding_pattern.get_array():
-            plane.fuel_mins -= 1
-            plane.save()

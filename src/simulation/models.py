@@ -54,7 +54,7 @@ class Aircraft(models.Model):
     ]
     zone_status = models.CharField(max_length=20, choices=ZONE_CHOICES)
 
-    last_update = models.DateTimeField(auto_now=True)
+    last_update = models.DateTimeField()
 
     def __str__(self):
         return f"{self.callsign} ({self.zone_status})"

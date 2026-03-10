@@ -274,6 +274,9 @@ if(typeof(EventSource) !== "undefined") {
       while (holdingpattern.rows.length > 1) {
           holdingpattern.deleteRow(1);
       }
+      while (runwayTest.rows.length > 1) {
+          runwayTest.deleteRow(1);
+      }
 /*
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
@@ -282,9 +285,7 @@ if(typeof(EventSource) !== "undefined") {
       while (landingSchedule.rows.length > 1) {
           landingSchedule.deleteRow(1);
       }
-      while (runwayTest.rows.length > 1) {
-          runwayTest.deleteRow(1);
-      }
+
 
       while (departed.rows.length > 1) {
           departed.deleteRow(1);

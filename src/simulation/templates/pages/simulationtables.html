@@ -262,6 +262,7 @@ let lastUpdate = 0;
 if(typeof(EventSource) !== "undefined") {
 
   var source = new EventSource("/stream/"); 
+
   source.onmessage = function(event) {
     //x.innerHTML += event.data + "<br>";
     const now = new Date().getTime();
@@ -497,22 +498,24 @@ async function getRunwaysData() {
 const runways = document.getElementById("runwayscontainerid");
 let htmlrunways ="";
 
-getRunwaysData().then(runwaysData => {
-  console.log(runwaysData);
+setTimeout(() => {
+  getRunwaysData().then(runwaysData => {
+    console.log(runwaysData);
 
-  for(let i = 0; i < runwaysData.length; i++){
-    let runway = runwaysData[i];
-    htmlrunways += "<div><table><caption>Runway "
-    htmlrunways += runway.bearing;
-    htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td data-id=\"runway"
-    htmlrunways += runway.id
-    htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
+    for(let i = 0; i < runwaysData.length; i++){
+      let runway = runwaysData[i];
+      htmlrunways += "<div><table><caption>Runway "
+      htmlrunways += runway.bearing;
+      htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td data-id=\"runway"
+      htmlrunways += runway.id
+      htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
+    }
+    console.log(htmlrunways);
+
+    runways.innerHTML = htmlrunways
   }
-  console.log(htmlrunways);
-
-  runways.innerHTML = htmlrunways
-}
-);
+  );
+}, 500);
 
 
 

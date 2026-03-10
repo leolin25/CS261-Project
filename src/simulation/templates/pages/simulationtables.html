@@ -241,46 +241,7 @@
 
 <script>
 
-//RUNWAYS
 
-//Function to get runway data
-async function getRunwaysData() {
-  const url = "/api/runway-data/";
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Response status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log(result);
-    return result;
-
-  } catch (error) {
-    console.error(error.message);
-  }
-}
-
-//Actually applying runwasy
-const runways = document.getElementById("runwayscontainerid");
-let htmlrunways ="";
-
-getRunwaysData().then(runwaysData => {
-  console.log(runwaysData);
-
-  for(let i = 0; i < runwaysData.length; i++){
-    let runway = runwaysData[i];
-    htmlrunways += "<div><table><caption>Runway "
-    htmlrunways += runway.bearing;
-    htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td id=\"runway"
-    htmlrunways += runway.bearing
-    htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
-  }
-  console.log(htmlrunways);
-
-  runways.innerHTML = htmlrunways
-}
-);
 
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
@@ -416,12 +377,20 @@ if(typeof(EventSource) !== "undefined") {
           c6.innerText = flight.emergency_status
 
         } */else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
+          //Put in test table
           var row =runwayTest.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
 
           c0.innerText = flight.callsign
           c1.innerText = flight.assigned_runway
+
+          //Put in actual runway
+          console.log("runway")
+          console.log(flight.assigned_runway)
+          console.log("bearing")
+
+          console.log(flight.assigned_runway.bearing)
 
         }/*else if(flight.zone_status == "DEPARTED"){
           //Departed table
@@ -504,7 +473,46 @@ if(typeof(EventSource) !== "undefined") {
 
 
 
+//RUNWAYS
 
+//Function to get runway data
+async function getRunwaysData() {
+  const url = "/api/runway-data/";
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(result);
+    return result;
+
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+//Actually applying runwasy
+const runways = document.getElementById("runwayscontainerid");
+let htmlrunways ="";
+
+getRunwaysData().then(runwaysData => {
+  console.log(runwaysData);
+
+  for(let i = 0; i < runwaysData.length; i++){
+    let runway = runwaysData[i];
+    htmlrunways += "<div><table><caption>Runway "
+    htmlrunways += runway.bearing;
+    htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td data-id=\"runway"
+    htmlrunways += runway.id
+    htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
+  }
+  console.log(htmlrunways);
+
+  runways.innerHTML = htmlrunways
+}
+);
 
 
 

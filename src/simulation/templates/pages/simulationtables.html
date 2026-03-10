@@ -245,14 +245,31 @@
 const runways = document.getElementById("runwayscontainerid");
 
 async function getRunways() {
-  const response = fetch('/getRunwaysSim');
-  const runwaysData = await response.json();  
+  const response = await fetch('/getRunwaysSim');
+  const runwaysData = await response.json();
+  console.log(runwaysData);
+  return runwaysData
 }
-getRunways();
 let htmlrunways ="";
 
+console.log("Hi")
+getRunways().then(runwaysData => {
+  console.log(runwaysData);
+  for(let i = 0; i < runwaysData.length; i++){
+    let runway = runwaysData[i];
+    console.log(runway.bearing);
+    htmlrunways += "<div><table><caption>Runway "
+    htmlrunways += runway.bearing;
+    htmlrunways += "</caption><tr><td>Callsign</td></tr></table><button type=\"button\" class=\"runwayclose\">Close Runway</button></div>"
 
-runways.innerHTML = htmlrunways
+  }
+
+  console.log(htmlrunways);
+  runways.innerHTML = htmlrunways
+}
+);
+
+
 
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");

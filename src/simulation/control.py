@@ -13,6 +13,9 @@ class Controller:
         self.last_update_time = start_time
         self.simulation_time = start_time
         self.runways = None
+        self.mixed_runways = None
+        self.takeoff_runways = None
+        self.landing_runways = None
         self.inbound_per_hour = None
         self.outbound_per_hour = None
         self.timescale = None #1 second to 1 minute by default
@@ -47,6 +50,9 @@ class Controller:
         if not config:
             return False
         self.runways = config.runways
+        self.mixed_runways = config.runways_mixed
+        self.takeoff_runways = config.runways_takeoff
+        self.landing_runways = config.runways_landing
         self.inbound_per_hour = config.inbound_per_hour
         self.outbound_per_hour = config.outbound_per_hour
         self.timescale = config.timescale
@@ -108,6 +114,10 @@ class Controller:
     def setup_simulation(self):
         Aircraft.objects.all().delete()
         Runway.objects.all().delete()
-        for _ in range(self.runways):
-            self.generator.generate_runway()
+        for _ in range(self.mixed_runways):
+            self.generator.generate_runway(mode="MIXED")
+        for _ in range(self.takeoff_runways):
+            self.generator.generate_runway(mode="TAKEOFF")
+        for _ in range(self.landing_runways):
+            self.generator.generate_runway(mode="LANDING")
         self.generator.run_generation(self.simulation_time)

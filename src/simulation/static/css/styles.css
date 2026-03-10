@@ -183,6 +183,9 @@ caption{
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
+  align-items: center;
+  justify-items: center;
+
 }
 
 .runwayscontainer div {
@@ -252,3 +255,31 @@ caption{
 .individualTables {
     margin-bottom: 20px;
 }
+
+.closerunway {
+    text-align: center;
+    font-size: 25px;
+    background-color: navy;
+    padding: 15px;
+    margin: 0px;
+    color: white;
+    align-items: center;
+    place-self: center;
+    border-radius: 5px;
+}
+
+.closerunway:hover{
+    background-color: #0c13d7;
+}
+
+.runwaydiv{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+}
+
+.individualrunwaytable{
+    margin: 20px;
+}
+

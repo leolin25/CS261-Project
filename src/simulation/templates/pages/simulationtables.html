@@ -6,16 +6,6 @@
 <button type="button" class="collapsible">Runways</button>
 
 <div class="runwayscontainer" id="runwayscontainerid">
-    {% for x in runway_range %}
-    <div>
-    <table>
-        <tr>
-            <td> Runway {{x}}</td>
-            <td> callsign</td>
-        </tr>
-    </table>
-    </div>
-    {% endfor %}
 
 </div>
   <div>
@@ -512,11 +502,11 @@ setTimeout(() => {
 
     for(let i = 0; i < runwaysData.length; i++){
       let runway = runwaysData[i];
-      htmlrunways += "<div><table><caption>Runway "
+      htmlrunways += "<div class=\"runwaydiv\"><table class=\"individualrunwaytable\"><caption>Runway "
       htmlrunways += runway.bearing;
       htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td class=\"individualrunway\" data-id=\"runway"
       htmlrunways += runway.id
-      htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
+      htmlrunways += "\"></td></tr></table><button type=\"button\" class=\"closerunway\">Close Runway</button></div>"
     }
     console.log(htmlrunways);
 

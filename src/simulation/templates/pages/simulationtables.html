@@ -5,7 +5,7 @@
     
 <button type="button" class="collapsible">Runways</button>
 
-<div class="runwayscontainer">
+<div class="runwayscontainer" id="runwayscontainerid">
     {% for x in runway_range %}
     <div>
     <table>
@@ -243,8 +243,9 @@
 
 //RUNWAYS
 
+//Function to get runway data
 async function getRunwaysData() {
-  const url = "api/runway-data/";
+  const url = "/api/runway-data/";
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -253,13 +254,33 @@ async function getRunwaysData() {
 
     const result = await response.json();
     console.log(result);
+    return result;
+
   } catch (error) {
     console.error(error.message);
   }
 }
 
+//Actually applying runwasy
+const runways = document.getElementById("runwayscontainerid");
+let htmlrunways ="";
 
+getRunwaysData().then(runwaysData => {
+  console.log(runwaysData);
 
+  for(let i = 0; i < runwaysData.length; i++){
+    let runway = runwaysData[i];
+    htmlrunways += "<div><table><caption>Runway "
+    htmlrunways += runway.bearing;
+    htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td id=\"runway"
+    htmlrunways += runway.bearing
+    htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
+  }
+  console.log(htmlrunways);
+
+  runways.innerHTML = htmlrunways
+}
+);
 
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");

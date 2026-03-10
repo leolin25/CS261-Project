@@ -1,4 +1,3 @@
-/* Базовые стили (дополнение к тому, что уже мог начать Итан) */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f7f6;
@@ -20,7 +19,6 @@ header {
     padding: 20px;
 }
 
-/* Стили формы конфигурации */
 .config-container {
     background-color: white;
     padding: 30px;
@@ -84,7 +82,6 @@ header {
     background-color: #2980b9;
 }
 
-/* Стили для ошибок валидации */
 .error-message {
     background-color: #e74c3c;
     color: white;

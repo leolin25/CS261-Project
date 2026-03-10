@@ -96,7 +96,6 @@ def simulation(request):
     return HttpResponse(template.render(context, request))
 
 
-
 class GetSampleData(APIView):
     serializer_class = SampleDataSerializer
 
@@ -109,21 +108,22 @@ class GetSampleData(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-def stream(request):
-    def event_stream():
-        while True:
-            controller.run_simulation()
-            flight_data = controller.get_stream_data()
-            serializer = SampleDataSerializer(flight_data, many=True)
-            data = f"data: {json.dumps(serializer.data)}\n\n" 
-            yield data
+class StreamView(View):
+    def get(self, request):
+        def event_stream():
+            controller = Controller(2, 10, 10, timescale=1, schedule_limit=2)
+            controller.setup_simulation()
+            while True:
+                controller.run_simulation()
+                flight_data = controller.get_stream_data()
+                serializer = SampleDataSerializer(flight_data, many=True)
+                data = f"data: {json.dumps(serializer.data)}\n\n"
+                yield data
 
-    controller = Controller(2, 10, 10, timescale=1, schedule_limit=2)
-    controller.setup_simulation()
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    response['X-Accel-Buffering'] = 'no'
-    return response
+        response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
+        response['Cache-Control'] = 'no-cache'
+        response['X-Accel-Buffering'] = 'no'
+        return response
 
 
 

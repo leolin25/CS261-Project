@@ -7,7 +7,7 @@
         <h2>Airport Simulation Configuration</h2>
         <p>Please define the airport parameters below to begin a new traffic management simulation.</p>
         
-        <form action="{% url 'results' %}" method="POST" id="config-form">
+        <form action="{% url 'home' %}" method="POST" id="config-form">
             {% csrf_token %}
             
             <div class="form-section">

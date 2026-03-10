@@ -1,7 +1,8 @@
 import json
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, StreamingHttpResponse
 from django.template import loader
+from django.views import View
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,9 +12,9 @@ from .control import Controller
 from .models import Aircraft
 
 
-def home(request):
-    # Loads the home page with current simulation data
-    return render(request, 'pages/home.html')
+class HomeView(View):
+    def get(self, request):
+        return render(request, 'pages/home.html')
 
 
 def results(request):

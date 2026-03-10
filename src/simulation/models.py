@@ -103,7 +103,9 @@ class Runway(models.Model):
 
 class RunConfig(models.Model):
     runways = models.IntegerField()
-    operating_mode = models.CharField(max_length=20, choices=Runway.MODE_CHOICES)
+    runways_mixed = models.IntegerField()
+    runways_takeoff = models.IntegerField()
+    runways_landing = models.IntegerField()
     inbound_per_hour = models.IntegerField()
     outbound_per_hour = models.IntegerField()
     timescale = models.FloatField(default=1.0)

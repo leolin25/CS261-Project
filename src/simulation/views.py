@@ -16,17 +16,17 @@ class HomeView(View):
     def get(self, request):
         return render(request, 'pages/home.html')
 
-    # Need to add max wait
-    # Need to remove runway status
     def post(self, request):
         valid = self.validate_input(request.POST)
         if not valid:
             return render(request, 'pages/home.html')
-        runways = int(request.POST.get('num_runways'))
-        operating_mode = request.POST.get('runway_mode')
+        runways_mixed = int(request.POST.get('num_runways_mixed'))
+        runways_takeoff = int(request.POST.get('num_runways_to'))
+        runways_landing = int(request.POST.get('num_runways_la'))
+        runways = runways_mixed + runways_takeoff + runways_landing
         inbound = int(request.POST.get('inbound_flow'))
         outbound = int(request.POST.get('outbound_flow'))
-        max_wait = 30
+        max_wait = int(request.POST.get('max_wait'))
         if "random_events" in request.POST:
             random_events = True
         else:
@@ -34,7 +34,9 @@ class HomeView(View):
         RunConfig.objects.all().delete()
         RunConfig.objects.create(
             runways=runways,
-            operating_mode=operating_mode,
+            runways_mixed=runways_mixed,
+            runways_takeoff=runways_takeoff,
+            runways_landing=runways_landing,
             inbound_per_hour=inbound,
             outbound_per_hour=outbound,
             max_wait=max_wait,
@@ -48,14 +50,17 @@ class HomeView(View):
             return False
         if int(data["inbound_flow"]) < 0 or int(data["outbound_flow"]) < 0:
             return False
-        if "num_runways" not in data:
+        if "num_runways_mixed" not in data or "num_runways_to" not in data or "num_runways_la" not in data:
             return False
-        if int(data["num_runways"]) <= 0 or int(data["num_runways"]) > 10:
+        if int(data["num_runways_mixed"]) < 0 or int(data["num_runways_to"]) < 0 or int(data["num_runways_la"]) < 0:
             return False
-        if "runway_mode" not in data:
+        if int(data["num_runways_mixed"]) + int(data["num_runways_to"]) + int(data["num_runways_la"]) <= 0:
             return False
-        if (data["runway_mode"].upper(), data["runway_mode"].capitalize()) not in Runway.MODE_CHOICES:
-            print(6)
+        if int(data["num_runways_mixed"]) + int(data["num_runways_to"]) + int(data["num_runways_la"]) > 10:
+            return False
+        if "max_wait" not in data:
+            return False
+        if int(data["max_wait"]) <= 0:
             return False
         return True
 

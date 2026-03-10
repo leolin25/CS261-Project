@@ -9,12 +9,55 @@ from rest_framework.views import APIView
 from .generation import Generator
 from .serializers import SampleDataSerializer
 from .control import Controller
-from .models import Aircraft
+from .models import Aircraft, Runway, RunConfig
 
 
 class HomeView(View):
     def get(self, request):
         return render(request, 'pages/home.html')
+
+    # Need to add max wait
+    # Need to remove runway status
+    def post(self, request):
+        valid = self.validate_input(request.POST)
+        if not valid:
+            return render(request, 'pages/home.html')
+        runways = int(request.POST.get('num_runways'))
+        operating_mode = request.POST.get('runway_mode')
+        inbound = int(request.POST.get('inbound_flow'))
+        outbound = int(request.POST.get('outbound_flow'))
+        max_wait = 30
+        if "random_events" in request.POST:
+            random_events = True
+        else:
+            random_events = False
+        RunConfig.objects.all().delete()
+        RunConfig.objects.create(
+            runways=runways,
+            operating_mode=operating_mode,
+            inbound_per_hour=inbound,
+            outbound_per_hour=outbound,
+            max_wait=max_wait,
+            random_events=random_events,
+        )
+        return redirect('simulation')
+
+    @staticmethod
+    def validate_input(data):
+        if "inbound_flow" not in data or "outbound_flow" not in data:
+            return False
+        if int(data["inbound_flow"]) < 0 or int(data["outbound_flow"]) < 0:
+            return False
+        if "num_runways" not in data:
+            return False
+        if int(data["num_runways"]) <= 0 or int(data["num_runways"]) > 10:
+            return False
+        if "runway_mode" not in data:
+            return False
+        if (data["runway_mode"].upper(), data["runway_mode"].capitalize()) not in Runway.MODE_CHOICES:
+            print(6)
+            return False
+        return True
 
 
 def results(request):

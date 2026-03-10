@@ -88,7 +88,7 @@
     </table>
   </div>
 </div>
-
+<!--
 <button type="button" class="collapsible">Schedule</button>
 
 <div class="simulationcontainer">
@@ -142,9 +142,10 @@
     </table>
   </div>
 </div>
-
+-->
 
 <!--Recently Cancelled, Diverted, Landed or taken off flights-->
+<!--
 <button type="button" class="collapsible">Recently Departed, Landed, Cancelled or Diverted</button>
 
 <div class="recentcontainer">
@@ -236,13 +237,14 @@
   </div>
 </div>
 
-
+-->
 
 <script>
 
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
 const holdingpattern = document.getElementById("holdingpatternTable");
+/*
 const takeoffSchedule = document.getElementById("takeoffScheduleTable");
 const landingSchedule = document.getElementById("landingScheduleTable");
 const runwayTest = document.getElementById("runwayTestTable");
@@ -251,7 +253,7 @@ const departed = document.getElementById("departedTable");
 const landed = document.getElementById("landedTable");
 const cancelled = document.getElementById("cancelledTable");
 const diverted = document.getElementById("divertedTable");
-
+*/
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
@@ -271,7 +273,7 @@ if(typeof(EventSource) !== "undefined") {
       while (holdingpattern.rows.length > 1) {
           holdingpattern.deleteRow(1);
       }
-
+/*
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
       }
@@ -298,7 +300,7 @@ if(typeof(EventSource) !== "undefined") {
       while (diverted.rows.length > 1) {
           diverted.deleteRow(1);
       }
-
+*/
       var payload = JSON.parse(event.data);
       //For each flight in json
       for(let i = 0; i < payload.length; i++){
@@ -337,7 +339,7 @@ if(typeof(EventSource) !== "undefined") {
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
 
-        } else if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
+        } /*else if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
             //If scheduled and no departure, put in takeoff schedule
           var row =takeoffSchedule.insertRow(-1);
           var c0 = row.insertCell(0);
@@ -370,7 +372,7 @@ if(typeof(EventSource) !== "undefined") {
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
 
-        }else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
+        } */else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
           var row =runwayTest.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
@@ -378,7 +380,7 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.assigned_runway
 
-        }else if(flight.zone_status == "DEPARTED"){
+        }/*else if(flight.zone_status == "DEPARTED"){
           //Departed table
           var row =departed.insertRow(-1);
           var c0 = row.insertCell(0);
@@ -432,7 +434,7 @@ if(typeof(EventSource) !== "undefined") {
           c3.innerText = flight.queue_entry_time
 
 
-        }
+        }*/
 
 
       }

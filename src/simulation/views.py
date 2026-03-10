@@ -137,3 +137,13 @@ class RunwayDataView(APIView):
         runways = Runway.objects.all()
         serializer = RunwaySerializer(runways, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EndSimulationView(APIView):
+    def get(self, request):
+        config = RunConfig.objects.last()
+        if not config:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        config.stop = True
+        config.save()
+        return Response({"message": "Simulation ended"}, status=status.HTTP_200_OK)

@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import HomeView, results, simulation, StreamView, GetSampleData, RunwayDataView
+from .views import HomeView, results, simulation, StreamView, GetSampleData, RunwayDataView, EndSimulationView
 
 
 urlpatterns = [
@@ -9,4 +9,5 @@ urlpatterns = [
     path('stream/', StreamView.as_view(), name='stream'),
     path('api/sample-data/', GetSampleData.as_view(), name='sample-data'),
     path('api/runway-data/', RunwayDataView.as_view(), name='runway-data'),
+    path('api/end-simulation/', EndSimulationView.as_view(), name='end-simulation'),
 ]

@@ -1,4 +1,4 @@
-from .models import Aircraft
+from .models import Aircraft, RunStats
 
 
 class DepartureController:
@@ -19,14 +19,34 @@ class DepartureController:
                 number_cancelled += 1
                 print("Flight {} cancelled".format(aircraft.callsign))
         Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+
+        # Update max cancelled stat if any cancellations occurred
+        if number_cancelled > 0:
+            stats = RunStats.objects.first()
+            if stats:
+                stats.update_max_cancelled(number_cancelled)
+
         return number_cancelled
 
     def process_departures(self, simulation_time):
         departed_aircrafts = Aircraft.objects.filter(zone_status='RUNWAY_TO')
+        stats = RunStats.objects.first()
+
         for aircraft in departed_aircrafts:
             success = self.runway_controller.free_runway(aircraft, simulation_time)
             if success:
                 print(f"Flight {aircraft.callsign} has departed.")
+
+                if stats and aircraft.queue_entry_time and aircraft.scheduled_departure:
+                    # Update wait time and delay time stats
+                    wait_time = (simulation_time - aircraft.queue_entry_time).total_seconds() / 60
+                    stats.add_stats(wait_time, 1)
+                    delay_time = (simulation_time - aircraft.scheduled_departure).total_seconds() / 60
+                    stats.add_stats(delay_time, 3)
+
+                    # Update max and min departure delay
+                    stats.update_max_departure_delay(delay_time)
+                    stats.update_min_departure_delay(delay_time)
 
         #Attempt to assign runways to planes in queue, ensuring FIFO ordering
         queue = Aircraft.objects.filter(zone_status='QUEUE_TO').order_by('queue_entry_time')

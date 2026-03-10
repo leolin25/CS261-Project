@@ -280,6 +280,13 @@ if(typeof(EventSource) !== "undefined") {
       while (runwayTest.rows.length > 1) {
           runwayTest.deleteRow(1);
       }
+
+      //Clear runways
+      const individualrunways = document.getElementsByClassName("individualrunway");
+      for (let i = 0; i < individualrunways.length; i++) {
+        individualrunways[i].innerHTML = "";
+      }
+
 /*
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
@@ -387,11 +394,12 @@ if(typeof(EventSource) !== "undefined") {
           c1.innerText = flight.assigned_runway
 
           //Put in actual runway
-          console.log("runway")
-          console.log(flight.assigned_runway)
-          console.log("bearing")
-
-          console.log(flight.assigned_runway.bearing)
+          let link = document.querySelector(`[data-id="runway${flight.assigned_runway}"]`);
+          if (link) {
+              link.innerHTML = flight.callsign;
+          } else {
+              console.warn(`Runway element for ${flight.assigned_runway} not found.`);
+          }
 
         }/*else if(flight.zone_status == "DEPARTED"){
           //Departed table
@@ -506,7 +514,7 @@ setTimeout(() => {
       let runway = runwaysData[i];
       htmlrunways += "<div><table><caption>Runway "
       htmlrunways += runway.bearing;
-      htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td data-id=\"runway"
+      htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td class=\"individualrunway\" data-id=\"runway"
       htmlrunways += runway.id
       htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
     }

@@ -101,6 +101,24 @@ class Runway(models.Model):
         return f"Runway {self.bearing} ({status})"
 
 
+class RunConfig(models.Model):
+    runways = models.IntegerField()
+    runways_mixed = models.IntegerField()
+    runways_takeoff = models.IntegerField()
+    runways_landing = models.IntegerField()
+    inbound_per_hour = models.IntegerField()
+    outbound_per_hour = models.IntegerField()
+    timescale = models.FloatField(default=1.0)
+    schedule_limit = models.IntegerField(default=2)
+    max_wait = models.IntegerField()
+    landing_duration = models.IntegerField(default=45)
+    takeoff_duration = models.IntegerField(default=45)
+    fuel_risk_threshold = models.IntegerField(default=20)
+    takeoff_risk_threshold = models.IntegerField(default=25)
+    random_events = models.BooleanField()
+    stop = models.BooleanField(default=False)
+
+
 class RunStats(models.Model):
     # A summation of all plane stats
     sum_holding_time_mins = models.FloatField(default=0.0)             # time spent in holding pattern

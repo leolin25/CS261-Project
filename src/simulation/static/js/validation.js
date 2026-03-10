@@ -3,34 +3,42 @@ document.addEventListener("DOMContentLoaded", function() {
     const errorContainer = document.getElementById('error-message');
 
     configForm.addEventListener('submit', function(event) {
-        // Очищаем предыдущие ошибки
+        // Clear previous errors
         errorContainer.style.display = 'none';
         errorContainer.textContent = '';
         
         let errorMsg = '';
 
-        // Получаем значения полей
+        // Get field values
         const inboundFlow = parseInt(document.getElementById('inbound_flow').value);
         const outboundFlow = parseInt(document.getElementById('outbound_flow').value);
-        const numRunways = parseInt(document.getElementById('num_runways').value);
+        const numRunways_mixed = parseInt(document.getElementById('num_runways_mixed').value);
+        const numRunways_to = parseInt(document.getElementById('num_runways_to').value);
+        const numRunways_la = parseInt(document.getElementById('num_runways_la').value);
+        const max_wait = parseInt(document.getElementById('max_wait').value);
 
-        // Правило 1: Защита от отрицательных потоков (Security/Robustness requirement)
+
+        //Protection against negative flows
         if (inboundFlow < 0 || outboundFlow < 0) {
             errorMsg = "Error: Flight flow rates per hour cannot be negative values.";
         }
         
-        // Правило 2: Ограничение количества полос (1-10)
-        else if (numRunways < 1 || numRunways > 10) {
+        // Limit the number of runways (1-10)
+        else if ((numRunways_mixed + numRunways_to + numRunways_la) < 1 || (numRunways_mixed + numRunways_to + numRunways_la) > 10) {
             errorMsg = "Error: The number of operational runways must be strictly between 1 and 10.";
         }
 
-        // Если есть ошибка, останавливаем отправку формы и показываем сообщение
+        else if (max_wait < 0){
+            errorMsg = "Error: Flight must not have a negative max wait time";
+
+        }
+
+        // If an error exists, prevent form submission and display the message
         if (errorMsg !== '') {
-            event.preventDefault(); // Блокирует submit
+            event.preventDefault(); 
             errorContainer.textContent = errorMsg;
             errorContainer.style.display = 'block';
             
-            // Прокручиваем к сообщению об ошибке для удобства пользователя
             errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     });

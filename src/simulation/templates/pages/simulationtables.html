@@ -5,7 +5,7 @@
     
 <button type="button" class="collapsible">Runways</button>
 
-<div class="runwayscontainer">
+<div class="runwayscontainer" id="runwayscontainerid">
     {% for x in runway_range %}
     <div>
     <table>
@@ -14,6 +14,7 @@
             <td> callsign</td>
         </tr>
     </table>
+    <button type="button" class="runwayclose">Close Runway</button>
     </div>
     {% endfor %}
 
@@ -29,7 +30,7 @@
         {% for x in runwayTest %}
         <tr>
             <td>{{x.callsign}}</td>
-            <td>{{x.assigned_runway}}</td>
+            <td>{{x.assigned_runway.bearing}}</td>
         </tr>
         {% endfor %}
         </tbody>
@@ -240,6 +241,17 @@
 
 <script>
 
+//Get runway data
+const runways = document.getElementById("runwayscontainerid");
+
+async function getRunways() {
+  const response = fetch('/getRunwaysSim');
+  const runwaysData = await response.json();  
+}
+getRunways();
+let htmlrunways ="hello";
+runways.innerHTML = htmlrunways
+
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
 const holdingpattern = document.getElementById("holdingpatternTable");
@@ -376,7 +388,7 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
 
           c0.innerText = flight.callsign
-          c1.innerText = flight.assigned_runway
+          c1.innerText = flight.assigned_runway.bearing
 
         }else if(flight.zone_status == "DEPARTED"){
           //Departed table

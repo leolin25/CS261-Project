@@ -255,3 +255,16 @@ caption{
 .individualTables {
     margin-bottom: 20px;
 }
+
+.runwayclose {
+    background-color: navy;
+    text-align: center;
+    color: white;
+        width: 100%;
+
+}
+
+.runwayclose:hover {
+    background-color: #0c13d7;
+
+}

@@ -78,6 +78,11 @@ class Controller:
         #.exclude(zone_status__in=["CANCELLED", "DIVERTED", "LANDED", "DEPARTED"])
         return list(flights)
     
+    @staticmethod
+    def getRunways():
+        runways = Runway.objects.all()
+        return list(runways)
+    
 
     def run_simulation(self):
         update_start_time = timezone.now()

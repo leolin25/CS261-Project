@@ -24,7 +24,8 @@ class DepartureController:
         if number_cancelled > 0:
             stats = RunStats.objects.first()
             if stats:
-                stats.update_max_cancelled(number_cancelled)
+                total_cancelled = Aircraft.objects.filter(zone_status='CANCELLED').count()
+                stats.update_max_cancelled(total_cancelled)
 
         return number_cancelled
 

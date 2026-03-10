@@ -33,7 +33,8 @@ class ArrivalController:
         if num_diverted > 0:
             stats = RunStats.objects.first()
             if stats:
-                stats.update_max_diverted(num_diverted)
+                total_diverted = Aircraft.objects.filter(zone_status='DIVERTED').count()
+                stats.update_max_diverted(total_diverted)
 
     def process_arrivals(self, simulation_time):
         stats = RunStats.objects.first()

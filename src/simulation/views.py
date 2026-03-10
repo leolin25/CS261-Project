@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .generation import Generator
-from .serializers import SampleDataSerializer
+from .serializers import SampleDataSerializer, RunwaySerializer
 from .control import Controller
 from .models import Aircraft, Runway, RunConfig
 
@@ -130,3 +130,10 @@ class StreamView(View):
         response['Cache-Control'] = 'no-cache'
         response['X-Accel-Buffering'] = 'no'
         return response
+
+
+class RunwayDataView(APIView):
+    def get(self, request):
+        runways = Runway.objects.all()
+        serializer = RunwaySerializer(runways, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

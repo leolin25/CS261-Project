@@ -85,7 +85,7 @@ class Controller:
 
     @staticmethod
     def get_stream_data():
-        flights = Aircraft.objects.all()
+        flights = Aircraft.objects.all().filter(zone_status__in=["QUEUE_TO", "QUEUE_LA", "RUNWAY_TO", "RUNWAY_LA"])
         #.exclude(zone_status__in=["CANCELLED", "DIVERTED", "LANDED", "DEPARTED"])
         return list(flights)
     

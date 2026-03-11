@@ -45,6 +45,9 @@ A group of functions that tracks the lowest recorded values. These include a fai
 * `update_min_cancelled(new_num)`
 * `update_min_diverted(new_num)`
 
+### `true_variance(self, indicator)`
+A function that takes an indicator and returns the variance of a set of data depending on the indicator. Refer to indicator table if you want to see what data to refer to.
+
 ---
 
 ## Saving Behavior & Usage

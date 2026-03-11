@@ -148,3 +148,35 @@ class EndSimulationView(APIView):
         config.stop = True
         config.save()
         return Response({"message": "Simulation ended"}, status=status.HTTP_200_OK)
+
+
+class CloseRunwayView(APIView):
+    def post(self, request):
+        runway_id = request.data.get("runway_id")
+        try:
+            runway_id = int(runway_id)
+        except ValueError:
+            return Response({"error": "Invalid runway ID"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            runway = Runway.objects.get(id=runway_id)
+            runway.operational_status = 'RUNWAYINSPEC'
+            runway.save()
+            return Response({"message": f"Runway id {runway.id} bearing {runway.bearing} closed"}, status=status.HTTP_200_OK)
+        except Runway.DoesNotExist:
+            return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class OpenRunwayView(APIView):
+    def post(self, request):
+        runway_id = request.data.get("runway_id")
+        try:
+            runway_id = int(runway_id)
+        except ValueError:
+            return Response({"error": "Invalid runway ID"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            runway = Runway.objects.get(id=runway_id)
+            runway.operational_status = 'AVAILABLE'
+            runway.save()
+            return Response({"message": f"Runway id {runway.id} bearing {runway.bearing} opened"}, status=status.HTTP_200_OK)
+        except Runway.DoesNotExist:
+            return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)

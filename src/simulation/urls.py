@@ -1,5 +1,6 @@
 from django.urls import path
-from .views import HomeView, results, simulation, StreamView, GetSampleData, RunwayDataView, EndSimulationView
+from .views import (HomeView, results, simulation, StreamView, GetSampleData, RunwayDataView, EndSimulationView,
+                    CloseRunwayView, OpenRunwayView)
 
 
 urlpatterns = [
@@ -10,4 +11,6 @@ urlpatterns = [
     path('api/sample-data/', GetSampleData.as_view(), name='sample-data'),
     path('api/runway-data/', RunwayDataView.as_view(), name='runway-data'),
     path('api/end-simulation/', EndSimulationView.as_view(), name='end-simulation'),
+    path('api/close-runway/', CloseRunwayView.as_view(), name='close-runway'),
+    path('api/open-runway/', OpenRunwayView.as_view(), name='open-runway'),
 ]

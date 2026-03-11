@@ -6,18 +6,10 @@
 <button type="button" class="collapsible">Runways</button>
 
 <div class="runwayscontainer" id="runwayscontainerid">
-    {% for x in runway_range %}
-    <div>
-    <table>
-        <tr>
-            <td> Runway {{x}}</td>
-            <td> callsign</td>
-        </tr>
-    </table>
-    </div>
-    {% endfor %}
 
 </div>
+
+<!--
   <div>
     <table id="runwayTestTable" class="individualTables">
         <caption>Runways</caption>
@@ -35,6 +27,7 @@
         </tbody>
     </table>
   </div>
+-->
 
 <button type="button" class="collapsible">Flights in Simulation</button>
 <div class="simulationcontainer">
@@ -246,9 +239,10 @@
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
 const holdingpattern = document.getElementById("holdingpatternTable");
-const runwayTest = document.getElementById("runwayTestTable");
 
 /*
+const runwayTest = document.getElementById("runwayTestTable");
+
 const takeoffSchedule = document.getElementById("takeoffScheduleTable");
 const landingSchedule = document.getElementById("landingScheduleTable");
 
@@ -277,9 +271,7 @@ if(typeof(EventSource) !== "undefined") {
       while (holdingpattern.rows.length > 1) {
           holdingpattern.deleteRow(1);
       }
-      while (runwayTest.rows.length > 1) {
-          runwayTest.deleteRow(1);
-      }
+
 
       //Clear runways
       const individualrunways = document.getElementsByClassName("individualrunway");
@@ -288,6 +280,10 @@ if(typeof(EventSource) !== "undefined") {
       }
 
 /*
+      while (runwayTest.rows.length > 1) {
+          runwayTest.deleteRow(1);
+      }
+
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
       }
@@ -386,12 +382,15 @@ if(typeof(EventSource) !== "undefined") {
 
         } */else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
           //Put in test table
+
+          /*
           var row =runwayTest.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
 
           c0.innerText = flight.callsign
           c1.innerText = flight.assigned_runway
+          */
 
           //Put in actual runway
           let link = document.querySelector(`[data-id="runway${flight.assigned_runway}"]`);
@@ -512,18 +511,18 @@ setTimeout(() => {
 
     for(let i = 0; i < runwaysData.length; i++){
       let runway = runwaysData[i];
-      htmlrunways += "<div><table><caption>Runway "
+      htmlrunways += "<div class=\"runwaydiv\"><table class=\"individualrunwaytable\"><caption>Runway "
       htmlrunways += runway.bearing;
       htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td class=\"individualrunway\" data-id=\"runway"
       htmlrunways += runway.id
-      htmlrunways += "\"></td></tr></table><button type=\"button\">Close Runway</button></div>"
+      htmlrunways += "\"></td></tr></table><button type=\"button\" class=\"closerunway\">Close Runway</button></div>"
     }
     console.log(htmlrunways);
 
     runways.innerHTML = htmlrunways
   }
   );
-}, 500);
+}, 100);
 
 
 

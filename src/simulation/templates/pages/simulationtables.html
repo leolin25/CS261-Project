@@ -475,6 +475,11 @@ if(typeof(EventSource) !== "undefined") {
     }
 
   };
+
+  source.addEventListener("end", function() {
+     source.close();
+  });
+
 } else {
   holdingpattern.innerHTML = "SSE Error";
 }

@@ -118,13 +118,14 @@ class StreamView(View):
         def event_stream():
             controller = Controller()
             controller.setup_simulation()
-            while True:
+            while not controller.check_simulation_end():
                 controller.run_simulation()
                 flight_data = controller.get_stream_data()
                 controller.update_configuration()
                 serializer = SampleDataSerializer(flight_data, many=True)
                 data = f"data: {json.dumps(serializer.data)}\n\n"
                 yield data
+            yield "event: end\ndata: Simulation ended\n\n"
 
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
@@ -137,3 +138,13 @@ class RunwayDataView(APIView):
         runways = Runway.objects.all()
         serializer = RunwaySerializer(runways, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EndSimulationView(APIView):
+    def get(self, request):
+        config = RunConfig.objects.last()
+        if not config:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        config.stop = True
+        config.save()
+        return Response({"message": "Simulation ended"}, status=status.HTTP_200_OK)

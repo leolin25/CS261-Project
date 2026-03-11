@@ -57,7 +57,8 @@ class RunwayController:
                 return False # Has not been on the runway for long enough
 
             # Free the runway
-            runway.operational_status = 'AVAILABLE'
+            if runway.operational_status == 'OCCUPIED': # Do not change runway status if it is closed
+                runway.operational_status = 'AVAILABLE'
             runway.occupied_by = None
             runway.time_occupied = None
             runway.save()

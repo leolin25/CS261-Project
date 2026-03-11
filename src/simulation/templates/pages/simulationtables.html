@@ -2,10 +2,15 @@
 
 {% block content %}
     
-<div class="stopcontainer">
-  <button type="button" class="stopsim" onclick="stopsim()">Stop Simulation</button>
+<div class = menuflex>
+  <div class="stopcontainer">
+    <button type="button" class="stopsim" onclick="stopsim()">Stop Simulation</button>
+  </div>
+  <div class="slidecontainer">
+    <input type="range" min="0.5" max="60" value="1" step="0.1" class="slider" id="timeslider">
+    <p>Value: <span id="sliderval"></span></p>
 </div>
-    
+</div>
 <button type="button" class="collapsible">Runways</button>
 
 <div class="runwayscontainer" id="runwayscontainerid">
@@ -649,6 +654,16 @@ async function stopsim() {
   } catch (error) {
     console.error(error.message);
   }
+}
+
+//time slider
+
+var slider = document.getElementById("timeslider");
+var output = document.getElementById("sliderval");
+output.innerHTML = slider.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
 }
 
 

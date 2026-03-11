@@ -334,10 +334,19 @@ caption{
 .menuflex{
     display: flex;
     justify-content: flex-start;
+    align-items: center;
+
 }
 
 .slidecontainer {
-  width: 70%; 
+  width: 100%;
+  margin-left: 20px;
+  align-items: center;
+
+}
+
+.slidecontainer p{
+    margin: 5px;
 }
 
 .slider {

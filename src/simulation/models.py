@@ -279,6 +279,7 @@ class RunStats(models.Model):
             self.save()
 
     # Returns the true variance of the stat corresponding to the indicator value
+    # Indicator 1: holding time, 2: takeoff queue time, 3: arrival delay, 4: departure delay
     def true_variance(self, indicator):
         if indicator == 0 and self.holding_num > 1:
             return self.holding_time_variance / (self.holding_num - 1)

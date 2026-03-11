@@ -509,7 +509,7 @@ async function getRunwaysData() {
   }
 }
 
-//Actually applying runwasy
+//Creating runways visually
 const runways = document.getElementById("runwayscontainerid");
 let htmlrunways ="";
 
@@ -523,14 +523,19 @@ setTimeout(() => {
       htmlrunways += runway.bearing;
       htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td class=\"individualrunway\" data-id=\"runway"
       htmlrunways += runway.id
-      htmlrunways += "\"></td></tr></table><button type=\"button\" class=\"closerunway\">Close Runway</button></div>"
+      htmlrunways += "\"></td></tr></table>"  
+      if ((runway.operational_status == "AVAILABLE") || (runway.operational_status == "OCCUPIED")){
+        htmlrunways += "<button type=\"button\" class=\"closerunway\">Close Runway</button></div>"
+      }else{
+        htmlrunways += "<button type=\"button\" class=\"openrunway\">Open Runway</button></div>"
+      }
     }
     console.log(htmlrunways);
 
     runways.innerHTML = htmlrunways
   }
   );
-}, 100);
+}, 200);
 
 
 
@@ -570,6 +575,7 @@ async function stopsim() {
     console.error(error.message);
   }
 }
+
 
 </script>
 

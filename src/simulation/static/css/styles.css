@@ -277,6 +277,22 @@ caption{
     background-color: #0c13d7;
 }
 
+.openrunway {
+    text-align: center;
+    font-size: 25px;
+    background-color: navy;
+    padding: 15px;
+    margin: 0px;
+    color: white;
+    align-items: center;
+    place-self: center;
+    border-radius: 5px;
+}
+
+.openrunway:hover{
+    background-color: #0c13d7;
+}
+
 .runwaydiv{
     display: flex;
     flex-direction: column;

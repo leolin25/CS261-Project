@@ -23,9 +23,19 @@ class Generator:
         return int(round(random.normal(loc=0, scale=5)))
 
     @staticmethod
-    def generate_fuel():
+    def generate_fuel(is_arrival):
         # Random fuel between 20 and 60 minutes for arrivals
-        return random.randint(20, 60)
+        return random.randint(20, 60) if is_arrival else random.randint(180, 360)
+
+    @staticmethod
+    # This function will generate a random event with p=0.01 otherwise it will return 'NONE' indicating no event
+    def generate_random_event():
+        # Generate a random number between 0 and 1
+        if random.random() < 0.01:
+            # Return a random event (e.g., 'MEDICAL', 'MECHANICAL')
+            return random.choice(['MEDICAL', 'MECHANICAL'])
+        else:
+            return 'NONE'
 
     def generate_aircraft(self, is_arrival):
         delay = self.generate_delay()
@@ -34,8 +44,9 @@ class Generator:
         else:
             scheduled_time = self.last_generated_outbound + timedelta(minutes=round(60 / self.outbound_per_hour))
         expected_time = scheduled_time + timedelta(minutes=delay)
-        fuel = self.generate_fuel()
+        fuel = self.generate_fuel(is_arrival)
         data = self.data.sample()
+        random_event = self.generate_random_event()
         aircraft = Aircraft(
             callsign=data["carrier"].values[0] + str(data["flight"].values[0]),
             operator=data["name"].values[0],
@@ -47,7 +58,7 @@ class Generator:
             assigned_runway=None,
             altitude=1000 if is_arrival else 0, #Default altitude for new aircraft
             fuel_mins=fuel,
-            emergency_status='NONE',
+            emergency_status=random_event,
             zone_status='SCHEDULED',
             last_update=expected_time #Only need to consider plane when it enters airport zone
         )

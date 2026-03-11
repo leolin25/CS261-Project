@@ -190,8 +190,8 @@ caption{
 
 .runwayscontainer div {
   background-color: white;
-  margin: 15px;
-  padding: 50px;
+  margin: 0px;
+  padding: 10px;
   font-size: 20px;
   flex: 1;
   width: 0;
@@ -266,7 +266,7 @@ caption{
     font-size: 25px;
     background-color: red;
     padding: 15px;
-    margin: 0px;
+    margin: 10px;
     color: white;
     align-items: center;
     place-self: center;
@@ -282,7 +282,7 @@ caption{
     font-size: 25px;
     background-color: rgb(8, 191, 8);
     padding: 15px;
-    margin: 0px;
+    margin: 10px;
     color: white;
     align-items: center;
     place-self: center;
@@ -294,6 +294,7 @@ caption{
 }
 
 .runwaydiv{
+    margin: 0px;
     display: flex;
     flex-direction: column;
     justify-items: center;
@@ -301,13 +302,13 @@ caption{
 }
 
 .individualrunwaytable{
-    margin: 20px;
+    margin: 0px;
     table-layout: fixed;
-    width: 250px;
+    width: 100%;
 }
 
 .individualrunwaytable caption{
-    font-size: 35px;
+    font-size: 30px;
 }
 
 .stopsim{

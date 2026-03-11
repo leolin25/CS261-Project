@@ -402,6 +402,7 @@ if(typeof(EventSource) !== "undefined") {
           } else {
               console.warn(`Runway element for ${flight.assigned_runway} not found.`);
           }
+          //Specify action in the runway section
           let actionlink = document.querySelector(`[data-id="runwayaction${flight.assigned_runway}"]`);
           if (actionlink) {
             if (flight.zone_status == "RUNWAY_TO"){
@@ -530,6 +531,15 @@ async function updateRunwaysData(){
       htmlrunways += runway.id;
       htmlrunways += "\"><caption>Runway "
       htmlrunways += runway.bearing;
+      if (runway.temp_optimised){
+        htmlrunways += " (Mixed)"
+      }else if(runway.operating_mode == "MIXED"){
+        htmlrunways += " (Mixed)"
+      }else if(runway.operating_mode == "LANDING"){
+        htmlrunways += " (Landing Only)"
+      }else if(runway.operating_mode == "TAKEOFF"){
+        htmlrunways += " (Take-Off Only)"
+      }
       htmlrunways += "</caption><tr><td>Callsign</td><td>Action</td></tr><tr><td class=\"individualrunway\" data-id=\"runway"
       htmlrunways += runway.id;
       htmlrunways += "\"></td><td class = \"individualrunway\" data-id =\"runwayaction"      

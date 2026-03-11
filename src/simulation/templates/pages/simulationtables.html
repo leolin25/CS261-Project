@@ -508,26 +508,29 @@ async function getRunwaysData() {
     console.error(error.message);
   }
 }
-
-//Creating runways visually
-const runways = document.getElementById("runwayscontainerid");
-let htmlrunways ="";
-
-setTimeout(() => {
-  getRunwaysData().then(runwaysData => {
+//Function to update runways data, called upon load and when changes are made in sim
+async function updateRunwaysData(){
+    getRunwaysData().then(runwaysData => {
     console.log(runwaysData);
+    let htmlrunways = ""
 
     for(let i = 0; i < runwaysData.length; i++){
       let runway = runwaysData[i];
-      htmlrunways += "<div class=\"runwaydiv\"><table class=\"individualrunwaytable\"><caption>Runway "
+      htmlrunways += "<div class=\"runwaydiv\"><table class=\"individualrunwaytable\" data-id=\"tablerunway"  
+      htmlrunways += runway.id;
+      htmlrunways += "\"><caption>Runway "
       htmlrunways += runway.bearing;
       htmlrunways += "</caption><tr><td>Callsign</td></tr><tr><td class=\"individualrunway\" data-id=\"runway"
-      htmlrunways += runway.id
+      htmlrunways += runway.id;
       htmlrunways += "\"></td></tr></table>"  
       if ((runway.operational_status == "AVAILABLE") || (runway.operational_status == "OCCUPIED")){
-        htmlrunways += "<button type=\"button\" class=\"closerunway\">Close Runway</button></div>"
+        htmlrunways += "<button type=\"button\" class=\"closerunway\" onclick=\"closeRunway("
+        htmlrunways += runway.id;
+        htmlrunways += ")\">Close Runway</button></div>"
       }else{
-        htmlrunways += "<button type=\"button\" class=\"openrunway\">Open Runway</button></div>"
+        htmlrunways += "<button type=\"button\" class=\"openrunway\" onclick=\"openRunway("
+        htmlrunways += runway.id;
+        htmlrunways += ")\">Open Runway</button></div>"
       }
     }
     console.log(htmlrunways);
@@ -535,6 +538,56 @@ setTimeout(() => {
     runways.innerHTML = htmlrunways
   }
   );
+}
+
+//Function to close a runway
+async function closeRunway(runwayID) {
+  //API CAll
+  let payload = "runway_id:"
+  payload += runwayID;
+  const url = "/api/close-runway/";
+  fetch(url, {
+    method: "POST",
+    headers: {
+    'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify({
+      runway_id: runwayID,
+    }),
+  })
+  //update data
+  setTimeout(() => {
+    updateRunwaysData();
+  }, 100);
+}
+
+//Function to open a runway
+async function openRunway(runwayID) {
+  //API CAll
+  let payload = "runway_id:"
+  payload += runwayID;
+  const url = "/api/open-runway/";
+  fetch(url, {
+    method: "POST",
+    headers: {
+    'Content-Type': 'application/json', 
+    },
+    body: JSON.stringify({
+      runway_id: runwayID,
+    }),
+  })
+  //update data
+  setTimeout(() => {
+    updateRunwaysData();
+  }, 100);
+}
+
+//Creating runways visually initially
+const runways = document.getElementById("runwayscontainerid");
+let htmlrunways ="";
+
+setTimeout(() => {
+  updateRunwaysData()
 }, 500);
 
 

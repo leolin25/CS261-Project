@@ -173,7 +173,7 @@ class RunStats(models.Model):
             self.holding_num += 1
             delta = (new_num - self.holding_mean)
             self.holding_mean += delta / self.holding_num
-            self.holding_time_variance += (new_num - self.holding_mean) * delta
+            self.holding_time_variance += (new_num - self.holding_mean) * delta 
         
         # Indicator = 1 means input parameter stores takeoff queue wait time value
         elif indicator == 1:
@@ -185,7 +185,7 @@ class RunStats(models.Model):
         
         # Indicator = 2 means input parameter stores arrival delay value
         elif indicator == 2:
-            self.sum_arrival_delay_mins += new_num
+            self.sum_arrival_delay_mins += max(0, new_num) # only consider delay, not early arrivals
             self.arrival_num += 1
             delta = (new_num - self.arrival_mean)
             self.arrival_mean += delta / self.arrival_num
@@ -193,7 +193,7 @@ class RunStats(models.Model):
         
         # Indicator = 3 means input parameter stores departure delay value
         elif indicator == 3:
-            self.sum_departure_delay_mins += new_num
+            self.sum_departure_delay_mins += max(0, new_num) # only consider delay, not early departures
             self.departure_num += 1
             delta = (new_num - self.departure_mean)
             self.departure_mean += delta / self.departure_num
@@ -277,4 +277,17 @@ class RunStats(models.Model):
         if new_num < self.min_num_diverted or self.min_num_diverted == 0:
             self.min_num_diverted = new_num
             self.save()
+
+    # Returns the true variance of the stat corresponding to the indicator value
+    def true_variance(self, indicator):
+        if indicator == 0 and self.holding_num > 1:
+            return self.holding_time_variance / (self.holding_num - 1)
+        elif indicator == 1 and self.takeoff_num > 1:
+            return self.takeoff_queue_time_variance / (self.takeoff_num - 1)
+        elif indicator == 2 and self.arrival_num > 1:
+            return self.arrival_delay_variance / (self.arrival_num - 1)
+        elif indicator == 3 and self.departure_num > 1:
+            return self.departure_delay_variance / (self.departure_num - 1)
+        else:
+            return None
         

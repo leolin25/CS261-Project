@@ -2,6 +2,9 @@
 
 {% block content %}
     
+<div class="stopcontainer">
+  <button type="button" class="stopsim" onclick="stopsim()">Stop Simulation</button>
+</div>
     
 <button type="button" class="collapsible">Runways</button>
 
@@ -547,11 +550,27 @@ for (i = 0; i < collapsible.length; i++) {
     }
   });
 }
+//Set collapsables to open to start
 for (i = 0; i < collapsible.length; i++) {
     collapsible[i].classList.add("active");
     var content = collapsible[i].nextElementSibling;
     content.style.maxHeight = content.scrollHeight + "px";
 }
+
+//stop simulation
+async function stopsim() {
+  const url = "/api/end-simulation/";
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+    window.location.href = '/results/';
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 </script>
 
     

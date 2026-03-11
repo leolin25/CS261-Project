@@ -241,6 +241,11 @@ caption{
     background-color: #0c13d7;
 }
 
+.active:hover{
+    background-color: navy;
+ 
+}
+
 .collapsible:after {
   content: '\0002B'; 
   font-size: 13px;
@@ -283,3 +288,22 @@ caption{
     margin: 20px;
 }
 
+.stopsim{
+    text-align: center;
+    font-size: 25px;
+    background-color: red;
+    padding: 15px;
+    color: white;
+    align-items: center;
+    border-radius: 5px;
+    margin: 20px;
+    justify-content: center;
+}
+.stopsim:hover{
+    background-color: rgb(171, 0, 0);
+}
+
+.stopcontainer{
+    display: flex;
+    justify-content: center;
+}

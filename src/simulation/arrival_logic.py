@@ -20,17 +20,33 @@ class ArrivalController:
             aircraft.last_update += timedelta(minutes=1)
         Aircraft.objects.bulk_update(aircrafts, ['fuel_mins', 'last_update'])
 
+
+    @staticmethod
+    def recalculate_altitudes():
+        emergencies = Aircraft.objects.filter(zone_status='QUEUE_LA',emergency_status__in=['MEDICAL', 'MECHANICAL','FUEL']).order_by('queue_entry_time')
+        general = Aircraft.objects.filter(zone_status='QUEUE_LA',emergency_status='NONE').order_by('queue_entry_time')
+        queue = list(emergencies) +list(general )
+        alt = 1000
+        for plane in queue:
+            plane.altitude = alt
+            alt+=1000
+
+        Aircraft.objects.bulk_update(queue,['altitude'])
+
     @staticmethod
     def update_aircraft_diversions():
         aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=10)
         num_diverted = 0
         for aircraft in aircrafts:
             aircraft.zone_status = 'DIVERTED'
+            aircraft.altitude = 0 #reset altitude when it leaves stack
             num_diverted += 1
             print(f"Flight {aircraft.callsign} diverted due to low fuel")
         Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
 
         if num_diverted > 0:
+            #if a plane leaves the stack then the gap between planes should to be closed
+            ArrivalController.recalculate_altitudes()
             stats = RunStats.objects.first()
             if stats:
                 total_diverted = Aircraft.objects.filter(zone_status='DIVERTED').count()
@@ -54,12 +70,16 @@ class ArrivalController:
                     # Update max and min arrival delay
                     stats.update_max_arrival_delay(delay_time)
                     stats.update_min_arrival_delay(delay_time)
+        
+        self.recalculate_altitudes()
 
         emergencies = Aircraft.objects.filter(zone_status='QUEUE_LA', emergency_status__in=['MEDICAL', 'MECHANICAL', 'FUEL']).order_by('queue_entry_time')
         general = Aircraft.objects.filter(zone_status='QUEUE_LA', emergency_status='NONE').order_by('queue_entry_time')
+
         queue = list(emergencies) + list(general)
         for aircraft in queue:
             success = self.runway_controller.assign_runway(aircraft, simulation_time)
             if success:
+                aircraft.altitude = 0 # set altitude to 0 if landedd.
                 aircraft.refresh_from_db()
                 print(f"Flight {aircraft.callsign} preparing for landing on runway {aircraft.assigned_runway.bearing}")

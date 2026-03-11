@@ -82,12 +82,20 @@ class Controller:
 
     def update_aircraft_statuses(self):
         aircrafts = Aircraft.objects.filter(zone_status="SCHEDULED", queue_entry_time__lte=self.simulation_time)
+        new_arrival = False
         for aircraft in aircrafts:
             if aircraft.scheduled_arrival:
                 aircraft.zone_status = "QUEUE_LA"
+                new_arrival = True
             elif aircraft.scheduled_departure :
                 aircraft.zone_status = "QUEUE_TO"
         Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+
+
+        # If a plane gets added to the arrival queue then update altitudes immediately 
+        if new_arrival:
+            self.arrival_controller.recalculate_altitudes()
+
 
     @staticmethod
     def get_stream_data():

@@ -542,6 +542,11 @@ for (i = 0; i < collapsible.length; i++) {
     }
   });
 }
+for (i = 0; i < collapsible.length; i++) {
+    collapsible[i].classList.add("active");
+    var content = collapsible[i].nextElementSibling;
+    content.style.maxHeight = content.scrollHeight + "px";
+}
 </script>
 
     

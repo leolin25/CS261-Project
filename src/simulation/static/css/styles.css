@@ -264,7 +264,7 @@ caption{
 .closerunway {
     text-align: center;
     font-size: 25px;
-    background-color: navy;
+    background-color: red;
     padding: 15px;
     margin: 0px;
     color: white;
@@ -274,13 +274,13 @@ caption{
 }
 
 .closerunway:hover{
-    background-color: #0c13d7;
+    background-color: rgb(171, 0, 0);
 }
 
 .openrunway {
     text-align: center;
     font-size: 25px;
-    background-color: navy;
+    background-color: rgb(8, 191, 8);
     padding: 15px;
     margin: 0px;
     color: white;
@@ -290,7 +290,7 @@ caption{
 }
 
 .openrunway:hover{
-    background-color: #0c13d7;
+    background-color: green;
 }
 
 .runwaydiv{
@@ -302,6 +302,12 @@ caption{
 
 .individualrunwaytable{
     margin: 20px;
+    table-layout: fixed;
+    width: 250px;
+}
+
+.individualrunwaytable caption{
+    font-size: 35px;
 }
 
 .stopsim{

@@ -336,7 +336,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          c3.innerText = flight.queue_entry_time
+          let timestamp = new Date(flight.queue_entry_time);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
 
         }else if(flight.zone_status == "QUEUE_LA"){
             //If flight in landing zone put in holding pattern
@@ -353,7 +360,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          c3.innerText = flight.queue_entry_time
+          let timestamp = new Date(flight.queue_entry_time);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
           c4.innerText = flight.altitude
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
@@ -369,7 +383,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          c3.innerText = flight.scheduled_departure
+          let timestamp = new Date(flight.scheduled_departure);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
 
         }else if (flight.zone_status == "SCHEDULED"){
           //Otherwise put it in landing schedule
@@ -386,7 +407,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          c3.innerText = flight.scheduled_arrival
+          let timestamp = new Date(flight.scheduled_arrival);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
           c4.innerText = flight.altitude
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
@@ -433,7 +461,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          c3.innerText = flight.queue_entry_time
+          let timestamp = new Date(flight.queue_entry_time);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
 
         }else if(flight.zone_status == "LANDED"){
             //Landed table
@@ -446,7 +481,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          c3.innerText = flight.queue_entry_time
+          let timestamp = new Date(flight.queue_entry_time);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
 
 
         } else if(flight.zone_status == "CANCELLED"){
@@ -460,7 +502,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          c3.innerText = flight.queue_entry_time
+          let timestamp = new Date(flight.queue_entry_time);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
 
         }else if (flight.zone_status == "DIVERTED"){
           //Diverted table
@@ -473,7 +522,14 @@ if(typeof(EventSource) !== "undefined") {
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          c3.innerText = flight.queue_entry_time
+          let timestamp = new Date(flight.queue_entry_time);
+          let date = timestamp.toLocaleDateString()
+          let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let text = ""
+          text += date
+          text += " "
+          text += time
+          c3.innerText = text
 
 
         }*/

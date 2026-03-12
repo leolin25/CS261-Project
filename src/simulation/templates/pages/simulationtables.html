@@ -805,6 +805,50 @@ slider.onchange = function() {
   })
 }
 
+
+//Live stats
+
+const maxintakeoffQ = document.getElementById("maxintakeoffQ");
+const maxinholding = document.getElementById("maxinholding");
+const averagearrivaldelay = document.getElementById("averagearrivaldelay");
+const averagedeparturedelay = document.getElementById("averagedeparturedelay");
+const totalcancelled = document.getElementById("totalcancelled");
+const totaldiverted = document.getElementById("totaldiverted");
+
+
+setInterval(updateStats, 5000);
+
+async function updateStats() {
+    getLiveStatsData().then(liveData => {
+      console.log(liveData);
+      maxintakeoffQ.innerHTML = liveData.max_takeoff_queue;
+      maxinholding.innerHTML = liveData.max_holding_queue;
+      averagearrivaldelay.innerHTML = liveData.mean_arrival_delay;
+      averagedeparturedelay.innerHTML = liveData.mean_departure_delay;
+      totalcancelled.innerHTML = liveData.cancelled;
+      totaldiverted.innerHTML = liveData.diverted;
+  }
+  );
+}
+
+async function getLiveStatsData() {
+  const url = "/api/live-results/";
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(result);
+    return result;
+
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+
 </script>
 
     

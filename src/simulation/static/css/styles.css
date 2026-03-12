@@ -429,4 +429,30 @@ caption{
 
 #livestatstable {
     width: 50%;
+    margin: 25px 0;
+    border-radius: 5px;
+    border: 1px solid black;
+
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
+
+#livestatstable thead tr {
+    color: #ffffff;
+    text-align: left;
+        border-radius: 5px;
+
+}
+
+
+
+#livestatstable tbody tr {
+    border-bottom: 1px solid #dddddd;
+        border-radius: 5px;
+
+}
+
+#livestatstable tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+

@@ -118,13 +118,20 @@ class StreamView(View):
         def event_stream():
             controller = Controller()
             controller.setup_simulation()
+
             while not controller.check_simulation_end():
                 controller.run_simulation()
                 flight_data = controller.get_stream_data()
                 controller.update_configuration()
+
                 serializer = SampleDataSerializer(flight_data, many=True)
-                data = f"data: {json.dumps(serializer.data)}\n\n"
+                payload = {
+                    "time": controller.get_simulation_time().isoformat(),
+                    "flights": serializer.data,
+                }
+                data = f"data: {json.dumps(payload)}\n\n"
                 yield data
+
             yield "event: end\ndata: Simulation ended\n\n"
 
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')

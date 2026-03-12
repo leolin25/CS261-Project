@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .generation import Generator
-from .serializers import SampleDataSerializer
+from .serializers import SampleDataSerializer, RunwaySerializer
 from .control import Controller
 from .models import Aircraft, Runway, RunConfig
 
@@ -118,15 +118,89 @@ class StreamView(View):
         def event_stream():
             controller = Controller()
             controller.setup_simulation()
-            while True:
+
+            while not controller.check_simulation_end():
                 controller.run_simulation()
                 flight_data = controller.get_stream_data()
                 controller.update_configuration()
+
                 serializer = SampleDataSerializer(flight_data, many=True)
-                data = f"data: {json.dumps(serializer.data)}\n\n"
+                payload = {
+                    "time": controller.get_simulation_time().isoformat(),
+                    "flights": serializer.data,
+                }
+                data = f"data: {json.dumps(payload)}\n\n"
                 yield data
+
+            yield "event: end\ndata: Simulation ended\n\n"
 
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         response['X-Accel-Buffering'] = 'no'
         return response
+
+
+class RunwayDataView(APIView):
+    def get(self, request):
+        runways = Runway.objects.all()
+        serializer = RunwaySerializer(runways, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class EndSimulationView(APIView):
+    def get(self, request):
+        config = RunConfig.objects.last()
+        if not config:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        config.stop = True
+        config.save()
+        return Response({"message": "Simulation ended"}, status=status.HTTP_200_OK)
+
+
+class CloseRunwayView(APIView):
+    def post(self, request):
+        runway_id = request.data.get("runway_id")
+        try:
+            runway_id = int(runway_id)
+        except ValueError:
+            return Response({"error": "Invalid runway ID"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            runway = Runway.objects.get(id=runway_id)
+            runway.operational_status = 'RUNWAYINSPEC'
+            runway.save()
+            return Response({"message": f"Runway id {runway.id} bearing {runway.bearing} closed"}, status=status.HTTP_200_OK)
+        except Runway.DoesNotExist:
+            return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class OpenRunwayView(APIView):
+    def post(self, request):
+        runway_id = request.data.get("runway_id")
+        try:
+            runway_id = int(runway_id)
+        except ValueError:
+            return Response({"error": "Invalid runway ID"}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            runway = Runway.objects.get(id=runway_id)
+            runway.operational_status = 'AVAILABLE'
+            runway.save()
+            return Response({"message": f"Runway id {runway.id} bearing {runway.bearing} opened"}, status=status.HTTP_200_OK)
+        except Runway.DoesNotExist:
+            return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangeTimescaleView(APIView):
+    def post(self, request):
+        timescale = request.data.get("timescale")
+        try:
+            timescale = float(timescale)
+        except ValueError:
+            return Response({"error": "Invalid timescale"}, status=status.HTTP_400_BAD_REQUEST)
+        if timescale < 0.5 or timescale > 30:
+            return Response({"error": "Timescale must be between 0.5 and 60"}, status=status.HTTP_400_BAD_REQUEST)
+        config = RunConfig.objects.last()
+        if not config:
+            return Response({"error": "RunConfig not found"}, status=status.HTTP_404_NOT_FOUND)
+        config.timescale = timescale
+        config.save()
+        return Response({"message": f"Timescale changed to {timescale}"}, status=status.HTTP_200_OK)

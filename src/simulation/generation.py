@@ -40,9 +40,9 @@ class Generator:
     def generate_aircraft(self, is_arrival):
         delay = self.generate_delay()
         if is_arrival:
-            scheduled_time = self.last_generated_inbound + timedelta(minutes=round(60 / self.inbound_per_hour))
+            scheduled_time = self.last_generated_inbound + timedelta(minutes=60 / self.inbound_per_hour)
         else:
-            scheduled_time = self.last_generated_outbound + timedelta(minutes=round(60 / self.outbound_per_hour))
+            scheduled_time = self.last_generated_outbound + timedelta(minutes=60 / self.outbound_per_hour)
         expected_time = scheduled_time + timedelta(minutes=delay)
         fuel = self.generate_fuel(is_arrival)
         data = self.data.sample()

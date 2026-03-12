@@ -189,7 +189,7 @@ class ChangeTimescaleView(APIView):
             timescale = float(timescale)
         except ValueError:
             return Response({"error": "Invalid timescale"}, status=status.HTTP_400_BAD_REQUEST)
-        if timescale < 0.5 or timescale > 60:
+        if timescale < 0.5 or timescale > 30:
             return Response({"error": "Timescale must be between 0.5 and 60"}, status=status.HTTP_400_BAD_REQUEST)
         config = RunConfig.objects.last()
         if not config:

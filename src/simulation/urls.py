@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (HomeView, results, simulation, StreamView, GetSampleData, RunwayDataView, EndSimulationView,
-                    CloseRunwayView, OpenRunwayView, ChangeTimescaleView)
+                    CloseRunwayView, OpenRunwayView, ChangeTimescaleView, LiveResultsView)
 
 
 urlpatterns = [
@@ -14,4 +14,5 @@ urlpatterns = [
     path('api/close-runway/', CloseRunwayView.as_view(), name='close-runway'),
     path('api/open-runway/', OpenRunwayView.as_view(), name='open-runway'),
     path('api/change-timescale/', ChangeTimescaleView.as_view(), name='change-timescale'),
+    path('api/live-results/', LiveResultsView.as_view(), name='live-results'),
 ]

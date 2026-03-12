@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from .generation import Generator
 from .serializers import SampleDataSerializer, RunwaySerializer
 from .control import Controller
-from .models import Aircraft, Runway, RunConfig
+from .models import Aircraft, Runway, RunConfig, RunStats
 
 
 class HomeView(View):
@@ -204,3 +204,20 @@ class ChangeTimescaleView(APIView):
         config.timescale = timescale
         config.save()
         return Response({"message": f"Timescale changed to {timescale}"}, status=status.HTTP_200_OK)
+
+
+class LiveResultsView(APIView):
+    def get(self, request):
+        try:
+            stats = RunStats.objects.get(id=1)
+        except RunStats.DoesNotExist:
+            return Response({"error": "Stats not found"}, status=status.HTTP_404_NOT_FOUND)
+        data = {
+            "mean_arrival_delay": stats.sum_arrival_delay_mins / stats.arrival_num,
+            "mean_departure_delay": stats.sum_departure_delay_mins / stats.departure_num,
+            "max_takeoff_queue": stats.max_num_takeoff_queue,
+            "max_holding_queue": stats.max_num_holding_pattern,
+            "cancelled": stats.max_num_cancelled,
+            "diverted": stats.max_num_diverted
+        }
+        return Response(data, status=status.HTTP_200_OK)

@@ -417,3 +417,16 @@ caption{
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.statscontainer {
+  display: flex;
+  background-color: #ffffff;
+  justify-content: space-evenly;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+#livestatstable {
+    width: 50%;
+}

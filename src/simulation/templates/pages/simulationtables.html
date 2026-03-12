@@ -43,6 +43,46 @@
   </div>
 -->
 
+<!--Live stats-->
+<button type="button" class="collapsible">Live Stats</button>
+<div class="statscontainer">
+    <table id="livestatstable" class="individualTables">
+        <caption>Live Stats</caption>
+        <thead>
+          <tr>
+              <th>Statistic</th>
+              <th style="width:50%">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Max planes in take-Off queue</td>
+          <td id="maxintakeoffQ"></td>
+        </tr>
+        <tr>
+          <td>Max planes in holding pattern</td>
+          <td id="maxinholding"></td>
+        </tr>        
+        <tr>
+          <td>Average arrival delay</td>
+          <td id="averagearrivaldelay"></td>
+        </tr>        
+        <tr>
+          <td>Average departure delay</td>
+          <td id="averagedeparturedelay"></td>
+        </tr>
+        <tr>
+          <td>Total Cancelled</td>
+          <td id="totalcancelled"></td>
+        </tr>
+          <tr>
+          <td>Total Diverted</td>
+          <td id="totaldiverted"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
 <button type="button" class="collapsible">Flights in Simulation</button>
 <div class="simulationcontainer">
   <div>

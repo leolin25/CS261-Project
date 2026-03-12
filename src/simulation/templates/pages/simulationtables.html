@@ -14,7 +14,7 @@
     </div>
   </div>
   <div id="datetimedisplay">
-    <p class="datetimedisplaybox">DATE TIME DISPLAY HERE</p>
+    <p id="datetimedisplaybox"></p>
   </div>
 </div>
 <button type="button" class="collapsible">Runways</button>
@@ -253,6 +253,7 @@
 //DATA STREAM
 const takeoffQ = document.getElementById("takeoffTable");
 const holdingpattern = document.getElementById("holdingpatternTable");
+const timedisplay = document.getElementById("datetimedisplaybox");
 
 /*
 const runwayTest = document.getElementById("runwayTestTable");
@@ -324,9 +325,26 @@ if(typeof(EventSource) !== "undefined") {
       }
 */
       var payload = JSON.parse(event.data);
+      var flightspayload = payload.flights;
+      var timepayload = payload.time;
+      console.log(timepayload);
+
+      
+      //Deal with time coming through
+      let timestamp = new Date(timepayload);
+      let date = timestamp.toLocaleDateString()
+      let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+      let timedisplaytext = ""
+      timedisplaytext += date
+      timedisplaytext += " "
+      timedisplaytext += time
+      console.log(timedisplaytext);
+      timedisplay.innerHTML = timedisplaytext
+
+
       //For each flight in json
-      for(let i = 0; i < payload.length; i++){
-        let flight = payload[i];
+      for(let i = 0; i < flightspayload.length; i++){
+        let flight = flightspayload[i];
 
         //If flight is in takeoff zone put it in takeoffQ
         if(flight.zone_status == "QUEUE_TO"){

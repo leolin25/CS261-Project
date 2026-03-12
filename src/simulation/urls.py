@@ -1,11 +1,11 @@
 from django.urls import path
-from .views import (HomeView, results, simulation, StreamView, GetSampleData, RunwayDataView, EndSimulationView,
+from .views import (HomeView, ResultsView, simulation, StreamView, GetSampleData, RunwayDataView, EndSimulationView,
                     CloseRunwayView, OpenRunwayView, ChangeTimescaleView, LiveResultsView)
 
 
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
-    path('results/', results, name='results'),
+    path('results/', ResultsView.as_view(), name='results'),
     path('simulation/',simulation, name='simulation'),
     path('stream/', StreamView.as_view(), name='stream'),
     path('api/sample-data/', GetSampleData.as_view(), name='sample-data'),

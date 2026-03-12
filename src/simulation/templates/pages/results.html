@@ -2,6 +2,8 @@
  
 {% block content %}
 
+{% csrf_token %}
+
 <h2>Summary Screen</h2>
 
 
@@ -133,18 +135,49 @@
 </div>
 <div class="resultcontainer">
     <div>
-        <button type="button" class="btn-submit">Save Configuration</button>
-    </div>
-    <div>
         <button type="button" onclick="location.href = '/'" class="btn-submit">Run New Configuration</button>
     </div>
     <div>
-        <button type="button" class="btn-submit">Replay Same Configuration</button>
+        <button type="button" onclick="sameConfig()"class="btn-submit">Replay Same Configuration</button>
     </div>
 </div>
 
 <script>
+const nummixedrunways = "{{nummixedrunways}}"; 
+const numtakeoffrunways = "{{numtakeoffrunways}}"; 
+const numlandingrunways = "{{numlandingrunways}}"; 
+const inperhour = "{{inperhour}}"; 
+const outperhour = "{{outperhour}}"; 
+const randomevents = "{{randomevents}}"; 
+const maxwait = "{{maxwait}}"; 
 
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+async function sameConfig() {
+    const url = "/results/";
+    fetch(url, {
+        method: "POST",
+        headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json', 
+        },
+        redirect: 'follow',
+        body: JSON.stringify({
+        num_runways_mixed: nummixedrunways,
+        num_runways_la: numlandingrunways,
+        num_runways_to: numtakeoffrunways,
+        inbound_flow: inperhour,
+        outbound_flow: outperhour,
+        random_events: randomevents,
+        max_wait:maxwait,
+        }),
+    })
+    .then(response =>{
+    if (response.redirected) {
+        window.location.href = response.url;
+    }
+    })
+}
 
 
 </script>

@@ -106,6 +106,36 @@ class ResultsView(View):
         }
         return HttpResponse(template.render(context, request))
 
+    def post(self, request):
+        #Run with same config
+        #No need to validate since the same input already
+        data = json.loads(request.body)    
+        print (data.get('num_runways_mixed'))         
+        runways_mixed = int(data.get('num_runways_mixed'))
+        runways_takeoff = int(data.get('num_runways_to'))
+        runways_landing = int(data.get('num_runways_la'))
+        runways = runways_mixed + runways_takeoff + runways_landing
+        inbound = int(data.get('inbound_flow'))
+        outbound = int(data.get('outbound_flow'))
+        max_wait = int(data.get('max_wait'))
+        random_events_init = data.get('random_events')
+        if random_events_init == "ON":
+            random_events = True
+        else:
+            random_events = False
+        RunConfig.objects.all().delete()
+        RunConfig.objects.create(
+            runways=runways,
+            runways_mixed=runways_mixed,
+            runways_takeoff=runways_takeoff,
+            runways_landing=runways_landing,
+            inbound_per_hour=inbound,
+            outbound_per_hour=outbound,
+            max_wait=max_wait,
+            random_events=random_events,
+        )
+        return redirect('simulation')   
+
 
 def simulation(request):
     #Loads simulation page

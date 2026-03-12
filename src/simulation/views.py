@@ -65,26 +65,46 @@ class HomeView(View):
         return True
 
 
-def results(request):
-    template = loader.get_template('pages/results.html')
-    context = {
-        'inperhour': '15',
-        'outperhour': '15',
-        'numrunways': '10',
-        'mixedorsingle': 'MIXED',
-        'randomevents': 'OFF',
+class ResultsView(View):
+    def get(self, request):
+        template = loader.get_template('pages/results.html')
 
-        'maxintakeoffQ': '10',
-        'maxinlandingQ': '15',
-        'maxinholding': '20',
-        'averagehold': '10',
-        'maxdelay': '60',
-        'averagedelay': '10',
-        'delayvariance': '3',
-        'delayrange': '40',
-        'numdiverted': '12',
-    }
-    return HttpResponse(template.render(context, request))
+        try:
+            stats = RunStats.objects.get(id=1)
+        except RunStats.DoesNotExist:
+            return render(request, 'pages/results.html')
+
+        config = RunConfig.objects.last()
+        if not config:
+            return render(request, 'pages/results.html')
+
+        context = {
+            'inperhour': config.inbound_per_hour,
+            'outperhour': config.outbound_per_hour,
+            'nummixedrunways': config.runways_mixed,
+            'numtakeoffrunways': config.runways_takeoff,
+            'numlandingrunways': config.runways_landing,
+            'maxwait': config.max_wait,
+            'randomevents': 'On' if config.random_events else 'Off',
+
+            'totaldeparted': stats.departure_num,
+            'totallanded': stats.arrival_num,
+            'maxintakeoffQ': stats.max_num_takeoff_queue,
+            'maxinholding': stats.max_num_holding_pattern,
+            'averagetakeoffqtime': stats.sum_takeoff_queue_time_mins / stats.takeoff_num if stats.takeoff_num > 0 else 0,
+            'averageholdingpatterntime': stats.sum_holding_time_mins / stats.holding_num if stats.holding_num > 0 else 0,
+            'averagedeparturedelay': stats.sum_departure_delay_mins / stats.departure_num if stats.departure_num > 0 else 0,
+            'averagearrivaldelay': stats.sum_arrival_delay_mins / stats.arrival_num if stats.arrival_num > 0 else 0,
+            'largestdeparturedelay': stats.max_departure_delay,
+            'largestarrivaldelay': stats.max_arrival_delay_mins,
+            'takeoffqtimevariance': stats.takeoff_queue_time_variance,
+            'departurevariance': stats.departure_delay_variance,
+            'holdtimevariance': stats.holding_time_variance,
+            'arrivalvariance': stats.arrival_delay_variance,
+            'numcancelled': stats.max_num_cancelled,
+            'numdiverted': stats.max_num_diverted,
+        }
+        return HttpResponse(template.render(context, request))
 
 
 def simulation(request):

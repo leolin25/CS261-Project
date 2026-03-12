@@ -212,9 +212,11 @@ class LiveResultsView(APIView):
             stats = RunStats.objects.get(id=1)
         except RunStats.DoesNotExist:
             return Response({"error": "Stats not found"}, status=status.HTTP_404_NOT_FOUND)
+        mean_arrival_delay = stats.sum_arrival_delay_mins / stats.arrival_num if stats.arrival_num > 0 else 0
+        mean_departure_delay = stats.sum_departure_delay_mins / stats.departure_num if stats.departure_num > 0 else 0
         data = {
-            "mean_arrival_delay": stats.sum_arrival_delay_mins / stats.arrival_num,
-            "mean_departure_delay": stats.sum_departure_delay_mins / stats.departure_num,
+            "mean_arrival_delay": mean_arrival_delay,
+            "mean_departure_delay": mean_departure_delay,
             "max_takeoff_queue": stats.max_num_takeoff_queue,
             "max_holding_queue": stats.max_num_holding_pattern,
             "cancelled": stats.max_num_cancelled,

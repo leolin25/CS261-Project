@@ -130,6 +130,8 @@ table, th, td {
 table {
     margin-left: auto;
     margin-right: auto;
+    border-collapse: collapse;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
 
@@ -137,9 +139,6 @@ tr,th {
     height: 50px;   
 }
 
-table {
-    border-collapse: collapse;
-}
 
 th {
     background-color: gray;

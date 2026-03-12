@@ -180,3 +180,20 @@ class OpenRunwayView(APIView):
             return Response({"message": f"Runway id {runway.id} bearing {runway.bearing} opened"}, status=status.HTTP_200_OK)
         except Runway.DoesNotExist:
             return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+class ChangeTimescaleView(APIView):
+    def post(self, request):
+        timescale = request.data.get("timescale")
+        try:
+            timescale = float(timescale)
+        except ValueError:
+            return Response({"error": "Invalid timescale"}, status=status.HTTP_400_BAD_REQUEST)
+        if timescale < 0.5 or timescale > 60:
+            return Response({"error": "Timescale must be between 0.5 and 60"}, status=status.HTTP_400_BAD_REQUEST)
+        config = RunConfig.objects.last()
+        if not config:
+            return Response({"error": "RunConfig not found"}, status=status.HTTP_404_NOT_FOUND)
+        config.timescale = timescale
+        config.save()
+        return Response({"message": f"Timescale changed to {timescale}"}, status=status.HTTP_200_OK)

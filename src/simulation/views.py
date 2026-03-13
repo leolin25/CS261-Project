@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .generation import Generator
-from .serializers import SampleDataSerializer, RunwaySerializer
+from .serializers import AircraftSerializer, RunwaySerializer
 from .control import Controller
 from .models import Aircraft, Runway, RunConfig, RunStats
 
@@ -152,7 +152,7 @@ def simulation(request):
 
 
 class GetSampleData(APIView):
-    serializer_class = SampleDataSerializer
+    serializer_class = AircraftSerializer
 
     def get(self, request):
         generator = Generator(2, 15, 15)
@@ -174,7 +174,7 @@ class StreamView(View):
                 flight_data = controller.get_stream_data()
                 controller.update_configuration()
 
-                serializer = SampleDataSerializer(flight_data, many=True)
+                serializer = AircraftSerializer(flight_data, many=True)
                 payload = {
                     "time": controller.get_simulation_time().isoformat(),
                     "flights": serializer.data,

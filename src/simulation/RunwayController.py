@@ -3,11 +3,12 @@ from .models import Aircraft, Runway
 
 
 class RunwayController:
-    def __init__(self, landing_duration, takeoff_duration, fuel_risk_threshold, takeoff_risk_threshold):
+    def __init__(self, landing_duration, takeoff_duration, fuel_risk_threshold, takeoff_risk_threshold, max_wait):
         self.landing_duration = landing_duration
         self.takeoff_duration = takeoff_duration
         self.fuel_risk_threshold = fuel_risk_threshold
         self.takeoff_risk_threshold = takeoff_risk_threshold
+        self.max_wait = max_wait
 
     # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
     @staticmethod
@@ -80,10 +81,10 @@ class RunwayController:
         
     # This function is called every minute to update the mixed runways based on current traffic, mixed runways are put in a temporary new optimised mode that suits the situation
     def optimise_runway_mode(self, simulation_time):
-        risk_time = simulation_time - timedelta(minutes=self.takeoff_risk_threshold)
+        risk_time = simulation_time - timedelta(minutes=self.takeoff_risk_threshold) - timedelta(minutes=self.max_wait)
 
         # In case of any bugs we can reset runways right here
-        self.reset_optimised_runways()
+        # self.reset_optimised_runways()
 
         # Find all mixed runways that are currently available
         mixed_runways = Runway.objects.filter(operational_status='AVAILABLE', operating_mode__icontains='MIXED', occupied_by__isnull=True)
@@ -108,7 +109,7 @@ class RunwayController:
                 runway.operating_mode = 'LANDING'
                 runway.temp_optimised = True
             # Prioritise landing if there are more emergency risks, otherwise prioritise takeoff if there are more cancellation risks.
-            elif arrival_risks >= takeoff_risks:
+            elif arrival_risks >= takeoff_risks and arrival_risks != 0:
                 arrival_risks -= 1
                 amount_arriving -= 1
                 runway.operating_mode = 'LANDING'

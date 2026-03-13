@@ -38,6 +38,7 @@ class Controller:
             self.takeoff_duration,
             self.fuel_risk_threshold,
             self.takeoff_risk_threshold,
+            self.max_wait,
         )
         self.departure_controller = DepartureController(
             self.runway_controller,
@@ -71,6 +72,7 @@ class Controller:
             self.runway_controller.takeoff_duration = self.takeoff_duration
             self.runway_controller.fuel_risk_threshold = self.fuel_risk_threshold
             self.runway_controller.takeoff_risk_threshold = self.takeoff_risk_threshold
+            self.runway_controller.max_wait = self.max_wait
             self.departure_controller.max_wait = self.max_wait
         return True
 

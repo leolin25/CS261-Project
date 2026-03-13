@@ -6,19 +6,21 @@ from .models import Aircraft, RunStats
 This class manages the arrival of planes, including the holding pattern and diverting planes that have been waiting for too long or have low fuel.
 """
 class ArrivalController:
-    def __init__(self, runway_controller):
+    def __init__(self, runway_controller, fuel_emergency_threshold):
         self.runway_controller = runway_controller
+        self.fuel_emergency_threshold = fuel_emergency_threshold
 
     """
     Decrease the fuel level of all planes in the holding pattern by 1 min, this function should be called by main every minute tick
     """
-    @staticmethod
-    def update_aircraft_fuel(simulation_time):
+    def update_aircraft_fuel(self, simulation_time):
         aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', last_update__lte=simulation_time-timedelta(minutes=1))
         for aircraft in aircrafts:
             aircraft.fuel_mins = max(0, aircraft.fuel_mins - 1)
+            if aircraft.fuel_mins < self.fuel_emergency_threshold and aircraft.emergency_status == 'NONE':
+                aircraft.emergency_status = 'FUEL'
             aircraft.last_update += timedelta(minutes=1)
-        Aircraft.objects.bulk_update(aircrafts, ['fuel_mins', 'last_update'])
+        Aircraft.objects.bulk_update(aircrafts, ['fuel_mins', 'last_update', 'emergency_status'])
 
 
     @staticmethod

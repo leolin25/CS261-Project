@@ -116,6 +116,7 @@ class RunConfig(models.Model):
     takeoff_duration = models.IntegerField(default=45)
     fuel_risk_threshold = models.IntegerField(default=20)
     takeoff_risk_threshold = models.IntegerField(default=10)
+    fuel_emergency_threshold = models.IntegerField(default=15)
     random_events = models.BooleanField()
     stop = models.BooleanField(default=False)
 

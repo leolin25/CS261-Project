@@ -25,6 +25,7 @@ class Controller:
         self.takeoff_duration = None
         self.fuel_risk_threshold = None
         self.takeoff_risk_threshold = None
+        self.fuel_emergency_threshold = None
         self.random_events = None
         self.stop = None
         self.update_configuration(first=True)
@@ -45,7 +46,10 @@ class Controller:
             self.runway_controller,
             self.max_wait,
         )
-        self.arrival_controller = ArrivalController(self.runway_controller)
+        self.arrival_controller = ArrivalController(
+            self.runway_controller,
+            self.fuel_emergency_threshold,
+        )
 
     def update_configuration(self, first=False):
         config = RunConfig.objects.last()
@@ -64,6 +68,7 @@ class Controller:
         self.takeoff_duration = config.takeoff_duration
         self.fuel_risk_threshold = config.fuel_risk_threshold
         self.takeoff_risk_threshold = config.takeoff_risk_threshold
+        self.fuel_emergency_threshold = config.fuel_emergency_threshold
         self.random_events = config.random_events
         self.stop = config.stop
         if not first:
@@ -76,6 +81,7 @@ class Controller:
             self.runway_controller.takeoff_risk_threshold = self.takeoff_risk_threshold
             self.runway_controller.max_wait = self.max_wait
             self.departure_controller.max_wait = self.max_wait
+            self.arrival_controller.fuel_emergency_threshold = self.fuel_emergency_threshold
         return True
 
     def check_simulation_end(self):

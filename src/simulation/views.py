@@ -60,7 +60,7 @@ class HomeView(View):
             return False
         if "max_wait" not in data:
             return False
-        if int(data["max_wait"]) <= 0:
+        if int(data["max_wait"]) < 1:
             return False
         return True
 

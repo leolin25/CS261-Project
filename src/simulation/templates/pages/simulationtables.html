@@ -839,8 +839,8 @@ async function updateStats() {
       console.log(liveData);
       maxintakeoffQ.innerHTML = liveData.max_takeoff_queue;
       maxinholding.innerHTML = liveData.max_holding_queue;
-      averagearrivaldelay.innerHTML = liveData.mean_arrival_delay;
-      averagedeparturedelay.innerHTML = liveData.mean_departure_delay;
+      averagearrivaldelay.innerHTML = liveData.mean_arrival_delay.toFixed(2);
+      averagedeparturedelay.innerHTML = liveData.mean_departure_delay.toFixed(2);
       totalcancelled.innerHTML = liveData.cancelled;
       totaldiverted.innerHTML = liveData.diverted;
   }

@@ -101,9 +101,15 @@ class Controller:
 
 
     @staticmethod
-    def get_stream_data():
-        flights = Aircraft.objects.all().filter(zone_status__in=["QUEUE_TO", "QUEUE_LA", "RUNWAY_TO", "RUNWAY_LA"])
-        return list(flights)
+    def get_stream_data(limit=5):
+        flights = Aircraft.objects.all().filter(zone_status__in=["QUEUE_TO", "QUEUE_LA", "RUNWAY_TO", "RUNWAY_LA"]).order_by('queue_entry_time')
+        arrivals_schedule = Aircraft.objects.filter(scheduled_arrival__isnull=False, zone_status="SCHEDULED").order_by('scheduled_arrival')[:limit]
+        departures_schedule = Aircraft.objects.filter(scheduled_departure__isnull=False, zone_status="SCHEDULED").order_by('scheduled_departure')[:limit]
+        arrivals = Aircraft.objects.filter(zone_status="LANDED").order_by('-scheduled_arrival')[:limit]
+        departures = Aircraft.objects.filter(zone_status="DEPARTED").order_by('-scheduled_departure')[:limit]
+        cancelled = Aircraft.objects.filter(zone_status="CANCELLED").order_by('-scheduled_departure')[:limit]
+        diverted = Aircraft.objects.filter(zone_status="DIVERTED").order_by('-scheduled_arrival')[:limit]
+        return list(flights) + list(arrivals_schedule) + list(departures_schedule) + list(arrivals) + list(departures) + list(cancelled) + list(diverted)
     
 
     def run_simulation(self):

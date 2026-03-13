@@ -25,6 +25,7 @@ class Controller:
         self.takeoff_duration = None
         self.fuel_risk_threshold = None
         self.takeoff_risk_threshold = None
+        self.random_events = None
         self.stop = None
         self.update_configuration(first=True)
         self.generator = Generator(
@@ -63,6 +64,7 @@ class Controller:
         self.takeoff_duration = config.takeoff_duration
         self.fuel_risk_threshold = config.fuel_risk_threshold
         self.takeoff_risk_threshold = config.takeoff_risk_threshold
+        self.random_events = config.random_events
         self.stop = config.stop
         if not first:
             self.generator.hour_limit = self.schedule_limit
@@ -118,7 +120,7 @@ class Controller:
         update_start_time = timezone.now()
         self.calculate_new_time((update_start_time - self.last_update_time).total_seconds())
         #print(f"Simulation Time: {self.simulation_time}, Real Time: {update_start_time}")
-        self.generator.run_generation(self.simulation_time)
+        self.generator.run_generation(self.simulation_time, random_events=self.random_events)
         self.update_aircraft_statuses()
         self.departure_controller.update_aircraft_cancellations(self.simulation_time)
         self.arrival_controller.update_aircraft_fuel(self.simulation_time)
@@ -155,4 +157,4 @@ class Controller:
         # Create a new RunStats object to track statistics for this run
         RunStats.objects.create(id=1)
         
-        self.generator.run_generation(self.simulation_time)
+        self.generator.run_generation(self.simulation_time, random_events=self.random_events)

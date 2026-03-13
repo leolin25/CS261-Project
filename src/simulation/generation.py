@@ -37,7 +37,7 @@ class Generator:
         else:
             return 'NONE'
 
-    def generate_aircraft(self, is_arrival):
+    def generate_aircraft(self, is_arrival, random_events):
         delay = self.generate_delay()
         if is_arrival:
             scheduled_time = self.last_generated_inbound + timedelta(minutes=60 / self.inbound_per_hour)
@@ -46,7 +46,7 @@ class Generator:
         expected_time = scheduled_time + timedelta(minutes=delay)
         fuel = self.generate_fuel(is_arrival)
         data = self.data.sample()
-        random_event = self.generate_random_event()
+        random_event = self.generate_random_event() if random_events else 'NONE'
         aircraft = Aircraft(
             callsign=data["carrier"].values[0] + str(data["flight"].values[0]),
             operator=data["name"].values[0],
@@ -81,11 +81,11 @@ class Generator:
         )
         print("Runway created with bearing {} and length {}".format(bearing, length))
 
-    def run_generation(self, simulation_time=timezone.now()):
+    def run_generation(self, simulation_time=timezone.now(), random_events=False):
         while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
                self.inbound_per_hour > 0):
-            self.generate_aircraft(is_arrival=True).save()
+            self.generate_aircraft(is_arrival=True, random_events=random_events).save()
 
         while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_outbound and
                self.outbound_per_hour > 0):
-            self.generate_aircraft(is_arrival=False).save()
+            self.generate_aircraft(is_arrival=False, random_events=random_events).save()

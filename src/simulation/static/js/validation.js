@@ -1,9 +1,11 @@
+//Script to validate the inputs in the form, ready to send to backend
+
 document.addEventListener("DOMContentLoaded", function() {
     const configForm = document.getElementById('config-form');
     const errorContainer = document.getElementById('error-message');
 
     configForm.addEventListener('submit', function(event) {
-        // Clear previous errors
+        // Clear any previous errors
         errorContainer.style.display = 'none';
         errorContainer.textContent = '';
         
@@ -20,16 +22,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
         //Protection against negative flows
         if (inboundFlow < 0 || outboundFlow < 0) {
-            errorMsg = "Error: Flight flow rates per hour cannot be negative values.";
+            errorMsg = "Error: Flight rates per hour cannot be negative values.";
         }
         
         // Limit the number of runways (1-10)
         else if ((numRunways_mixed + numRunways_to + numRunways_la) < 1 || (numRunways_mixed + numRunways_to + numRunways_la) > 10) {
-            errorMsg = "Error: The number of operational runways must be strictly between 1 and 10.";
+            errorMsg = "Error: The number of runways must be between 1 and 10.";
         }
-
-        else if (max_wait < 0){
-            errorMsg = "Error: Flight must not have a negative max wait time";
+        //Ensures max wait is not 0 or less
+        else if (max_wait < 1){
+            errorMsg = "Error: Flight must not have a negative or zero max wait time";
 
         }
 

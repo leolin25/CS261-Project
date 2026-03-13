@@ -56,19 +56,19 @@
         </thead>
         <tbody>
         <tr>
-          <td>Max planes in take-Off queue</td>
+          <td>Max Planes In Take-Off Queue</td>
           <td id="maxintakeoffQ"></td>
         </tr>
         <tr>
-          <td>Max planes in holding pattern</td>
+          <td>Max Planes In Holding Pattern</td>
           <td id="maxinholding"></td>
         </tr>        
         <tr>
-          <td>Average arrival delay</td>
+          <td>Average Arrival Delay</td>
           <td id="averagearrivaldelay"></td>
         </tr>        
         <tr>
-          <td>Average departure delay</td>
+          <td>Average Departure Delay</td>
           <td id="averagedeparturedelay"></td>
         </tr>
         <tr>
@@ -88,6 +88,7 @@
   <div>
     <table id="takeoffTable" class="individualTables">
         <caption>Take-Off Queue</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -95,6 +96,7 @@
             <th>Expected Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in takeoffQ %}
         <tr>
@@ -109,7 +111,8 @@
   </div>
   <div>
     <table id="holdingpatternTable" class="individualTables">
-        <caption>Holding pattern</caption>
+        <caption>Holding Pattern</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -119,6 +122,7 @@
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in holdingpattern %}
         <tr>
@@ -142,6 +146,7 @@
   <div>
     <table id="takeoffScheduleTable" class="individualTables">
         <caption>Take-Off Schedule</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -149,6 +154,7 @@
             <th>Expected Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in takeoffSchedule %}
         <tr>
@@ -164,6 +170,7 @@
   <div>
     <table id="landingScheduleTable" class="individualTables">
         <caption>Landing Schedule</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -173,6 +180,7 @@
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in landingSchedule %}
         <tr>
@@ -199,6 +207,7 @@
   <div>
     <table id="departedTable" class="individualTables">
         <caption>Recent Departures</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -206,6 +215,7 @@
             <th>Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in departed %}
         <tr>
@@ -221,12 +231,14 @@
   <div>
     <table id="landedTable" class="individualTables">
         <caption>Recently Landed</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
             <th>Arrival Time</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in landed %}
         <tr>
@@ -242,6 +254,7 @@
     <div>
     <table id="cancelledTable" class="individualTables">
         <caption>Recently Cancelled</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -249,6 +262,7 @@
             <th>Previously Expected Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in cancelled %}
         <tr>
@@ -264,12 +278,14 @@
   <div>
     <table id="divertedTable" class="individualTables">
         <caption>Recently Diverted</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
             <th>Previously Expected Arrival Time</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in diverted %}
         <tr>

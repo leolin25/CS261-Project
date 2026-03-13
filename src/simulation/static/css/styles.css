@@ -134,6 +134,11 @@ table {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
+th {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 
 tr,th {
     height: 50px;   

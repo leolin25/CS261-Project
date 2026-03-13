@@ -34,15 +34,16 @@ class ArrivalController:
         Aircraft.objects.bulk_update(queue,['altitude'])
 
     @staticmethod
-    def update_aircraft_diversions():
+    def update_aircraft_diversions(simulation_time):
         aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=10)
         num_diverted = 0
         for aircraft in aircrafts:
             aircraft.zone_status = 'DIVERTED'
             aircraft.altitude = 0 #reset altitude when it leaves stack
+            aircraft.final_state_time = simulation_time
             num_diverted += 1
             print(f"Flight {aircraft.callsign} diverted due to low fuel")
-        Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+        Aircraft.objects.bulk_update(aircrafts, ['zone_status', 'final_state_time'])
 
         if num_diverted > 0:
             #if a plane leaves the stack then the gap between planes should to be closed

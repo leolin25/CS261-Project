@@ -16,9 +16,10 @@ class DepartureController:
             wait_duration = (simulation_time - aircraft.queue_entry_time).total_seconds() / 60
             if wait_duration > self.max_wait:
                 aircraft.zone_status = 'CANCELLED'
+                aircraft.final_state_time = simulation_time
                 number_cancelled += 1
                 print("Flight {} cancelled".format(aircraft.callsign))
-        Aircraft.objects.bulk_update(aircrafts, ['zone_status'])
+        Aircraft.objects.bulk_update(aircrafts, ['zone_status', 'final_state_time'])
 
         # Update max cancelled stat if any cancellations occurred
         if number_cancelled > 0:

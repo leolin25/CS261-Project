@@ -65,6 +65,7 @@ class RunwayController:
             
             # Erase the runway from the plane's memory
             aircraft.assigned_runway = None
+            aircraft.final_state_time = simulation_time
             # Move the plane to the next zone
             if aircraft.zone_status == 'RUNWAY_LA':
                 aircraft.zone_status = 'LANDED'

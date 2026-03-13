@@ -7,6 +7,8 @@
         <h2>Airport Simulation Configuration</h2>
         <p>Please define the airport parameters below to begin a new traffic management simulation.</p>
         
+        <!--Post form to send to backend the input parameters
+        Form performs its own checks, also checked in backend-->
         <form action="{% url 'home' %}" method="POST" id="config-form">
             {% csrf_token %}
             
@@ -23,7 +25,7 @@
             </div>
 
             <div class="form-section">
-                <h3>Runway Configuration (Max 10 Runways)</h3>
+                <h3>Runway Configuration (Max 10 Runways Total)</h3>
                 <div class="form-group">
                     <label for="num_runways_mixed">Number of Mixed Runways:</label>
                     <input type="number" id="num_runways_mixed" name="num_runways_mixed" min="0" max="10" required placeholder="e.g., 2">
@@ -42,13 +44,13 @@
                 
                 <div class="form-group">
                     <label for="max_wait">Max Wait Time Before Take-Off Cancelled(mins):</label>
-                    <input type="number" id="max_wait" name="max_wait" min="0" required placeholder="e.g., 30">
+                    <input type="number" id="max_wait" name="max_wait" min="1" required placeholder="e.g., 30">
                 </div>
 
                 
                 <div class="form-group checkbox-group">
                     <input type="checkbox" id="random_events" name="random_events">
-                    <label for="random_events">Enable Random Events (Mechanical failures, inspections)</label>
+                    <label for="random_events">Enable Random Events For Aircraft (Mechanical Failures, Passenger Sickness etc)</label>
                 </div>
             </div>
 

@@ -7,9 +7,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .generation import Generator
-from .serializers import SampleDataSerializer, RunwaySerializer
+from .serializers import AircraftSerializer, RunwaySerializer
 from .control import Controller
-from .models import Aircraft, Runway, RunConfig
+from .models import Aircraft, Runway, RunConfig, RunStats
 
 
 class HomeView(View):
@@ -60,31 +60,81 @@ class HomeView(View):
             return False
         if "max_wait" not in data:
             return False
-        if int(data["max_wait"]) <= 0:
+        if int(data["max_wait"]) < 1:
             return False
         return True
 
 
-def results(request):
-    template = loader.get_template('pages/results.html')
-    context = {
-        'inperhour': '15',
-        'outperhour': '15',
-        'numrunways': '10',
-        'mixedorsingle': 'MIXED',
-        'randomevents': 'OFF',
+class ResultsView(View):
+    def get(self, request):
+        template = loader.get_template('pages/results.html')
 
-        'maxintakeoffQ': '10',
-        'maxinlandingQ': '15',
-        'maxinholding': '20',
-        'averagehold': '10',
-        'maxdelay': '60',
-        'averagedelay': '10',
-        'delayvariance': '3',
-        'delayrange': '40',
-        'numdiverted': '12',
-    }
-    return HttpResponse(template.render(context, request))
+        try:
+            stats = RunStats.objects.get(id=1)
+        except RunStats.DoesNotExist:
+            return render(request, 'pages/results.html')
+
+        config = RunConfig.objects.last()
+        if not config:
+            return render(request, 'pages/results.html')
+
+        context = {
+            'inperhour': config.inbound_per_hour,
+            'outperhour': config.outbound_per_hour,
+            'nummixedrunways': config.runways_mixed,
+            'numtakeoffrunways': config.runways_takeoff,
+            'numlandingrunways': config.runways_landing,
+            'maxwait': config.max_wait,
+            'randomevents': 'On' if config.random_events else 'Off',
+
+            'totaldeparted': stats.departure_num,
+            'totallanded': stats.arrival_num,
+            'maxintakeoffQ': stats.max_num_takeoff_queue,
+            'maxinholding': stats.max_num_holding_pattern,
+            'averagetakeoffqtime': round(stats.sum_takeoff_queue_time_mins / stats.takeoff_num,2) if stats.takeoff_num > 0 else 0,
+            'averageholdingpatterntime': round(stats.sum_holding_time_mins / stats.holding_num,2) if stats.holding_num > 0 else 0,
+            'averagedeparturedelay': round(stats.sum_departure_delay_mins / stats.departure_num,2) if stats.departure_num > 0 else 0,
+            'averagearrivaldelay': round(stats.sum_arrival_delay_mins / stats.arrival_num,2) if stats.arrival_num > 0 else 0,
+            'largestdeparturedelay': stats.max_departure_delay,
+            'largestarrivaldelay': stats.max_arrival_delay_mins,
+            'takeoffqtimevariance': round(stats.takeoff_queue_time_variance,2),
+            'departurevariance': round(stats.departure_delay_variance,2),
+            'holdtimevariance': round(stats.holding_time_variance,2),
+            'arrivalvariance': round(stats.arrival_delay_variance,2),
+            'numcancelled': stats.max_num_cancelled,
+            'numdiverted': stats.max_num_diverted,
+        }
+        return HttpResponse(template.render(context, request))
+
+    def post(self, request):
+        #Run with same config
+        #No need to validate since the same input already
+        data = json.loads(request.body)    
+        print (data.get('num_runways_mixed'))         
+        runways_mixed = int(data.get('num_runways_mixed'))
+        runways_takeoff = int(data.get('num_runways_to'))
+        runways_landing = int(data.get('num_runways_la'))
+        runways = runways_mixed + runways_takeoff + runways_landing
+        inbound = int(data.get('inbound_flow'))
+        outbound = int(data.get('outbound_flow'))
+        max_wait = int(data.get('max_wait'))
+        random_events_init = data.get('random_events')
+        if random_events_init == "ON":
+            random_events = True
+        else:
+            random_events = False
+        RunConfig.objects.all().delete()
+        RunConfig.objects.create(
+            runways=runways,
+            runways_mixed=runways_mixed,
+            runways_takeoff=runways_takeoff,
+            runways_landing=runways_landing,
+            inbound_per_hour=inbound,
+            outbound_per_hour=outbound,
+            max_wait=max_wait,
+            random_events=random_events,
+        )
+        return redirect('simulation')   
 
 
 def simulation(request):
@@ -102,7 +152,7 @@ def simulation(request):
 
 
 class GetSampleData(APIView):
-    serializer_class = SampleDataSerializer
+    serializer_class = AircraftSerializer
 
     def get(self, request):
         generator = Generator(2, 15, 15)
@@ -124,7 +174,7 @@ class StreamView(View):
                 flight_data = controller.get_stream_data()
                 controller.update_configuration()
 
-                serializer = SampleDataSerializer(flight_data, many=True)
+                serializer = AircraftSerializer(flight_data, many=True)
                 payload = {
                     "time": controller.get_simulation_time().isoformat(),
                     "flights": serializer.data,
@@ -204,3 +254,22 @@ class ChangeTimescaleView(APIView):
         config.timescale = timescale
         config.save()
         return Response({"message": f"Timescale changed to {timescale}"}, status=status.HTTP_200_OK)
+
+
+class LiveResultsView(APIView):
+    def get(self, request):
+        try:
+            stats = RunStats.objects.get(id=1)
+        except RunStats.DoesNotExist:
+            return Response({"error": "Stats not found"}, status=status.HTTP_404_NOT_FOUND)
+        mean_arrival_delay = stats.sum_arrival_delay_mins / stats.arrival_num if stats.arrival_num > 0 else 0
+        mean_departure_delay = stats.sum_departure_delay_mins / stats.departure_num if stats.departure_num > 0 else 0
+        data = {
+            "mean_arrival_delay": mean_arrival_delay,
+            "mean_departure_delay": mean_departure_delay,
+            "max_takeoff_queue": stats.max_num_takeoff_queue,
+            "max_holding_queue": stats.max_num_holding_pattern,
+            "cancelled": stats.max_num_cancelled,
+            "diverted": stats.max_num_diverted
+        }
+        return Response(data, status=status.HTTP_200_OK)

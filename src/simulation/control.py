@@ -38,6 +38,7 @@ class Controller:
             self.takeoff_duration,
             self.fuel_risk_threshold,
             self.takeoff_risk_threshold,
+            self.max_wait,
         )
         self.departure_controller = DepartureController(
             self.runway_controller,
@@ -71,6 +72,7 @@ class Controller:
             self.runway_controller.takeoff_duration = self.takeoff_duration
             self.runway_controller.fuel_risk_threshold = self.fuel_risk_threshold
             self.runway_controller.takeoff_risk_threshold = self.takeoff_risk_threshold
+            self.runway_controller.max_wait = self.max_wait
             self.departure_controller.max_wait = self.max_wait
         return True
 
@@ -101,9 +103,15 @@ class Controller:
 
 
     @staticmethod
-    def get_stream_data():
-        flights = Aircraft.objects.all().filter(zone_status__in=["QUEUE_TO", "QUEUE_LA", "RUNWAY_TO", "RUNWAY_LA"])
-        return list(flights)
+    def get_stream_data(limit=5):
+        flights = Aircraft.objects.all().filter(zone_status__in=["QUEUE_TO", "QUEUE_LA", "RUNWAY_TO", "RUNWAY_LA"]).order_by('queue_entry_time')
+        arrivals_schedule = Aircraft.objects.filter(scheduled_arrival__isnull=False, zone_status="SCHEDULED").order_by('scheduled_arrival')[:limit]
+        departures_schedule = Aircraft.objects.filter(scheduled_departure__isnull=False, zone_status="SCHEDULED").order_by('scheduled_departure')[:limit]
+        arrivals = Aircraft.objects.filter(zone_status="LANDED").order_by('-final_state_time')[:limit]
+        departures = Aircraft.objects.filter(zone_status="DEPARTED").order_by('-final_state_time')[:limit]
+        cancelled = Aircraft.objects.filter(zone_status="CANCELLED").order_by('-final_state_time')[:limit]
+        diverted = Aircraft.objects.filter(zone_status="DIVERTED").order_by('-final_state_time')[:limit]
+        return list(flights) + list(arrivals_schedule) + list(departures_schedule) + list(arrivals) + list(departures) + list(cancelled) + list(diverted)
     
 
     def run_simulation(self):
@@ -114,7 +122,7 @@ class Controller:
         self.update_aircraft_statuses()
         self.departure_controller.update_aircraft_cancellations(self.simulation_time)
         self.arrival_controller.update_aircraft_fuel(self.simulation_time)
-        self.arrival_controller.update_aircraft_diversions()
+        self.arrival_controller.update_aircraft_diversions(self.simulation_time)
         self.runway_controller.optimise_runway_mode(self.simulation_time)
         self.departure_controller.process_departures(self.simulation_time)
         self.arrival_controller.process_arrivals(self.simulation_time)

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Aircraft, Runway
 
-class SampleDataSerializer(serializers.ModelSerializer):
+class AircraftSerializer(serializers.ModelSerializer):
     class Meta:
         model = Aircraft
         fields = (
@@ -17,7 +17,8 @@ class SampleDataSerializer(serializers.ModelSerializer):
             'fuel_mins',
             'emergency_status',
             'zone_status',
-            'last_update'
+            'last_update',
+            'final_state_time',
         )
 
 

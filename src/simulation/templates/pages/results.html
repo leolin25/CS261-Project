@@ -2,6 +2,8 @@
  
 {% block content %}
 
+{% csrf_token %}
+
 <h2>Summary Screen</h2>
 
 
@@ -16,24 +18,32 @@
 
         </tr>
         <tr>
-            <td>Inbound flights per hour</td>
+            <td>Inbound Flights Per Hour</td>
             <td>{{inperhour}}</td>
         </tr>
         <tr>
-            <td>Outbound flights per hour</td>
+            <td>Outbound Flights Per Hour</td>
             <td>{{outperhour}}</td>
         </tr>
         <tr>
-            <td>Runways Operational</td>
-            <td>{{numrunways}}</td>
+            <td>Num Mixed Runways</td>
+            <td>{{nummixedrunways}}</td>
         </tr>
         <tr>
-            <td>Mixed use / Single use runways</td>
-            <td>{{mixedorsingle}}</td>
+            <td>Num Take-Off Only Runways</td>
+            <td>{{numtakeoffrunways}}</td>
+        </tr>
+        <tr>
+            <td>Num Landing Only Runways</td>
+            <td>{{numlandingrunways}}</td>
         </tr>
         <tr>
             <td>Random Events</td>
             <td>{{randomevents}}</td>
+        </tr>
+        <tr>
+            <td>Max Wait Before Cancellation</td>
+            <td>{{maxwait}}</td>
         </tr>
     </table>
   </div>
@@ -46,28 +56,44 @@
 
         </tr>
         <tr>
-            <td>Max planes in takeoff queue</td>
+            <td>Total Departed</td>
+            <td>{{totaldeparted}}</td>
+        </tr>
+        <tr>
+            <td>Total Landed</td>
+            <td>{{totallanded}}</td>
+        </tr>
+        <tr>
+            <td>Max Planes In Take-Off Queue</td>
             <td>{{maxintakeoffQ}}</td>
         </tr>
         <tr>
-            <td>Max planes in landing queue</td>
-            <td>{{maxinlandingQ}}</td>
-        </tr>
-        <tr>
-            <td>Max Planes in holding pattern</td>
+            <td>Max Planes In Holding Pattern</td>
             <td>{{maxinholding}}</td>
         </tr>
         <tr>
-            <td>Average hold time</td>
-            <td>{{averagehold}}</td>
+            <td>Average Takeoff Queue Time</td>
+            <td>{{averagetakeoffqtime}}</td>
         </tr>
         <tr>
-            <td>Max delay</td>
-            <td>{{maxdelay}}</td>
+            <td>Average Holding Pattern Time</td>
+            <td>{{averageholdingpatterntime}}</td>
         </tr>
         <tr>
-            <td>Average delay</td>
-            <td>{{averagedelay}}</td>
+            <td>Average Departure Delay</td>
+            <td>{{averagedeparturedelay}}</td>
+        </tr>
+        <tr>
+            <td>Average Arrival Delay</td>
+            <td>{{averagearrivaldelay}}</td>
+        </tr>
+        <tr>
+            <td>Largest Departure Delay</td>
+            <td>{{largestdeparturedelay}}</td>
+        </tr>
+        <tr>
+            <td>Largest Arrival Delay</td>
+            <td>{{largestarrivaldelay}}</td>
         </tr>
     </table>
   </div>
@@ -80,15 +106,27 @@
 
         </tr>
         <tr>
-            <td>Delay variance</td>
-            <td>{{delayvariance}}</td>
+            <td>Take-Off Queue Time Variance</td>
+            <td>{{takeoffqtimevariance}}</td>
         </tr>
         <tr>
-            <td>Delay range</td>
-            <td>{{delayrange}}</td>
+            <td>Departure Variance</td>
+            <td>{{departurevariance}}</td>
         </tr>
         <tr>
-            <td>Planes diverted</td>
+            <td>Hold Time Variance</td>
+            <td>{{holdtimevariance}}</td>
+        </tr>
+        <tr>
+            <td>Arrival Variance</td>
+            <td>{{arrivalvariance}}</td>
+        </tr>
+        <tr>
+            <td>Planes Cancelled</td>
+            <td>{{numcancelled}}</td>
+        </tr>
+        <tr>
+            <td>Planes Diverted</td>
             <td>{{numdiverted}}</td>
         </tr>
 
@@ -97,16 +135,52 @@
 </div>
 <div class="resultcontainer">
     <div>
-        <button type="button" class="btn-submit">Save Configuration</button>
-    </div>
-    <div>
         <button type="button" onclick="location.href = '/'" class="btn-submit">Run New Configuration</button>
     </div>
     <div>
-        <button type="button" class="btn-submit">Replay Same Configuration</button>
+        <button type="button" onclick="sameConfig()"class="btn-submit">Replay Same Configuration</button>
     </div>
 </div>
 
+<script>
+const nummixedrunways = "{{nummixedrunways}}"; 
+const numtakeoffrunways = "{{numtakeoffrunways}}"; 
+const numlandingrunways = "{{numlandingrunways}}"; 
+const inperhour = "{{inperhour}}"; 
+const outperhour = "{{outperhour}}"; 
+const randomevents = "{{randomevents}}"; 
+const maxwait = "{{maxwait}}"; 
+
+const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+async function sameConfig() {
+    const url = "/results/";
+    fetch(url, {
+        method: "POST",
+        headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json', 
+        },
+        redirect: 'follow',
+        body: JSON.stringify({
+        num_runways_mixed: nummixedrunways,
+        num_runways_la: numlandingrunways,
+        num_runways_to: numtakeoffrunways,
+        inbound_flow: inperhour,
+        outbound_flow: outperhour,
+        random_events: randomevents,
+        max_wait:maxwait,
+        }),
+    })
+    .then(response =>{
+    if (response.redirected) {
+        window.location.href = response.url;
+    }
+    })
+}
+
+
+</script>
 
 
     

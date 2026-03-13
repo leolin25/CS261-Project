@@ -55,6 +55,7 @@ class Aircraft(models.Model):
     zone_status = models.CharField(max_length=20, choices=ZONE_CHOICES)
 
     last_update = models.DateTimeField()
+    final_state_time = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.callsign} ({self.zone_status})"
@@ -114,7 +115,7 @@ class RunConfig(models.Model):
     landing_duration = models.IntegerField(default=45)
     takeoff_duration = models.IntegerField(default=45)
     fuel_risk_threshold = models.IntegerField(default=20)
-    takeoff_risk_threshold = models.IntegerField(default=25)
+    takeoff_risk_threshold = models.IntegerField(default=10)
     random_events = models.BooleanField()
     stop = models.BooleanField(default=False)
 
@@ -165,39 +166,55 @@ class RunStats(models.Model):
     # The second parameter "indicator", can be set between 0-3 corresponding to 
     # holding time, takeoff queue time, arrival delay, departure delay.
     def add_stats(self, new_num, indicator):
-        delta = 0
-        
         # Indicator = 0 means input parameter stores holding time value
         if indicator == 0:
-            self.sum_holding_time_mins += new_num 
-            self.holding_num += 1
-            delta = (new_num - self.holding_mean)
-            self.holding_mean += delta / self.holding_num
-            self.holding_time_variance += (new_num - self.holding_mean) * delta 
+            new_count = self.holding_num + 1
+            new_sum = self.sum_holding_time_mins + new_num
+            new_mean = new_sum / new_count
+            alpha = (self.holding_num - 1) * self.holding_time_variance
+            beta = (new_num - self.holding_mean) * (new_num - new_mean)
+            self.holding_time_variance = ((alpha + beta) / self.holding_num) if self.holding_num > 0 else 0.0
+            self.holding_num = new_count
+            self.sum_holding_time_mins = new_sum
+            self.holding_mean = new_mean
         
         # Indicator = 1 means input parameter stores takeoff queue wait time value
         elif indicator == 1:
-            self.sum_takeoff_queue_time_mins += new_num
-            self.takeoff_num += 1
-            delta = (new_num - self.takeoff_mean)
-            self.takeoff_mean += delta / self.takeoff_num
-            self.takeoff_queue_time_variance += (new_num - self.takeoff_mean) * delta
+            new_count = self.takeoff_num + 1
+            new_sum = self.sum_takeoff_queue_time_mins + new_num
+            new_mean = new_sum / new_count
+            alpha = (self.takeoff_num - 1) * self.takeoff_queue_time_variance
+            beta = (new_num - self.takeoff_mean) * (new_num - new_mean)
+            self.takeoff_queue_time_variance = ((alpha + beta) / self.takeoff_num) if self.takeoff_num > 0 else 0.0
+            self.takeoff_num = new_count
+            self.sum_takeoff_queue_time_mins = new_sum
+            self.takeoff_mean = new_mean
         
         # Indicator = 2 means input parameter stores arrival delay value
         elif indicator == 2:
-            self.sum_arrival_delay_mins += max(0, new_num) # only consider delay, not early arrivals
-            self.arrival_num += 1
-            delta = (new_num - self.arrival_mean)
-            self.arrival_mean += delta / self.arrival_num
-            self.arrival_delay_variance += (new_num - self.arrival_mean) * delta
+            new_num = max(0, new_num) # only consider delay, not early arrivals
+            new_count = self.arrival_num + 1
+            new_sum = self.sum_arrival_delay_mins + new_num
+            new_mean = new_sum / new_count
+            alpha = (self.arrival_num - 1) * self.arrival_delay_variance
+            beta = (new_num - self.arrival_mean) * (new_num - new_mean)
+            self.arrival_delay_variance = ((alpha + beta) / self.arrival_num) if self.arrival_num > 0 else 0.0
+            self.arrival_num = new_count
+            self.sum_arrival_delay_mins = new_sum
+            self.arrival_mean = new_mean
         
         # Indicator = 3 means input parameter stores departure delay value
         elif indicator == 3:
-            self.sum_departure_delay_mins += max(0, new_num) # only consider delay, not early departures
-            self.departure_num += 1
-            delta = (new_num - self.departure_mean)
-            self.departure_mean += delta / self.departure_num
-            self.departure_delay_variance += (new_num - self.departure_mean) * delta
+            new_num = max(0, new_num)
+            new_count = self.departure_num + 1
+            new_sum = self.sum_departure_delay_mins + new_num
+            new_mean = new_sum / new_count
+            alpha = (self.departure_num - 1) * self.departure_delay_variance
+            beta = (new_num - self.departure_mean) * (new_num - new_mean)
+            self.departure_delay_variance = ((alpha + beta) / self.departure_num) if self.departure_num > 0 else 0.0
+            self.departure_num = new_count
+            self.sum_departure_delay_mins = new_sum
+            self.departure_mean = new_mean
 
         self.save()
 

@@ -134,6 +134,11 @@ table {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
 }
 
+th {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 
 tr,th {
     height: 50px;   
@@ -145,7 +150,7 @@ th {
 }
 
 caption{
-    font-size: 40px;
+    font-size: 38px;
     padding: 10px;
 }
 
@@ -215,7 +220,7 @@ caption{
 .recentcontainer div {
   background-color: white;
   margin: 15px;
-  padding: 50px;
+  padding: 15px;
   font-size: 15px;
   flex: 1;
   width: 0;
@@ -417,3 +422,42 @@ caption{
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.statscontainer {
+  display: flex;
+  background-color: #ffffff;
+  justify-content: space-evenly;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+#livestatstable {
+    width: 50%;
+    margin: 25px 0;
+    border-radius: 5px;
+    border: 1px solid black;
+
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+#livestatstable thead tr {
+    color: #ffffff;
+    text-align: left;
+        border-radius: 5px;
+
+}
+
+
+
+#livestatstable tbody tr {
+    border-bottom: 1px solid #dddddd;
+        border-radius: 5px;
+
+}
+
+#livestatstable tbody tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+

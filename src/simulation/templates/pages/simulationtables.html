@@ -43,11 +43,52 @@
   </div>
 -->
 
+<!--Live stats-->
+<button type="button" class="collapsible">Live Stats</button>
+<div class="statscontainer">
+    <table id="livestatstable" class="individualTables">
+        <caption>Live Stats</caption>
+        <thead>
+          <tr>
+              <th>Statistic</th>
+              <th style="width:50%">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr>
+          <td>Max Planes In Take-Off Queue</td>
+          <td id="maxintakeoffQ"></td>
+        </tr>
+        <tr>
+          <td>Max Planes In Holding Pattern</td>
+          <td id="maxinholding"></td>
+        </tr>        
+        <tr>
+          <td>Average Arrival Delay</td>
+          <td id="averagearrivaldelay"></td>
+        </tr>        
+        <tr>
+          <td>Average Departure Delay</td>
+          <td id="averagedeparturedelay"></td>
+        </tr>
+        <tr>
+          <td>Total Cancelled</td>
+          <td id="totalcancelled"></td>
+        </tr>
+          <tr>
+          <td>Total Diverted</td>
+          <td id="totaldiverted"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
 <button type="button" class="collapsible">Flights in Simulation</button>
 <div class="simulationcontainer">
   <div>
     <table id="takeoffTable" class="individualTables">
         <caption>Take-Off Queue</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -55,6 +96,7 @@
             <th>Expected Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in takeoffQ %}
         <tr>
@@ -69,7 +111,8 @@
   </div>
   <div>
     <table id="holdingpatternTable" class="individualTables">
-        <caption>Holding pattern</caption>
+        <caption>Holding Pattern</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -79,6 +122,7 @@
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in holdingpattern %}
         <tr>
@@ -95,13 +139,13 @@
     </table>
   </div>
 </div>
-<!--
-<button type="button" class="collapsible">Schedule</button>
+<button type="button" class="collapsible">Schedule (Next 5 For Each)</button>
 
 <div class="simulationcontainer">
   <div>
     <table id="takeoffScheduleTable" class="individualTables">
         <caption>Take-Off Schedule</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
@@ -109,6 +153,7 @@
             <th>Expected Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in takeoffSchedule %}
         <tr>
@@ -124,15 +169,16 @@
   <div>
     <table id="landingScheduleTable" class="individualTables">
         <caption>Landing Schedule</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
             <th>Expected Arrival Time</th>
-            <th>Altitude</th>
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in landingSchedule %}
         <tr>
@@ -140,7 +186,6 @@
             <td>{{x.operator}}</td>
             <td>{{x.origin}}</td>
             <td>{{x.scheduledArrival}}</td>
-            <td>{{x.altitude}}</td>
             <td>{{x.fuelRemaining}}</td>
             <td>{{x.emergencyStatus}}</td>
         </tr>
@@ -149,23 +194,25 @@
     </table>
   </div>
 </div>
--->
+
 
 <!--Recently Cancelled, Diverted, Landed or taken off flights-->
-<!--
-<button type="button" class="collapsible">Recently Departed, Landed, Cancelled or Diverted</button>
+<button type="button" class="collapsible">Recently Departed, Landed, Cancelled or Diverted (5 Most Recent)</button>
 
 <div class="recentcontainer">
   <div>
     <table id="departedTable" class="individualTables">
         <caption>Recent Departures</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Destination</th>
-            <th>Departure Time</th>
+            <th>Scheduled Departure Time</th>
+            <th>Actual Departure Time</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in departed %}
         <tr>
@@ -181,12 +228,15 @@
   <div>
     <table id="landedTable" class="individualTables">
         <caption>Recently Landed</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
-            <th>Arrival Time</th>
+            <th>Scheduled Arrival Time</th>
+            <th>Actual Arrival Time</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in landed %}
         <tr>
@@ -202,13 +252,16 @@
     <div>
     <table id="cancelledTable" class="individualTables">
         <caption>Recently Cancelled</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Destination</th>
-            <th>Previously Expected Departure Time</th>
+            <th>Expected Departure Time</th>
+            <th>Time Flight Cancelled</th>
 
         </tr>
+        </thead>
         <tbody>
         {% for x in cancelled %}
         <tr>
@@ -224,12 +277,15 @@
   <div>
     <table id="divertedTable" class="individualTables">
         <caption>Recently Diverted</caption>
+        <thead>
         <tr>
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
-            <th>Previously Expected Arrival Time</th>
+            <th>Expected Arrival Time</th>
+            <th>Time Flight Diverted</th>
         </tr>
+        </thead>
         <tbody>
         {% for x in diverted %}
         <tr>
@@ -244,7 +300,6 @@
   </div>
 </div>
 
--->
 
 <script>
 
@@ -257,7 +312,7 @@ const timedisplay = document.getElementById("datetimedisplaybox");
 
 /*
 const runwayTest = document.getElementById("runwayTestTable");
-
+*/
 const takeoffSchedule = document.getElementById("takeoffScheduleTable");
 const landingSchedule = document.getElementById("landingScheduleTable");
 
@@ -265,7 +320,7 @@ const departed = document.getElementById("departedTable");
 const landed = document.getElementById("landedTable");
 const cancelled = document.getElementById("cancelledTable");
 const diverted = document.getElementById("divertedTable");
-*/
+
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
@@ -299,6 +354,8 @@ if(typeof(EventSource) !== "undefined") {
           runwayTest.deleteRow(1);
       }
 
+      */
+
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
       }
@@ -323,11 +380,10 @@ if(typeof(EventSource) !== "undefined") {
       while (diverted.rows.length > 1) {
           diverted.deleteRow(1);
       }
-*/
+
       var payload = JSON.parse(event.data);
       var flightspayload = payload.flights;
       var timepayload = payload.time;
-      console.log(timepayload);
 
       
       //Deal with time coming through
@@ -338,7 +394,6 @@ if(typeof(EventSource) !== "undefined") {
       timedisplaytext += date
       timedisplaytext += " "
       timedisplaytext += time
-      console.log(timedisplaytext);
       timedisplay.innerHTML = timedisplaytext
 
 
@@ -393,7 +448,7 @@ if(typeof(EventSource) !== "undefined") {
           c5.innerText = flight.fuel_mins
           c6.innerText = flight.emergency_status
 
-        } /*else if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
+        } else if(flight.scheduled_departure != null && flight.zone_status == "SCHEDULED"){
             //If scheduled and no departure, put in takeoff schedule
           var row =takeoffSchedule.insertRow(-1);
           var c0 = row.insertCell(0);
@@ -422,7 +477,6 @@ if(typeof(EventSource) !== "undefined") {
           var c3 = row.insertCell(3);
           var c4 = row.insertCell(4);
           var c5 = row.insertCell(5);
-          var c6 = row.insertCell(6);
 
 
           c0.innerText = flight.callsign
@@ -436,11 +490,11 @@ if(typeof(EventSource) !== "undefined") {
           text += " "
           text += time
           c3.innerText = text
-          c4.innerText = flight.altitude
-          c5.innerText = flight.fuel_mins
-          c6.innerText = flight.emergency_status
+          c4.innerText = flight.fuel_mins
+          c5.innerText = flight.emergency_status
 
-        } */else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
+        } else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
+          //Flights actively in a runway
           //Put in test table
 
           /*
@@ -471,25 +525,39 @@ if(typeof(EventSource) !== "undefined") {
           } else {
               console.warn(`Runway element for ${flight.assigned_runway} not found.`);
           }
-        }/*else if(flight.zone_status == "DEPARTED"){
+
+
+        }else if(flight.zone_status == "DEPARTED"){
+          console.log(flight)
+
           //Departed table
           var row =departed.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
+
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          let timestamp = new Date(flight.queue_entry_time);
+          let scheduledtimestamp = new Date(flight.scheduled_departure);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
+          let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
           let text = ""
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
         }else if(flight.zone_status == "LANDED"){
             //Landed table
@@ -498,18 +566,28 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
+
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          let timestamp = new Date(flight.queue_entry_time);
+          let scheduledtimestamp = new Date(flight.scheduled_arrival);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
+          let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
           let text = ""
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
 
         } else if(flight.zone_status == "CANCELLED"){
@@ -519,18 +597,27 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
-          let timestamp = new Date(flight.queue_entry_time);
+          let scheduledtimestamp = new Date(flight.scheduled_departure);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
+          let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
           let text = ""
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
         }else if (flight.zone_status == "DIVERTED"){
           //Diverted table
@@ -539,21 +626,30 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
-          let timestamp = new Date(flight.queue_entry_time);
+          let scheduledtimestamp = new Date(flight.scheduled_arrival);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
+          let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
           let text = ""
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
 
-        }*/
+        }
 
 
       }
@@ -764,6 +860,50 @@ slider.onchange = function() {
     }),
   })
 }
+
+
+//Live stats
+
+const maxintakeoffQ = document.getElementById("maxintakeoffQ");
+const maxinholding = document.getElementById("maxinholding");
+const averagearrivaldelay = document.getElementById("averagearrivaldelay");
+const averagedeparturedelay = document.getElementById("averagedeparturedelay");
+const totalcancelled = document.getElementById("totalcancelled");
+const totaldiverted = document.getElementById("totaldiverted");
+
+
+setInterval(updateStats, 5000);
+
+async function updateStats() {
+    getLiveStatsData().then(liveData => {
+      console.log(liveData);
+      maxintakeoffQ.innerHTML = liveData.max_takeoff_queue;
+      maxinholding.innerHTML = liveData.max_holding_queue;
+      averagearrivaldelay.innerHTML = liveData.mean_arrival_delay.toFixed(2);
+      averagedeparturedelay.innerHTML = liveData.mean_departure_delay.toFixed(2);
+      totalcancelled.innerHTML = liveData.cancelled;
+      totaldiverted.innerHTML = liveData.diverted;
+  }
+  );
+}
+
+async function getLiveStatsData() {
+  const url = "/api/live-results/";
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    console.log(result);
+    return result;
+
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
 
 </script>
 

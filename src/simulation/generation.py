@@ -60,7 +60,8 @@ class Generator:
             fuel_mins=fuel,
             emergency_status=random_event,
             zone_status='SCHEDULED',
-            last_update=expected_time #Only need to consider plane when it enters airport zone
+            last_update=expected_time, #Only need to consider plane when it enters airport zone
+            final_state_time=None
         )
         if is_arrival:
             self.last_generated_inbound = scheduled_time

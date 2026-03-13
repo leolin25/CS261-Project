@@ -175,7 +175,6 @@
             <th>Operator</th>
             <th>Origin</th>
             <th>Expected Arrival Time</th>
-            <th>Altitude</th>
             <th>Fuel Remaining</th>
             <th>Emergency Status</th>
         </tr>
@@ -187,7 +186,6 @@
             <td>{{x.operator}}</td>
             <td>{{x.origin}}</td>
             <td>{{x.scheduledArrival}}</td>
-            <td>{{x.altitude}}</td>
             <td>{{x.fuelRemaining}}</td>
             <td>{{x.emergencyStatus}}</td>
         </tr>
@@ -210,7 +208,8 @@
             <th>Callsign</th>
             <th>Operator</th>
             <th>Destination</th>
-            <th>Departure Time</th>
+            <th>Scheduled Departure Time</th>
+            <th>Actual Departure Time</th>
 
         </tr>
         </thead>
@@ -234,7 +233,8 @@
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
-            <th>Arrival Time</th>
+            <th>Scheduled Arrival Time</th>
+            <th>Actual Arrival Time</th>
         </tr>
         </thead>
         <tbody>
@@ -257,7 +257,8 @@
             <th>Callsign</th>
             <th>Operator</th>
             <th>Destination</th>
-            <th>Previously Expected Departure Time</th>
+            <th>Expected Departure Time</th>
+            <th>Time When Flight Cancelled</th>
 
         </tr>
         </thead>
@@ -281,7 +282,8 @@
             <th>Callsign</th>
             <th>Operator</th>
             <th>Origin</th>
-            <th>Previously Expected Arrival Time</th>
+            <th>Expected Arrival Time</th>
+            <th>Time When Flight Diverted</th>
         </tr>
         </thead>
         <tbody>
@@ -475,7 +477,6 @@ if(typeof(EventSource) !== "undefined") {
           var c3 = row.insertCell(3);
           var c4 = row.insertCell(4);
           var c5 = row.insertCell(5);
-          var c6 = row.insertCell(6);
 
 
           c0.innerText = flight.callsign
@@ -489,11 +490,11 @@ if(typeof(EventSource) !== "undefined") {
           text += " "
           text += time
           c3.innerText = text
-          c4.innerText = flight.altitude
-          c5.innerText = flight.fuel_mins
-          c6.innerText = flight.emergency_status
+          c4.innerText = flight.fuel_mins
+          c5.innerText = flight.emergency_status
 
         } else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
+          //Flights actively in a runway
           //Put in test table
 
           /*
@@ -524,6 +525,8 @@ if(typeof(EventSource) !== "undefined") {
           } else {
               console.warn(`Runway element for ${flight.assigned_runway} not found.`);
           }
+
+
         }else if(flight.zone_status == "DEPARTED"){
           console.log(flight)
 
@@ -533,20 +536,28 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
+
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
+          let scheduledtimestamp = new Date(flight.scheduled_departure);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
           let timestamp = new Date(flight.final_state_time);
-          console.log(flight.final_state_time)
-          console.log(timestamp)
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
           let text = ""
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
         }else if(flight.zone_status == "LANDED"){
             //Landed table
@@ -555,10 +566,20 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
+
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
+          let scheduledtimestamp = new Date(flight.scheduled_arrival);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
           let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
@@ -566,7 +587,7 @@ if(typeof(EventSource) !== "undefined") {
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
 
         } else if(flight.zone_status == "CANCELLED"){
@@ -576,10 +597,19 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.destination
+          let scheduledtimestamp = new Date(flight.scheduled_departure);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += scheduledtime
+          c3.innerText = scheduledtext
           let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
@@ -587,7 +617,7 @@ if(typeof(EventSource) !== "undefined") {
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
         }else if (flight.zone_status == "DIVERTED"){
           //Diverted table
@@ -596,10 +626,19 @@ if(typeof(EventSource) !== "undefined") {
           var c1 = row.insertCell(1);
           var c2 = row.insertCell(2);
           var c3 = row.insertCell(3);
+          var c4 = row.insertCell(4);
 
           c0.innerText = flight.callsign
           c1.innerText = flight.operator
           c2.innerText = flight.origin
+          let scheduledtimestamp = new Date(flight.scheduled_arrival);
+          let scheduleddate = scheduledtimestamp.toLocaleDateString()
+          let scheduledtime = scheduledtimestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+          let scheduledtext = ""
+          scheduledtext += scheduleddate
+          scheduledtext += " "
+          scheduledtext += timscheduledtimee
+          c3.innerText = scheduledtext
           let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()
           let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
@@ -607,7 +646,7 @@ if(typeof(EventSource) !== "undefined") {
           text += date
           text += " "
           text += time
-          c3.innerText = text
+          c4.innerText = text
 
 
         }

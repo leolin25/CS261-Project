@@ -258,7 +258,7 @@
             <th>Operator</th>
             <th>Destination</th>
             <th>Expected Departure Time</th>
-            <th>Time When Flight Cancelled</th>
+            <th>Time Flight Cancelled</th>
 
         </tr>
         </thead>
@@ -283,7 +283,7 @@
             <th>Operator</th>
             <th>Origin</th>
             <th>Expected Arrival Time</th>
-            <th>Time When Flight Diverted</th>
+            <th>Time Flight Diverted</th>
         </tr>
         </thead>
         <tbody>
@@ -637,7 +637,7 @@ if(typeof(EventSource) !== "undefined") {
           let scheduledtext = ""
           scheduledtext += scheduleddate
           scheduledtext += " "
-          scheduledtext += timscheduledtimee
+          scheduledtext += scheduledtime
           c3.innerText = scheduledtext
           let timestamp = new Date(flight.final_state_time);
           let date = timestamp.toLocaleDateString()

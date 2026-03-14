@@ -1,67 +1,50 @@
-# Airport Modelling Project
+# Airport Modelling Project User Guide
 
-If you need help then import the code into an LLM like gemini or chatGPT: https://github.com/leolin25/CS261-Project.git
+## Step 1. Install Python
 
-These instructions are to setup the project on your own computer.
+Install python onto your computer if you have not already:
 
-## Step 1: Install Required Tools (If you don't have them)
+https://www.python.org/downloads/
 
-**1. Install Python**
-* Download specific version 3.10 or newer: https://www.python.org/downloads/
-* **IMPORTANT:** During installation, check the box that says **"Add Python to PATH"**.
+## Step 2: Extract the code 
 
-**2. Install Git (For Windows Users)**
-* Download here: https://git-scm.com/download/win
-* Install with all default settings.
-* Once installed, open your Start Menu and search for "Git Bash". Use this terminal for all the commands below.
+1. Locate the zip file and extract it
 
----
+2. Open command prompt
 
-## Step 2: Download the Code
+3. Using command prompt navigate to the newly extracted folder
 
-1.  Open your Git Bash terminal
-2.  Navigate to where you want the project (e.g., Documents):
-    ```bash
-    cd ~/Documents
-    ```
-3.  Clone the repository:
-    ```bash
-    git clone <PASTE_YOUR_GITHUB_REPO_URL_HERE>
-    ```
-4.  Enter the project folder:
-    ```bash
-    cd <YOUR_PROJECT_FOLDER_NAME>
-    ```
+```cmd
+cd Documects/CS261-Project
+```
 
-## Step 3: Set Up the Environment (Do this once)
+## Step 3: Set Up the Environment
 
-We need to create a virtual "box" (venv) for our libraries so they don't mess up your computer.
+You need to create a virtual "box" (venv) for the libraries so they don't mess up your computer.
 
 1. Create the Virtual Environment:
-```bash
+```cmd
 python -m venv venv
 ```
 
 2. Activate the environment:
-```bash
+```cmd
 source venv/Scripts/activate
 ```
 
 3. Install dependencies:
-```bash
+```cmd
 pip install -r requirements.txt
 ```
 4. Build your own copy of the database:
-```bash
+```cmd
 cd src
 python manage.py migrate
 ```
 
-----------------------------------------------------------------------------------
-STEP 4: RUN THE SIMULATION (Do this every time you work on the project)
--------------------------------------------------------
+## STEP 4: RUN THE SIMULATION (Do this every time you want to open the model)
 
-1. Open your terminal (Git Bash).
+1. Open your terminal/command prompt.
 
 2. Navigate to your project folder:
    cd ~/Documents/<YOUR_PROJECT_FOLDER_NAME>

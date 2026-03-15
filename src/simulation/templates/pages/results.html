@@ -4,10 +4,12 @@
 
 {% csrf_token %}
 
+<!--Results page, displays statistics about sim and buttons to replay sim or go to form and start again with new params.-->
+
 <h2>Summary Screen</h2>
 
 
-
+<!--Stats pages in flexbox, lots of repeated code here-->
 <div class="resultcontainer">
   <div>
     <table>
@@ -133,9 +135,12 @@
     </table>
   </div>
 </div>
+
+<!--Buttons to redirect-->
 <div class="resultcontainer">
     <div>
         <button type="button" onclick="location.href = '/'" class="btn-submit">Run New Configuration</button>
+        <!--This button takes user to form page-->
     </div>
     <div>
         <button type="button" onclick="sameConfig()"class="btn-submit">Replay Same Configuration</button>
@@ -153,8 +158,12 @@ const maxwait = "{{maxwait}}";
 
 const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
+//Function to run the same config, gets the config parameters that were passed to this page by django templates,
+//Sends that data back off to run a new sim
+//No need for validation here, data already validated from entering before
 async function sameConfig() {
     const url = "/results/";
+    //Api call, post config data
     fetch(url, {
         method: "POST",
         headers: {
@@ -172,6 +181,7 @@ async function sameConfig() {
         max_wait:maxwait,
         }),
     })
+    //Redirect to simulation page
     .then(response =>{
     if (response.redirected) {
         window.location.href = response.url;

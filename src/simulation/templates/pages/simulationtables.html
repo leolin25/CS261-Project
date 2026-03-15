@@ -1,7 +1,11 @@
 {% extends 'pages/base.html' %}
 
 {% block content %}
-    
+
+<!--This is the main page that runs the simulation and shows the live data from it, including which plane is in which runway,
+planes in holding pattern & takeoff queue, recently departed cancelled landed and diverted , the live stats and the schedule (made possible through the generation script)-->
+
+    <!--Menu bar, containing stop sim button, the timesclae slider and the simulation date & time-->
 <div class = menuflex>
   <div class="stopcontainer">
     <button type="button" class="stopsim" onclick="stopsim()">Stop Simulation</button>
@@ -11,6 +15,7 @@
     <p>Timescale: <span id="sliderval"></span> (1 second = <span id="sliderval2"></span> minutes in simulation) </p>
     <div class="tooltip">ⓘ
       <span class="tooltiptext">Simulation speeds above 5 may cause issues on slower CPUs</span>
+      <!--Warning that this time increase may cause problems if on weak computers-->
     </div>
   </div>
   <div id="datetimedisplay">
@@ -22,6 +27,10 @@
 <div class="runwayscontainer" id="runwayscontainerid">
 
 </div>
+
+
+<!--Runway test table was made before working api call for runways, left in to potentially assist with future debugging-->
+
 
 <!--
   <div>
@@ -83,6 +92,8 @@
     </table>
 </div>
 
+<!--Live flights in sim-->
+
 <button type="button" class="collapsible">Flights in Simulation</button>
 <div class="simulationcontainer">
   <div>
@@ -141,6 +152,7 @@
 </div>
 <button type="button" class="collapsible">Schedule (Next 5 For Each)</button>
 
+<!--Scheduled flights-->
 <div class="simulationcontainer">
   <div>
     <table id="takeoffScheduleTable" class="individualTables">
@@ -321,12 +333,16 @@ const landed = document.getElementById("landedTable");
 const cancelled = document.getElementById("cancelledTable");
 const diverted = document.getElementById("divertedTable");
 
+
+//Gets the SSE stream being sent from the server
 let lastUpdate = 0;
 
 if(typeof(EventSource) !== "undefined") {
 
+  //mak ecall to setup the stream (views.py deals with this)
   var source = new EventSource("/stream/"); 
 
+  //When recieves a message from stream
   source.onmessage = function(event) {
     //x.innerHTML += event.data + "<br>";
     const now = new Date().getTime();
@@ -356,6 +372,7 @@ if(typeof(EventSource) !== "undefined") {
 
       */
 
+      //delete existing rows
       while (takeoffSchedule.rows.length > 1) {
           takeoffSchedule.deleteRow(1);
       }
@@ -381,13 +398,16 @@ if(typeof(EventSource) !== "undefined") {
           diverted.deleteRow(1);
       }
 
+      //Split the stream data into the live time and the flights data
       var payload = JSON.parse(event.data);
       var flightspayload = payload.flights;
       var timepayload = payload.time;
 
       
-      //Deal with time coming through
+      //Deal with time coming through, display that in top left corner
+      //This needs to be in stream since time can be scaled and is controlled in backend
       let timestamp = new Date(timepayload);
+      //Time is formatted sensibly for human reading
       let date = timestamp.toLocaleDateString()
       let time = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
       let timedisplaytext = ""
@@ -402,6 +422,8 @@ if(typeof(EventSource) !== "undefined") {
         let flight = flightspayload[i];
 
         //If flight is in takeoff zone put it in takeoffQ
+
+        //This repeated code adds the cells and populates them with the data about the flight
         if(flight.zone_status == "QUEUE_TO"){
           var row =takeoffQ.insertRow(-1);
           var c0 = row.insertCell(0);
@@ -469,7 +491,7 @@ if(typeof(EventSource) !== "undefined") {
           c3.innerText = text
 
         }else if (flight.zone_status == "SCHEDULED"){
-          //Otherwise put it in landing schedule
+          //Otherwise put it in landing schedule (if scheduled)
           var row =landingSchedule.insertRow(-1);
           var c0 = row.insertCell(0);
           var c1 = row.insertCell(1);
@@ -495,6 +517,8 @@ if(typeof(EventSource) !== "undefined") {
 
         } else if(flight.zone_status == "RUNWAY_TO" || flight.zone_status == "RUNWAY_LA") {
           //Flights actively in a runway
+
+
           //Put in test table
 
           /*
@@ -511,7 +535,7 @@ if(typeof(EventSource) !== "undefined") {
           if (link) {
               link.innerHTML = flight.callsign;
           } else {
-              console.warn(`Runway element for ${flight.assigned_runway} not found.`);
+              console.warn(`Runway for ${flight.assigned_runway} not found.`);
           }
           //Specify action in the runway section
           let actionlink = document.querySelector(`[data-id="runwayaction${flight.assigned_runway}"]`);
@@ -523,7 +547,7 @@ if(typeof(EventSource) !== "undefined") {
 
             }
           } else {
-              console.warn(`Runway element for ${flight.assigned_runway} not found.`);
+              console.warn(`Runway for ${flight.assigned_runway} not found.`);
           }
 
 
@@ -653,7 +677,7 @@ if(typeof(EventSource) !== "undefined") {
 
 
       }
-      //Reset the collapsables
+      //Reset the collapsables heights to adjust for new data
       let activeCollapsables = document.getElementsByClassName("collapsible");
       for (let i = 0; i < activeCollapsables.length; i++) {
         if (activeCollapsables[i].classList.contains("active")) {
@@ -671,6 +695,7 @@ if(typeof(EventSource) !== "undefined") {
 
   };
 
+  //STops stream
   source.addEventListener("end", function() {
      source.close();
   });
@@ -683,8 +708,9 @@ if(typeof(EventSource) !== "undefined") {
 
 //RUNWAYS
 
-//Function to get runway data
+//Function to get runway data, returns a json repsonse
 async function getRunwaysData() {
+  //Call api
   const url = "/api/runway-data/";
   try {
     const response = await fetch(url);
@@ -694,6 +720,7 @@ async function getRunwaysData() {
 
     const result = await response.json();
     console.log(result);
+    //return data
     return result;
 
   } catch (error) {
@@ -701,11 +728,13 @@ async function getRunwaysData() {
   }
 }
 //Function to update runways data, called upon load and when changes are made in sim
+//Uses getrunwaysdata and then updates the runways data on screen
 async function updateRunwaysData(){
     getRunwaysData().then(runwaysData => {
     console.log(runwaysData);
     let htmlrunways = ""
 
+    //For each runway, append html string to construct the runways screen
     for(let i = 0; i < runwaysData.length; i++){
       let runway = runwaysData[i];
       htmlrunways += "<div class=\"runwaydiv\"><table class=\"individualrunwaytable\" data-id=\"tablerunway"  
@@ -726,6 +755,7 @@ async function updateRunwaysData(){
       htmlrunways += "\"></td><td class = \"individualrunway\" data-id =\"runwayaction"      
       htmlrunways += runway.id;
       htmlrunways +="\"></td></tr></table>"
+      //CHeck if runway closed or open
       if ((runway.operational_status == "AVAILABLE") || (runway.operational_status == "OCCUPIED")){
         htmlrunways += "<button type=\"button\" class=\"closerunway\" onclick=\"closeRunway("
         htmlrunways += runway.id;
@@ -749,6 +779,7 @@ async function closeRunway(runwayID) {
   let payload = "runway_id:"
   payload += runwayID;
   const url = "/api/close-runway/";
+  //Post runwayid to api to tell it to close runway
   fetch(url, {
     method: "POST",
     headers: {
@@ -758,7 +789,7 @@ async function closeRunway(runwayID) {
       runway_id: runwayID,
     }),
   })
-  //update data
+  //update runways data (runway should now appear closed)
   setTimeout(() => {
     updateRunwaysData();
   }, 100);
@@ -770,6 +801,7 @@ async function openRunway(runwayID) {
   let payload = "runway_id:"
   payload += runwayID;
   const url = "/api/open-runway/";
+    //Post runwayid to api to tell it to open runway
   fetch(url, {
     method: "POST",
     headers: {
@@ -779,7 +811,7 @@ async function openRunway(runwayID) {
       runway_id: runwayID,
     }),
   })
-  //update data
+  //update runways data (runway should now appear closed)
   setTimeout(() => {
     updateRunwaysData();
   }, 100);
@@ -789,6 +821,8 @@ async function openRunway(runwayID) {
 const runways = document.getElementById("runwayscontainerid");
 let htmlrunways ="";
 
+//Wait 500ms from page load before loading runways
+//Needs to allow time for the stream to be setup since that creates the backend sim, without which there are no runways
 setTimeout(() => {
   updateRunwaysData()
 }, 500);
@@ -800,6 +834,7 @@ setTimeout(() => {
 var collapsible = document.getElementsByClassName("collapsible");
 var i;
 
+//For each collapsable allow it to toggle active on click and update height accordingly
 for (i = 0; i < collapsible.length; i++) {
   collapsible[i].addEventListener("click", function() {
     this.classList.toggle("active");
@@ -811,7 +846,7 @@ for (i = 0; i < collapsible.length; i++) {
     }
   });
 }
-//Set collapsables to open to start
+//Set collapsables to defauly open to start
 for (i = 0; i < collapsible.length; i++) {
     collapsible[i].classList.add("active");
     var content = collapsible[i].nextElementSibling;
@@ -820,12 +855,14 @@ for (i = 0; i < collapsible.length; i++) {
 
 //stop simulation
 async function stopsim() {
+  //tell api to stop
   const url = "/api/end-simulation/";
   try {
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`Response status: ${response.status}`);
     }
+    //redirect to results page
     window.location.href = '/results/';
   } catch (error) {
     console.error(error.message);
@@ -840,15 +877,16 @@ var output2 = document.getElementById("sliderval2");
 
 output.innerHTML = slider.value;
 output2.innerHTML = slider.value;
-
+//WHen slider mooves update the value on screen
 slider.oninput = function() {
   output.innerHTML = this.value;
   output2.innerHTML = this.value;
 
 }
 
+//When mouse releases off slider, call api to change timescale
 slider.onchange = function() {
-  //Make api call here
+  //Api call
   const url = "/api/change-timescale/";
   fetch(url, {
     method: "POST",
@@ -872,8 +910,11 @@ const totalcancelled = document.getElementById("totalcancelled");
 const totaldiverted = document.getElementById("totaldiverted");
 
 
+//Update stats every 5 seconds
 setInterval(updateStats, 5000);
 
+
+//Function to update stats on the page using the data sourced in getlivestatsdata
 async function updateStats() {
     getLiveStatsData().then(liveData => {
       console.log(liveData);
@@ -887,6 +928,7 @@ async function updateStats() {
   );
 }
 
+//Calls an api to get the live stats data
 async function getLiveStatsData() {
   const url = "/api/live-results/";
   try {

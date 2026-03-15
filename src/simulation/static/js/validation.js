@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         }
 
-        // If an error exists, prevent form submission and display the message
+        // If an error exists, prevents form submission and displays the message
         if (errorMsg !== '') {
             event.preventDefault(); 
             errorContainer.textContent = errorMsg;

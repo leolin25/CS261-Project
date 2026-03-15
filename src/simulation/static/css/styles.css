@@ -1,3 +1,4 @@
+/*basic styles */
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f7f6;
@@ -12,6 +13,8 @@ header {
     padding: 20px;
     text-align: center;
 }
+
+/*some styles for the html form to submit parameters for simulation */
 
 .container {
     max-width: 800px;
@@ -48,6 +51,7 @@ header {
     font-weight: bold;
 }
 
+/*styles number inputs in form */
 .form-group input[type="number"],
 .form-group select {
     padding: 10px;
@@ -230,6 +234,7 @@ caption{
     background-color: #f2f2f2;
 }
 
+/*some collapsable styles here */
 
 .collapsible {
     width: 100%;
@@ -249,6 +254,8 @@ caption{
     background-color: navy;
  
 }
+
+/*content in these is the plus or minus symbols apearing om container buttons*/
 
 .collapsible:after {
   content: '\0002B'; 
@@ -342,6 +349,8 @@ caption{
 
 }
 
+/*styles for the time slider */
+
 .slidecontainer {
   width: 100%;
   margin-left: 20px;
@@ -381,13 +390,7 @@ caption{
   cursor: pointer; 
 }
 
-.slider::-moz-range-thumb {
-  width: 25px; 
-  height: 25px;
-  border-radius: 50%; 
-  background: navy; 
-  cursor: pointer; 
-}
+/*datetime*/
 
 #datetimedisplaybox{
     font-size: xx-large;
@@ -399,6 +402,8 @@ caption{
 
 }
 
+
+/*tooltip for mini warning about slow cpus*/
 
 .tooltip {
   position: relative;

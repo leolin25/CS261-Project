@@ -399,6 +399,14 @@ caption {
   cursor: pointer;
 }
 
+.slider::-moz-range-thumb {
+  width: 25px; 
+  height: 25px;
+  border-radius: 50%; 
+  background: navy; 
+  cursor: pointer; 
+}
+
 /* DATETIME DISPLAY */
 
 #datetimedisplaybox {

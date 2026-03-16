@@ -1,5 +1,11 @@
 from .models import Aircraft, RunStats
 
+# Manages all outbound traffic. The key responsibilities include:
+# update_aircraft_cancellations() - Marks aircraft 
+# which have been in the departure queue longer than the maximum wait time as cancelled
+
+# process_departures() - Frees runways for aircraft which have completed taking 
+# off and then assigns available runways to aircrafts in the departure queue in FIFO order
 
 class DepartureController:
     """

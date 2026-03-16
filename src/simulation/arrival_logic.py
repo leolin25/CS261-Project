@@ -2,6 +2,14 @@ from datetime import timedelta
 from .models import Aircraft, RunStats
 
 
+# Manages all inbound aircraft from holding pattern entry through to runway assignment
+# Decrements fuel every simulation minute for aircraft in QUEUE_LA, escalating to FUEL emergency 
+#  status when below the threshold. Diverts aircraft at or below 10 mins fuel
+# if no runway can be assigned. Maintains altitude separation in the holding stack
+# (1000ft increments), with emergency aircraft placed at the bottom of the stack.
+
+# Runway assignment prioritises emergencies, then processes remaining aircraft in
+# queue entry order
 """
 This class manages the arrival of planes, including the holding pattern and diverting planes that have been waiting for too long or have low fuel.
 """

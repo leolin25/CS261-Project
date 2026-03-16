@@ -11,8 +11,15 @@ from .serializers import AircraftSerializer, RunwaySerializer
 from .control import Controller
 from .models import Aircraft, Runway, RunConfig, RunStats
 
+# Django views and REST API endpoints. 
+# HomeView handles the configuration form, validating and persisting input to 
+# RunConfig before redirecting to the simulation page
 
-# Home page view consisting of simulation start form
+# The SSE endpoint at /stream/ maintains a persistent connection with the
+# frontend and pushes serialised aircraft and runway data on every simulation tick
+# Additional API endpoints handle mid-simulation actions such as :losing and reopening
+# runways, adjusting the timescale and terminating the simulation
+
 class HomeView(View):
     def get(self, request):
         return render(request, 'pages/home.html') # Render form page

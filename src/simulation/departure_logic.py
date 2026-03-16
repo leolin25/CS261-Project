@@ -1,6 +1,6 @@
 from .models import Aircraft, RunStats
 
-# Manages all outbound traffic. The key responsibilities include:
+# Manages all outbound traffic:
 # update_aircraft_cancellations() - Marks aircraft 
 # which have been in the departure queue longer than the maximum wait time as cancelled
 

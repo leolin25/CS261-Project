@@ -6,7 +6,11 @@ from random import randint
 import pandas as pd
 from .models import Aircraft, Runway
 
-
+# Responsible for populating the simulation with new aircraft objects. On each call of run_generation(),
+# it generates inbound and outbound flights until the schedule window (simulation time + hour_view) is filled
+# Each aircraft object is built from a random row of a real-world flight CSV dataset. A normally distributed delay 
+# is applied to the scheduled time (mean 0, s.d. 5 minutes) and a 1% chance exists per aircraft for a random emergency 
+# (medical or mechanical) to be assigned to it
 class Generator:
     def __init__(self, hour_limit, inbound_per_hour, outbound_per_hour, start_time=None):
         self.hour_limit = hour_limit # How many hours to generate aircraft for

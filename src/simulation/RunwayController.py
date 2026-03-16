@@ -1,6 +1,15 @@
 from datetime import timedelta
 from .models import Aircraft, Runway
 
+# Interface between aircraft and runways:
+# assign_runway() finds an available runway matching the aircrafts 
+# required operating mode (LANDING / TAKEOFF), marks it OCCUPIED and links it to the aircraft
+
+# free_runway() checks whether the required occupancy duration has elapsed before releasing the runway and updating the
+# aircraft's status to LANDED or DEPARTED
+# optimise_runway_mode() temporarily reassigns
+# MIXED runways to single-mode operation based on current queue pressures, with
+# emergency aircraft and diversion/cancellation risk taking priority over queue size.
 
 class RunwayController:
     def __init__(self, landing_duration, takeoff_duration, fuel_risk_threshold, takeoff_risk_threshold, max_wait):

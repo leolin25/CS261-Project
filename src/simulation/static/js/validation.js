@@ -4,6 +4,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const configForm = document.getElementById('config-form');
     const errorContainer = document.getElementById('error-message');
 
+
+    // clear the error as soon as the user edits any field 
+    // This way I fix the problem where entering more than 10 runways, change and press submit, the error will show
+    configForm.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', function() {
+            errorContainer.style.display = 'none';
+            errorContainer.textContent = '';
+        });
+    });
+
     configForm.addEventListener('submit', function(event) {
         // clear any previous errors
         errorContainer.style.display = 'none';

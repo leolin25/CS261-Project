@@ -12,14 +12,15 @@ from .control import Controller
 from .models import Aircraft, Runway, RunConfig, RunStats
 
 
+# Home page view consisting of simulation start form
 class HomeView(View):
     def get(self, request):
-        return render(request, 'pages/home.html')
+        return render(request, 'pages/home.html') # Render form page
 
     def post(self, request):
-        valid = self.validate_input(request.POST)
+        valid = self.validate_input(request.POST) # Check form validity
         if not valid:
-            return render(request, 'pages/home.html')
+            return render(request, 'pages/home.html') # Re-render form if invalid
         runways_mixed = int(request.POST.get('num_runways_mixed'))
         runways_takeoff = int(request.POST.get('num_runways_to'))
         runways_landing = int(request.POST.get('num_runways_la'))
@@ -31,8 +32,8 @@ class HomeView(View):
             random_events = True
         else:
             random_events = False
-        RunConfig.objects.all().delete()
-        RunConfig.objects.create(
+        RunConfig.objects.all().delete() # Delete previous configs
+        RunConfig.objects.create( # Save config to database
             runways=runways,
             runways_mixed=runways_mixed,
             runways_takeoff=runways_takeoff,
@@ -42,8 +43,9 @@ class HomeView(View):
             max_wait=max_wait,
             random_events=random_events,
         )
-        return redirect('simulation')
+        return redirect('simulation') # Redirect to simulation
 
+    # Form data validation
     @staticmethod
     def validate_input(data):
         if "inbound_flow" not in data or "outbound_flow" not in data:
@@ -65,6 +67,7 @@ class HomeView(View):
         return True
 
 
+# Results page view displaying simulation results
 class ResultsView(View):
     def get(self, request):
         template = loader.get_template('pages/results.html')
@@ -78,7 +81,7 @@ class ResultsView(View):
         if not config:
             return render(request, 'pages/results.html')
 
-        context = {
+        context = { # Form data to be sent and displayed
             'inperhour': config.inbound_per_hour,
             'outperhour': config.outbound_per_hour,
             'nummixedrunways': config.runways_mixed,
@@ -137,20 +140,15 @@ class ResultsView(View):
         return redirect('simulation')   
 
 
+# Simulation page view
 def simulation(request):
     #Loads simulation page
-    #takeoffQ = Member.objects.all().values()
-    #landingQ = Member.objects.all().values()
-    num_runways = 7
-
     template = loader.get_template('pages/simulationtables.html')
-    context = {
-        'runway_range': range(1, num_runways + 1)
-
-    }
+    context = {}
     return HttpResponse(template.render(context, request))
 
 
+# API endpoint to get sample aircraft data for testing
 class GetSampleData(APIView):
     serializer_class = AircraftSerializer
 
@@ -163,33 +161,37 @@ class GetSampleData(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# API endpoint to stream live aircraft data
 class StreamView(View):
     def get(self, request):
         def event_stream():
+            # Setup simulation
             controller = Controller()
             controller.setup_simulation()
 
-            while not controller.check_simulation_end():
-                controller.run_simulation()
-                flight_data = controller.get_stream_data()
-                controller.update_configuration()
+            while not controller.check_simulation_end(): # Run until simulation not ended
+                controller.run_simulation() # Run simulation tick
+                flight_data = controller.get_stream_data() # Get data to be sent to frontend
+                controller.update_configuration() # Reload config
 
                 serializer = AircraftSerializer(flight_data, many=True)
                 payload = {
-                    "time": controller.get_simulation_time().isoformat(),
+                    "time": controller.get_simulation_time().isoformat(), # Include simulation time in data to be sent
                     "flights": serializer.data,
                 }
                 data = f"data: {json.dumps(payload)}\n\n"
                 yield data
 
-            yield "event: end\ndata: Simulation ended\n\n"
+            yield "event: end\ndata: Simulation ended\n\n" # Send end event to prevent reconnection
 
+        # Form SSE connection
         response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
         response['Cache-Control'] = 'no-cache'
         response['X-Accel-Buffering'] = 'no'
         return response
 
 
+# API endpoint to send runway data
 class RunwayDataView(APIView):
     def get(self, request):
         runways = Runway.objects.all()
@@ -197,6 +199,7 @@ class RunwayDataView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+# API endpoint to trigger simulation end
 class EndSimulationView(APIView):
     def get(self, request):
         config = RunConfig.objects.last()
@@ -207,6 +210,7 @@ class EndSimulationView(APIView):
         return Response({"message": "Simulation ended"}, status=status.HTTP_200_OK)
 
 
+# API endpoint to close a runway
 class CloseRunwayView(APIView):
     def post(self, request):
         runway_id = request.data.get("runway_id")
@@ -223,6 +227,7 @@ class CloseRunwayView(APIView):
             return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+# API endpoint to open a runway
 class OpenRunwayView(APIView):
     def post(self, request):
         runway_id = request.data.get("runway_id")
@@ -239,6 +244,7 @@ class OpenRunwayView(APIView):
             return Response({"error": "Runway not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+# API endpoint to change simulation timescale
 class ChangeTimescaleView(APIView):
     def post(self, request):
         timescale = request.data.get("timescale")
@@ -256,6 +262,7 @@ class ChangeTimescaleView(APIView):
         return Response({"message": f"Timescale changed to {timescale}"}, status=status.HTTP_200_OK)
 
 
+# API endpoint to send subset of results to display while simulation is running
 class LiveResultsView(APIView):
     def get(self, request):
         try:

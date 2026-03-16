@@ -4,13 +4,13 @@ from .models import Aircraft, Runway
 
 class RunwayController:
     def __init__(self, landing_duration, takeoff_duration, fuel_risk_threshold, takeoff_risk_threshold, max_wait):
-        self.landing_duration = landing_duration
-        self.takeoff_duration = takeoff_duration
-        self.fuel_risk_threshold = fuel_risk_threshold
-        self.takeoff_risk_threshold = takeoff_risk_threshold
-        self.max_wait = max_wait
+        self.landing_duration = landing_duration # Time taken for aircraft to land and move off runway in seconds
+        self.takeoff_duration = takeoff_duration # Time taken for aircraft to move onto runway and takeoff in seconds
+        self.fuel_risk_threshold = fuel_risk_threshold # Amount of fuel left after which aircraft considered diversion risk in minutes
+        self.takeoff_risk_threshold = takeoff_risk_threshold # Amount of time left before forced cancellation at which aircraft considered cancellation risk in minutes
+        self.max_wait = max_wait # Maximum wait time in departure queue before cancellation in minutes
 
-    # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not. Also updates the runway's status to OCCUPIED and saves the assigned runway number in the aircraft's record.
+    # Assigns a given aircraft to a runway based on its zone status (arriving or departing) and the runway's operating mode. Returns True if a runway is assigned and False is not
     @staticmethod
     def assign_runway(aircraft, simulation_time):
         available_runways = Runway.objects.filter(operational_status='AVAILABLE', occupied_by__isnull=True)
@@ -79,12 +79,9 @@ class RunwayController:
         except Runway.DoesNotExist:
             return False
         
-    # This function is called every minute to update the mixed runways based on current traffic, mixed runways are put in a temporary new optimised mode that suits the situation
+    # This function is called to update the mixed runways based on current traffic, mixed runways are put in a temporary new optimised mode that suits the situation
     def optimise_runway_mode(self, simulation_time):
         risk_time = simulation_time - timedelta(minutes=self.takeoff_risk_threshold) - timedelta(minutes=self.max_wait)
-
-        # In case of any bugs we can reset runways right here
-        # self.reset_optimised_runways()
 
         # Find all mixed runways that are currently available
         mixed_runways = Runway.objects.filter(operational_status='AVAILABLE', operating_mode__icontains='MIXED', occupied_by__isnull=True)
@@ -130,7 +127,7 @@ class RunwayController:
                 runway.temp_optimised = True
         Runway.objects.bulk_update(mixed_runways, ['operating_mode', 'temp_optimised'])
 
-    # This function resets all runways back to mixed if they have been optimised
+    # This function resets all runways back to mixed if they have been optimised and are not occupied
     @staticmethod
     def reset_optimised_runways():
         optimised_runways = Runway.objects.filter(temp_optimised=True, occupied_by__isnull=True)

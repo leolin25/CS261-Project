@@ -9,13 +9,13 @@ from .models import Aircraft, Runway
 
 class Generator:
     def __init__(self, hour_limit, inbound_per_hour, outbound_per_hour, start_time=None):
-        self.hour_limit = hour_limit
+        self.hour_limit = hour_limit # How many hours to generate aircraft for
         self.inbound_per_hour = inbound_per_hour
         self.outbound_per_hour = outbound_per_hour
         base_time = start_time if start_time is not None else timezone.now()
         self.last_generated_inbound = base_time
         self.last_generated_outbound = base_time
-        self.data = pd.read_csv(settings.BASE_DIR / 'simulation' / 'data' / 'flight-data.csv')
+        self.data = pd.read_csv(settings.BASE_DIR / 'simulation' / 'data' / 'flight-data.csv') # Data for aircrafts
 
     @staticmethod
     def generate_delay():
@@ -24,7 +24,7 @@ class Generator:
 
     @staticmethod
     def generate_fuel(is_arrival):
-        # Random fuel between 20 and 60 minutes for arrivals
+        # Uniformally random fuel between 20 and 60 minutes for arrivals and between 180 and 360 minutes for departures
         return random.randint(20, 60) if is_arrival else random.randint(180, 360)
 
     @staticmethod
@@ -38,15 +38,15 @@ class Generator:
             return 'NONE'
 
     def generate_aircraft(self, is_arrival, random_events):
-        delay = self.generate_delay()
+        delay = self.generate_delay() # Generate aircraft delay in minutes
         if is_arrival:
             scheduled_time = self.last_generated_inbound + timedelta(minutes=60 / self.inbound_per_hour)
         else:
             scheduled_time = self.last_generated_outbound + timedelta(minutes=60 / self.outbound_per_hour)
-        expected_time = scheduled_time + timedelta(minutes=delay)
-        fuel = self.generate_fuel(is_arrival)
+        expected_time = scheduled_time + timedelta(minutes=delay) # Calculate expected time by adding delay to scheduled time
+        fuel = self.generate_fuel(is_arrival) # Generate aircraft fuel in minutes
         data = self.data.sample()
-        random_event = self.generate_random_event() if random_events else 'NONE'
+        random_event = self.generate_random_event() if random_events else 'NONE' # Generate random event if simulation running with random events on
         aircraft = Aircraft(
             callsign=data["carrier"].values[0] + str(data["flight"].values[0]),
             operator=data["name"].values[0],
@@ -61,7 +61,7 @@ class Generator:
             emergency_status=random_event,
             zone_status='SCHEDULED',
             last_update=expected_time, #Only need to consider plane when it enters airport zone
-            final_state_time=None
+            final_state_time=None # Time when plane lands, departs, diverts or cancels
         )
         if is_arrival:
             self.last_generated_inbound = scheduled_time
@@ -82,10 +82,12 @@ class Generator:
         print("Runway created with bearing {} and length {}".format(bearing, length))
 
     def run_generation(self, simulation_time=timezone.now(), random_events=False):
+        # Generate inbound aircraft until sufficient hours worth of aircraft have been generated based on last inbound generated time and hour limit
         while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_inbound and
                self.inbound_per_hour > 0):
-            self.generate_aircraft(is_arrival=True, random_events=random_events).save()
+            self.generate_aircraft(is_arrival=True, random_events=random_events).save() # Save aircraft to database
 
+        # Generate outbound aircraft until sufficient hours worth of aircraft have been generated based on last outbound generated time and hour limit
         while (simulation_time + timedelta(hours=self.hour_limit) > self.last_generated_outbound and
                self.outbound_per_hour > 0):
-            self.generate_aircraft(is_arrival=False, random_events=random_events).save()
+            self.generate_aircraft(is_arrival=False, random_events=random_events).save() # Save aircraft to database

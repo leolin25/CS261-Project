@@ -7,13 +7,13 @@ class DepartureController:
     """
     def __init__(self, runway_controller, max_wait):
         self.runway_controller = runway_controller
-        self.max_wait = max_wait
+        self.max_wait = max_wait # Max wait time before flight needs to be cancelled in minutes
 
     def update_aircraft_cancellations(self, simulation_time):
-        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_TO')
+        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_TO') # Find aircraft in departure queue
         number_cancelled = 0
         for aircraft in aircrafts:
-            wait_duration = (simulation_time - aircraft.queue_entry_time).total_seconds() / 60
+            wait_duration = (simulation_time - aircraft.queue_entry_time).total_seconds() / 60 # Calculate time spent in departure queue so far
             if wait_duration > self.max_wait:
                 aircraft.zone_status = 'CANCELLED'
                 aircraft.final_state_time = simulation_time
@@ -34,8 +34,9 @@ class DepartureController:
         departed_aircrafts = Aircraft.objects.filter(zone_status='RUNWAY_TO')
         stats = RunStats.objects.first()
 
+        # Free runways for aircraft that have finished departing
         for aircraft in departed_aircrafts:
-            success = self.runway_controller.free_runway(aircraft, simulation_time)
+            success = self.runway_controller.free_runway(aircraft, simulation_time) # Check if plane has finished departing and free runway if it has
             if success:
                 print(f"Flight {aircraft.callsign} has departed.")
 

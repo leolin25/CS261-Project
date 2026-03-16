@@ -8,26 +8,28 @@ This class manages the arrival of planes, including the holding pattern and dive
 class ArrivalController:
     def __init__(self, runway_controller, fuel_emergency_threshold):
         self.runway_controller = runway_controller
-        self.fuel_emergency_threshold = fuel_emergency_threshold
+        self.fuel_emergency_threshold = fuel_emergency_threshold # Amount of fuel left after which plane declares fuel emergency in minutes
 
     """
-    Decrease the fuel level of all planes in the holding pattern by 1 min, this function should be called by main every minute tick
+    Decrease the fuel level of all planes in the holding pattern by 1 min, this function should be called by main
     """
     def update_aircraft_fuel(self, simulation_time):
         aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', last_update__lte=simulation_time-timedelta(minutes=1))
         for aircraft in aircrafts:
-            aircraft.fuel_mins = max(0, aircraft.fuel_mins - 1)
+            aircraft.fuel_mins = max(0, aircraft.fuel_mins - 1) # Decrement fuel
             if aircraft.fuel_mins < self.fuel_emergency_threshold and aircraft.emergency_status == 'NONE':
-                aircraft.emergency_status = 'FUEL'
+                aircraft.emergency_status = 'FUEL' # Declare fuel emergency if fuel too low
             aircraft.last_update += timedelta(minutes=1)
         Aircraft.objects.bulk_update(aircrafts, ['fuel_mins', 'last_update', 'emergency_status'])
 
-
+    """
+    Calculate altitudes of aircraft in holding pattern prioritising emergencies and otherwise time entered queue
+    """
     @staticmethod
     def recalculate_altitudes():
         emergencies = Aircraft.objects.filter(zone_status='QUEUE_LA',emergency_status__in=['MEDICAL', 'MECHANICAL','FUEL']).order_by('queue_entry_time')
         general = Aircraft.objects.filter(zone_status='QUEUE_LA',emergency_status='NONE').order_by('queue_entry_time')
-        queue = list(emergencies) +list(general )
+        queue = list(emergencies) +list(general)
         alt = 1000
         for plane in queue:
             plane.altitude = alt
@@ -35,9 +37,12 @@ class ArrivalController:
 
         Aircraft.objects.bulk_update(queue,['altitude'])
 
+    """
+    Divert aircraft that have run out of fuel and update altitudes of remaining aircraft
+    """
     @staticmethod
     def update_aircraft_diversions(simulation_time):
-        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=10)
+        aircrafts = Aircraft.objects.filter(zone_status='QUEUE_LA', fuel_mins__lte=10) # Find aircraft with 10 or less minutes of fuel
         num_diverted = 0
         for aircraft in aircrafts:
             aircraft.zone_status = 'DIVERTED'
@@ -55,11 +60,14 @@ class ArrivalController:
                 total_diverted = Aircraft.objects.filter(zone_status='DIVERTED').count()
                 stats.update_max_diverted(total_diverted)
 
+    """
+    Process arriving aircraft by freeing runways for flights that have finished landing and assigning new flights to free runways prioritising emergencies
+    """
     def process_arrivals(self, simulation_time):
         stats = RunStats.objects.first()
-        arrived_aircrafts = Aircraft.objects.filter(zone_status='RUNWAY_LA')
+        arrived_aircrafts = Aircraft.objects.filter(zone_status='RUNWAY_LA') # Aircraft currently landing on runway
         for aircraft in arrived_aircrafts:
-            success = self.runway_controller.free_runway(aircraft, simulation_time)
+            success = self.runway_controller.free_runway(aircraft, simulation_time) # Check if plane has finished landing and free runway if it has
             if success:
                 print(f"Flight {aircraft.callsign} has landed.")
 
@@ -79,10 +87,11 @@ class ArrivalController:
         emergencies = Aircraft.objects.filter(zone_status='QUEUE_LA', emergency_status__in=['MEDICAL', 'MECHANICAL', 'FUEL']).order_by('queue_entry_time')
         general = Aircraft.objects.filter(zone_status='QUEUE_LA', emergency_status='NONE').order_by('queue_entry_time')
 
+        # Assign free runways to planes in holding pattern prioritising emergencies
         queue = list(emergencies) + list(general)
         for aircraft in queue:
-            success = self.runway_controller.assign_runway(aircraft, simulation_time)
+            success = self.runway_controller.assign_runway(aircraft, simulation_time) # Try assigning runway to plane
             if success:
-                aircraft.altitude = 0 # set altitude to 0 if landedd.
+                aircraft.altitude = 0 # set altitude to 0 if landed.
                 aircraft.refresh_from_db()
                 print(f"Flight {aircraft.callsign} preparing for landing on runway {aircraft.assigned_runway.bearing}")

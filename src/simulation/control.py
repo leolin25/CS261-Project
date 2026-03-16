@@ -6,6 +6,12 @@ from .RunwayController import RunwayController
 from .departure_logic import DepartureController
 from .arrival_logic import ArrivalController
 
+# Central simulation controller. Initialises all sbusystems (Generator, RunwayController,
+# ArrivalController, DepartureController) from RunConfig on startup, then 
+# drives the simulation forward by calling run_simulation() on every tick. Each tick advances the
+# clock, injects new aircraft, moves scheduled flights into their queues, processes
+# cancellations and diversions, optimises runway modes, and handles arrivals and departures
+# in a fixed order. All subsystems share state through the Django database
 
 class Controller:
     def __init__(self, launch_time=None):
